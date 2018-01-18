@@ -1,0 +1,231 @@
+# Standard library imports
+import datetime as dt
+from urllib.parse import urlparse
+
+# 3rd party library imports
+import requests
+from lxml import etree
+import pandas as pd
+
+# Local imports
+from .ags_stats import ToolsBase
+
+
+class ArcSocCounts(ToolsBase):
+    """
+    Track ArcSoc counts across application servers.
+    """
+    def __init__(self, site, project):
+        super().__init__(site, project)
+
+        if site == 'BLDR':
+            self.bbhost = 'bb-bldr.ncep.noaa.gov'
+        else:
+            self.bbhost = 'bb.ncep.noaa.gov'
+
+    def run(self):
+
+        # Clean out old data.
+        seven_days_ago = dt.datetime.now() - dt.timedelta(days=7)
+        sql = f"""
+               DELETE FROM arcsoc_count
+               WHERE time < '{seven_days_ago}'
+               """
+        self.cursor.execute(sql)
+
+        # Get the server IDs that correspond to each server.
+        sql = f"""
+               SELECT * from servers
+               WHERE
+                   project = '{self.project}' AND
+                   site = '{self.site}' AND
+                   hostname LIKE '%gisapp'
+               """
+        df = pd.io.sql.read_sql(sql, self.conn)
+
+        now = dt.datetime.now()
+
+        data = []
+        for _, row in df.iterrows():
+
+            host = row['hostname']
+            id = row['id']
+
+            url = f"http://{self.bbhost}/html/{host}.procs.html"
+            r = requests.get(url)
+            doc = etree.HTML(r.content)
+
+            # 1st <PRE> tag, IMG tag inside of it, text we want is
+            # the following text that has the term 'arcsoc'
+            imgs = doc.xpath('//pre/img')
+            count = None
+            for img in imgs:
+                if 'arcsoc' in img.tail:
+                    count = int(img.tail.split()[3])
+
+            data.append({'time': now, 'server_id': id, 'arcsoc_count': count})
+
+        # Insert into the database.
+        sql = """
+              INSERT INTO arcsoc_count
+              (server_id, time, arcsoc_count)
+              VALUES
+              (%(server_id)s, %(time)s, %(arcsoc_count)s)
+              """
+        self.cursor.executemany(sql, data)
+        self.conn.commit()
+
+
+class BBFlagHistory(object):
+
+    def __init__(self, url, output_file=None):
+        """
+        Parameters
+        ----------
+        url : str
+            Top-level Big Brother URL.
+        scheme, netloc : str
+            Portions of the URL, i.e.
+            <scheme>://<netloc>/<path>;<params>?<query>#<fragment>
+        output : str or None
+            File or filename to which output is written.
+        """
+        self.url = url
+        self.output_file = output_file
+
+        o = urlparse(self.url)
+        self.scheme = o.scheme
+        self.netloc = o.netloc
+
+        r = requests.get(self.url)
+        self.doc = etree.HTML(r.content.decode('utf-8'))
+
+        self.table = self.doc.xpath('//table[@summary="Group Block"]')[0]
+
+        # Get the names of the columns.
+        self.columns = self.table.xpath('//a/font[@color="teal"]/b/text()')
+
+        # Get the names of the hosts.
+        self.hosts = self.table.xpath('tr/td[@nowrap]/a[2]/font/text()')
+
+        self.setup_output_document()
+
+    def setup_output_document(self):
+        """
+        Create the output HTML document if specified.
+        """
+
+        if self.output_file is None:
+            self.output_doc = None
+            return
+
+        self.output_doc = etree.Element('html')
+
+        head = etree.SubElement(self.output_doc, 'head')
+        link = etree.SubElement(head, 'link')
+        link.attrib['rel'] = 'stylesheet'
+        link.attrib['type'] = 'text/css'
+        link.attrib['href'] = '../summary.css'
+
+        body = etree.SubElement(self.output_doc, 'body')
+
+        # Add the current date so we know when it last updated.
+        p = etree.SubElement(body, 'p')
+        p.attrib['style'] = 'text-align:right'
+        p.text = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        otable = etree.SubElement(body, 'table')
+
+        # Add a header row.
+        tr = etree.SubElement(otable, 'tr')
+        tr.attrib['id'] = 'header'
+
+        # Add an empty TH to allow for the row headers.
+        etree.SubElement(tr, 'th')
+
+        for column in self.columns:
+            th = etree.SubElement(tr, 'th')
+            th.text = column
+
+        for host in self.hosts:
+            tr = etree.SubElement(otable, 'tr')
+            tr.attrib['id'] = host
+
+            # Host header
+            th = etree.SubElement(tr, 'th')
+            th.text = host.split('.')[0]
+
+            for column in self.columns:
+                td = etree.SubElement(tr, 'td')
+                td.attrib['id'] = column
+
+    def run(self):
+        """
+        Interrogate BB lead-in screen.
+        """
+
+        for column in self.columns:
+            # Go thru each BB column
+            if self.output_file is None:
+                print(column)
+            for host in self.hosts:
+                # Look for a hyperlink specific to both the host and the BB
+                # column.  If we find one, then that combination needs to be
+                # interrogated.
+                resource = host + '.' + column
+                elts = self.table.xpath(f'//a[@href="/html/{resource}.html"]')
+                if len(elts) > 0:
+                    self.process_host_column(host, column)
+
+        if self.output_file is not None:
+            with open(self.output_file, mode='wb') as f:
+                f.write(etree.tostring(self.output_doc))
+
+    def process_host_column(self, host, column):
+        """
+        Interrogate the history screen for the host and the column.
+        """
+        url = self.scheme + '://' + self.netloc + '/cgi-bin/bb-hist.sh'
+        params = {
+            'HISTFILE': host.replace('.', ',') + '.' + column,
+            'ENTRIES': 50,
+        }
+
+        r = requests.get(url, params=params)
+        doc = etree.HTML(r.content.decode('utf-8'))
+
+        # Get the table with the detailed flag history.
+        tables = doc.xpath('//table')
+        table = tables[5]
+        percentages = table.xpath('tr[3]/td/b/text()')
+        percentages = [x.replace('%', '') for x in percentages[:4]]
+        G, Y, R, P = percentages
+
+        if self.output_file is None:
+            fmt = "    {host:40}: {green} {yellow} {red} {purple}"
+            text = fmt.format(host=host, green=G, yellow=Y, red=R, purple=P)
+            print(text)
+        else:
+            # Locate the TD element for the host and column.  If the flag was
+            # green 100% of the time, supply the green flag gif.  Otherwise
+            # fill in the numbers.
+            path = './/tr[@id="{host}"]/td[@id="{column}"]'
+            path = path.format(host=host, column=column)
+            td = self.output_doc.xpath(path)[0]
+
+            if G == '100':
+                # Just supply a green gif.  We were green 100% of the time.
+                img = etree.SubElement(td, 'img')
+                img.attrib['src'] = '/ncep_common/nowcoast/images/green.gif'
+            else:
+                # Fill in the actual numbers and color them to make them stand
+                # out.
+                bb_colors = ['green', 'yellow', 'red', 'purple']
+                for percentage, color in zip(percentages, bb_colors):
+                    if color == 'green':
+                        continue
+                    if percentage == '0':
+                        continue
+                    span = etree.SubElement(td, 'span')
+                    span.attrib['style'] = 'color:' + color
+                    span.text = ' ' + percentage + ' '

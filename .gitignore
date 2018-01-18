@@ -1,0 +1,7 @@
+*.pyc
+build
+.coverage
+dist
+gis_utilities.egg-info
+bin
+*.swp
