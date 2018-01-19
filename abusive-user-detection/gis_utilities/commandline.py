@@ -3,7 +3,6 @@ import argparse
 import datetime
 import pathlib
 
-from .akamai import RetrieveAkamaiLogs
 from .big_brother import BBFlagHistory, ArcSocCounts
 from .check_mk import CheckCheckMK
 from .daily_log_merge import DailyApacheLogCount, DailyApacheLogCountPlot
@@ -154,23 +153,6 @@ def collect_arcsoc_counts():
     args = parser.parse_args()
 
     obj = ArcSocCounts(args.site, args.project)
-    obj.run()
-
-
-def get_akamai_logs():
-    """
-    Retrieve akamai logs from remote FTP server.
-    """
-    description = ("Command line utility for retrieving Akamai web logs from"
-                   "remote FTP server.")
-    parser = argparse.ArgumentParser(description=description)
-
-    parser.add_argument('project',
-                        choices=['idpgis', 'nowcoast'],
-                        help='Retrieve logs for this project.')
-    args = parser.parse_args()
-
-    obj = RetrieveAkamaiLogs(args.project)
     obj.run()
 
 

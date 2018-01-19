@@ -5,3 +5,5 @@ dist
 gis_utilities.egg-info
 bin
 *.swp
+akamai/nco_akamai.egg-info
+ags/ags_user.egg-info
