@@ -46,16 +46,46 @@ class AGSServiceStatisticsPlotsViaMPL(ToolsBase):
         Retrieve the application servers (not the database readers)
         """
 
+        if self.site == 'BLDR':
+            site = 'bldr'
+        else:
+            # NOT cprk!!!
+            site = 'lnx'
+
+        if self.project == 'nowcoast':
+            project = 'nc'
+        else:
+            project = ''
+
+        pattern = f"{site}-{project}gisapp"
+
+        cursor = self.conn.cursor()
+
         sql = f"""
                SELECT DISTINCT hostname FROM servers
-               WHERE project = '{self.project}'
-                     AND site = '{self.site}'
-                     AND hostname LIKE '%gisapp%'
+               WHERE hostname like '%{pattern}%'
                """
-        self.cursor.execute(sql)
-        self.servers = [item[0] for item in self.cursor.fetchall()]
+
+        cursor.execute(sql)
+
+        self.servers = [item[0] for item in cursor.fetchall()]
 
     def retrieve_services(self):
+
+        if self.site == 'BLDR':
+            site = 'bldr'
+        else:
+            # NOT cprk!!!
+            site = 'lnx'
+
+        if self.project == 'nowcoast':
+            project = 'nc'
+        else:
+            project = ''
+
+        pattern = f"{site}-{project}gisapp"
+
+        cursor = self.conn.cursor()
 
         self.folders = []
         self.services = []
@@ -64,9 +94,11 @@ class AGSServiceStatisticsPlotsViaMPL(ToolsBase):
                SELECT DISTINCT b.folder, b.service
                FROM servers a INNER JOIN services b
                ON a.id = b.server_id
-               WHERE a.project='{self.project}'
+               WHERE hostname like '%{pattern}%'
                    AND b.priority <= {self.priority}
                """
+        cursor.execute(sql)
+
         self.cursor.execute(sql)
         resultset = self.cursor.fetchall()
         self.folders, self.services = zip(*resultset)
@@ -150,6 +182,20 @@ class AGSServiceStatisticsPlotsViaMPL(ToolsBase):
         Collect data for the last day.  Much more than that results in a plot
         that is too heavy.
         """
+
+        if self.site == 'BLDR':
+            site = 'bldr'
+        else:
+            # NOT cprk!!!
+            site = 'lnx'
+
+        if self.project == 'nowcoast':
+            project = 'nc'
+        else:
+            project = ''
+
+        pattern = f"{site}-{project}gisapp"
+
         current_time = dt.datetime.now() - dt.timedelta(hours=self.num_hours)
         sql = f"""
                SELECT
@@ -160,8 +206,7 @@ class AGSServiceStatisticsPlotsViaMPL(ToolsBase):
                ON servers.id = services.server_id
                INNER JOIN statistics stats
                ON servers.id = stats.server AND services.id = stats.service
-               WHERE servers.project = '{self.project}'
-                 AND servers.site = '{self.site}'
+               WHERE servers.hostname like '%{pattern}%'
                  AND services.service = '{service}'
                  AND stats.time > '{current_time}'
                ORDER BY servers.hostname, stats.time ASC
@@ -169,9 +214,11 @@ class AGSServiceStatisticsPlotsViaMPL(ToolsBase):
         logging.info(sql)
         df = pd.io.sql.read_sql(sql, self.conn)
 
+        df['time'] = pd.to_datetime(df['time'])
+
         # Sometimes the statistics are negative.  Why?  MPL doesn't like it
         # in area plots.
-        df = df.query('busy >= 0 & free >= 0 & notcreated >= 0')
+        df = df.query('busy >= 0 & free >= 0 & notCreated >= 0')
 
         return df
 
@@ -184,7 +231,7 @@ class AGSServiceStatisticsPlotsViaMPL(ToolsBase):
         print(f"NOBS for {server}/{service} is {df.shape[0]}")
 
         fig, ax1 = plt.subplots()
-        df[['busy', 'free', 'notcreated']].plot.area(ax=ax1)
+        df[['busy', 'free', 'notCreated']].plot.area(ax=ax1)
 
         ax1.set_title(service)
         ax1.set_ylabel('instances')

@@ -56,6 +56,7 @@ class ToolsBase(object):
         self.db_path = pathlib.Path.home() / 'data' / 'sqlite' / 'gis.db'
         self.conn = sqlite3.connect(str(self.db_path),
                                     detect_types=sqlite3.PARSE_DECLTYPES)
+        self.conn.row_factory = sqlite3.Row
         self.cursor = self.conn.cursor()
 
     def get_token_requests(self, servername):
