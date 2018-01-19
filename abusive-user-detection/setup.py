@@ -4,16 +4,11 @@ scripts = [
     'bb_flag_history',
     'bin_daily_apache_log_file',
     'ccmk',
-    'collect_ags_stats',
     'collect_arcsoc_counts',
     'count_nco_log_items',
-    'get_ags_requests',
     'get_akamai_logs',
     'heatmap',
-    'plot_mpl_ags_stats',
     'plot_nco_hits',
-    'set_ags',
-    'summarize_ags_logs'
 ]
 console_scripts = [f"{item}=gis_utilities.commandline:{item}"
                    for item in scripts]
@@ -38,7 +33,7 @@ kwargs = {
         'tables>=3.3.0',
         'scikit-image',
     ],
-    'version': '0.0.4',
+    'version': '0.0.5',
 }
 
 setup(**kwargs)
