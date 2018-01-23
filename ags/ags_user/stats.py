@@ -310,6 +310,14 @@ class CollectAgsUsageRequests(ToolsBase):
         r = requests.post(url, params=params)
         r.raise_for_status()
 
+        try:
+            if report_data['status'] == 'error':
+                msg = 'Error retrieving report: {0}'.format(report_data)
+                raise RuntimeError(msg)
+        except KeyError:
+            # 'status' not in the top-level JSON if all was ok.
+            pass
+
         return report_data
 
     def get_services(self, hostname, token):
