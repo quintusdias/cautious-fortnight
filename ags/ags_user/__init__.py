@@ -1,5 +1,5 @@
-from . import ags_stats
+from . import stats
 
-from .ags_rest import AgsRestAdmin
+from .rest import AgsRestAdmin
 
-__all__ = [ags_stats, AgsRestAdmin]
+__all__ = [stats, AgsRestAdmin]

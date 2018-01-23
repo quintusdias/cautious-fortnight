@@ -10,8 +10,8 @@ import pandas as pd
 from lxml import etree
 
 # Local imports
-from .ags_rest import AgsRestAdminBase
-from .ags_stats import TokenRetrievalError
+from .rest import AgsRestAdminBase
+from .stats import TokenRetrievalError
 
 
 class DailySummary(AgsRestAdminBase):

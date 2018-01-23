@@ -2,10 +2,10 @@
 import argparse
 import datetime
 
-from .ags_logs import DailySummary
-from .ags_plot_stats import AGSServiceStatisticsPlotsViaMPL
-from .ags_stats import CollectAgsStats, CollectAgsUsageRequests
-from .ags_rest import AgsRestAdmin
+from .logs import DailySummary
+from .plot_stats import AGSServiceStatisticsPlotsViaMPL
+from .stats import CollectAgsStats, CollectAgsUsageRequests
+from .rest import AgsRestAdmin
 from .heatmap import HeatMap
 
 

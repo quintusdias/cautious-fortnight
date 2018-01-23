@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 # Local imports
-from .ags_stats import ToolsBase
+from .stats import ToolsBase
 
 _DEFAULT_WEB_ROOT = ('/mnt/intra_wwwdev/ncep/ncepintradev/htdocs'
                      '/ncep_common/nowcoast')

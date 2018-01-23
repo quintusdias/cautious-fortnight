@@ -6,7 +6,7 @@ import pandas as pd
 import requests
 
 # Local imports
-from .ags_stats import ToolsBase
+from .stats import ToolsBase
 
 
 class AgsRestAdminBase(ToolsBase):
