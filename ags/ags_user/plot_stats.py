@@ -252,6 +252,8 @@ class AGSServiceStatisticsPlotsViaMPL(ToolsBase):
         frame.set_facecolor('white')
         frame.set_edgecolor('black')
 
+        fig.tight_layout()
+
         parent_dir = self.root / server / str(self.num_hours)
         parent_dir.mkdir(parents=True, exist_ok=True)
         path = parent_dir / f"{service}.png"
