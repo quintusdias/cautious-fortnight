@@ -1,5 +1,6 @@
 # Standard library imports
 import datetime
+import itertools
 import pathlib
 
 # 3rd party library imports
@@ -172,6 +173,13 @@ class Summarize(object):
         with open(self.configfile, mode='rt') as f:
             self.config = yaml.load(f)
 
+        # Pre-compute the linestyles and colors.
+        colors = sns.color_palette(n_colors=6)
+        linestyles = ['-', '--', ':', '-.']
+        tuples = list(itertools.product(linestyles, colors))
+        tuples = tuples[:len(self.config['testunits'])]
+        self.linestyles, self.colors = zip(*tuples)
+
         self.output_dir = pathlib.Path(output_dir)
 
         self.index_tuples = []
@@ -262,19 +270,41 @@ class Summarize(object):
         a = etree.SubElement(li, 'a', href='#configuration')
         a.text = 'Configuration'
 
+    def _reset_index_to_num_threads(self, df):
+        """
+        Use the number of threads as the proxy for number of users.  Don't
+        use run_level, which is what we have now.
+        """
+        new_idx = []
+        for run_level in df.index:
+            tot_num_threads = sum(item['num_threads'][run_level]
+                                  for item in self.config['testunits'])
+            new_idx.append(tot_num_threads)
+        df.index = pd.Index(new_idx, name='NumThreads')
+
+    def _set_colors_and_linestyles(self, ax):
+        for idx, line in enumerate(ax.lines):
+            line.set_linestyle(self.linestyles[idx])
+            line.set_color(self.colors[idx])
+
     def _generate_bandwidth_div(self, body):
         """
         Create a plot for the bandwidth and write a nice table.
         """
         df = self.df['bytes'].unstack()
+        self._reset_index_to_num_threads(df)
 
         # Create the plot
         fig, ax = plt.subplots()
         df.plot(ax=ax)
-        ax.set_xticks(list(range(len(self.config['intervals']))))
+        self._set_colors_and_linestyles(ax)
+
+        lgd = ax.legend(loc='center left', bbox_to_anchor=(1.05, 0.5))
         ax.set_ylabel('Bytes')
         output_file = str(self.output_dir / 'bytes.png')
-        fig.savefig(output_file)
+        fig.savefig(output_file,
+                    bbox_extra_artists=(lgd,),
+                    bbox_inches='tight')
 
         # Create the HTML for the table.
         table_html_str = (df.style
@@ -302,14 +332,19 @@ class Summarize(object):
         Create a plot for the elapsed time and write a nice table.
         """
         df = self.df['elapsed'].unstack() / 1000
+        self._reset_index_to_num_threads(df)
 
         # Create the plot
         fig, ax = plt.subplots()
         df.plot(ax=ax)
-        ax.set_xticks(list(range(len(self.config['intervals']))))
+        self._set_colors_and_linestyles(ax)
+
+        lgd = ax.legend(loc='center left', bbox_to_anchor=(1.05, 0.5))
         ax.set_ylabel('seconds')
         output_file = str(self.output_dir / 'elapsed.png')
-        fig.savefig(output_file)
+        fig.savefig(output_file,
+                    bbox_extra_artists=(lgd,),
+                    bbox_inches='tight')
 
         # Create the HTML for the table.
         table_html_str = (df.style
@@ -337,14 +372,19 @@ class Summarize(object):
         Create a plot for the throughput and write a nice table.
         """
         df = self.df['error_rate'].unstack() / 1000
+        self._reset_index_to_num_threads(df)
 
         # Create the plot
         fig, ax = plt.subplots()
         df.plot(ax=ax)
-        ax.set_xticks(list(range(len(self.config['intervals']))))
+        self._set_colors_and_linestyles(ax)
+
+        lgd = ax.legend(loc='center left', bbox_to_anchor=(1.05, 0.5))
         ax.set_ylabel('%')
         output_file = str(self.output_dir / 'error_rate.png')
-        fig.savefig(output_file)
+        fig.savefig(output_file,
+                    bbox_extra_artists=(lgd,),
+                    bbox_inches='tight')
 
         # Create the HTML for the table.
         table_html_str = (df.style
@@ -372,14 +412,30 @@ class Summarize(object):
         Create a plot for the throughput and write a nice table.
         """
         df = self.df['throughput'].unstack()
+        self._reset_index_to_num_threads(df)
 
-        # Create the plot
+        # Create the service-by-service plot
         fig, ax = plt.subplots()
         df.plot(ax=ax)
-        ax.set_xticks(list(range(len(self.config['intervals']))))
+        self._set_colors_and_linestyles(ax)
+
+        lgd = ax.legend(loc='center left', bbox_to_anchor=(1.05, 0.5))
         ax.set_ylabel('tr/sec')
         output_file = str(self.output_dir / 'throughput.png')
-        fig.savefig(output_file)
+        fig.savefig(output_file,
+                    bbox_extra_artists=(lgd,),
+                    bbox_inches='tight')
+
+        # Create the overall throughput plot.                                   
+        fig, ax = plt.subplots()                                                
+        overall_df = df.sum(axis=1)                                                     
+        overall_df.plot(ax=ax)                                                          
+        self._set_colors_and_linestyles(ax)
+
+        ax.set_title(f'Overall Throughput: Max = {overall_df.max():.0f}')               
+        ax.set_ylabel('tr/sec')                                                 
+        output_file = str(self.output_dir / 'throughput_overall.png')           
+        fig.savefig(output_file)    
 
         # Create the HTML for the table.
         table_html_str = (df.style
@@ -395,6 +451,7 @@ class Summarize(object):
         h1 = etree.SubElement(div, 'h1')
         h1.text = 'Throughput'
         etree.SubElement(div, 'img', src="throughput.png")
+        etree.SubElement(div, 'img', src="throughput_overall.png")
         div.append(table)
 
         # Add the throughput section to the table of contents.
