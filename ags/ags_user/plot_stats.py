@@ -232,9 +232,12 @@ class AGSServiceStatisticsPlotsViaMPL(ToolsBase):
 
         fig, ax1 = plt.subplots()
         df[['busy', 'free', 'notCreated']].plot.area(ax=ax1)
+        ax1.legend(loc='upper right')
 
         ax1.set_title(service)
         ax1.set_ylabel('instances')
+
+        # The legend looks better in the upper right corner.
 
         ax2 = ax1.twinx()
 
