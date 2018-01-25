@@ -1,0 +1,32 @@
+intervals: [2, 2, 2]
+output_root: output
+input_root: input
+server: idpgisqa.bldr.ncep.noaa.gov
+port: 
+# Normally this should be 60? 
+ramp_time: 1    
+testunits:
+  - service: NMFS/HAPC/MapServer
+    num_threads: [2, 2, 2]
+  - service: NOS_Biogeo_Biomapper/Hawaii_Imagery/MapServer
+    num_threads: [2, 2, 2]
+  - service: NOS_ESI/ESI_Alabama_Maps/ImageServer
+    num_threads: [2, 2, 2]
+  - service: NOS_ESI/ESI_CentralCalifornia_Data/MapServer
+    num_threads: [2, 2, 2]
+  - service: NOS_ESI/ESI_CentralCalifornia_TandE_Data/MapServer
+    num_threads: [2, 2, 2]
+  - service: NWS_Climate_Outlooks/cpc_wkly_sst/MapServer
+    num_threads: [2, 2, 2]
+  - service: NWS_Forecasts_Guidance_Warnings/NDFD_temp/MapServer
+    num_threads: [2, 2, 2]
+  - service: NWS_Forecasts_Guidance_Warnings/watch_warn_adv/MapServer
+    num_threads: [2, 2, 2]
+  - service: NWS_Forecasts_Guidance_Warnings/wpc_qpf/MapServer
+    num_threads: [2, 2, 2]
+  - service: NWS_Observations/ahps_riv_gauges/MapServer
+    num_threads: [2, 2, 2]
+  - service: NWS_Observations/radar_base_reflectivity/MapServer
+    num_threads: [2, 2, 2]
+  - service: radar/radar_base_reflectivity_time/ImageServer
+    num_threads: [2, 2, 2]
