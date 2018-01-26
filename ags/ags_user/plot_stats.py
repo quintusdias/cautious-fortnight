@@ -197,10 +197,15 @@ class AGSServiceStatisticsPlotsViaMPL(ToolsBase):
         pattern = f"{site}-{project}gisapp"
 
         current_time = dt.datetime.now() - dt.timedelta(hours=self.num_hours)
+
+        # The "time [timestamp]" is a trick documented at
+        # https://docs.python.org
+        # /3.6/library/sqlite3.html#sqlite3.PARSE_COLNAMES
         sql = f"""
                SELECT
                    servers.hostname,
-                   stats.time, stats.notCreated, stats.free, stats.busy,
+                   stats.time as 'time [timestamp]',
+                   stats.notCreated, stats.free, stats.busy,
                    stats.transactions
                FROM servers inner join services
                ON servers.id = services.server_id
@@ -212,9 +217,8 @@ class AGSServiceStatisticsPlotsViaMPL(ToolsBase):
                ORDER BY servers.hostname, stats.time ASC
                """
         logging.info(sql)
-        df = pd.io.sql.read_sql(sql, self.conn)
 
-        df['time'] = pd.to_datetime(df['time'])
+        df = pd.io.sql.read_sql(sql, self.conn)
 
         # Sometimes the statistics are negative.  Why?  MPL doesn't like it
         # in area plots.
