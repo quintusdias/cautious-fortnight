@@ -14,7 +14,7 @@ from .rest import AgsRestAdminBase
 from .stats import TokenRetrievalError
 
 
-class DailySummary(AgsRestAdminBase):
+class SummarizeAgsLogs(AgsRestAdminBase):
     """
     Attributes
     ----------
@@ -38,9 +38,7 @@ class DailySummary(AgsRestAdminBase):
         self.startTime = startTime
         self.endTime = endTime
 
-        path = ('/mnt/intra_wwwdev/ncep/ncepintradev/htdocs'
-                '/ncep_common/nowcoast/ags_stats/logs')
-        self.root = pathlib.Path(path) / project / site / tier
+        self.root = output
 
         self.root.mkdir(exist_ok=True, parents=True)
 
@@ -69,12 +67,28 @@ class DailySummary(AgsRestAdminBase):
         df = pd.concat(dfs)
         df.sort_index(inplace=True)
 
-        if self.output is not None:
-            if self.output.endswith('csv'):
-                df.to_csv(self.output)
-            elif self.output.endswith('pkl'):
-                with open(self.output, mode='wb') as f:
-                    pickle.dump(df, f)
+        self.write_output(df)
+
+    def write_output(df):
+
+        # First just save the data so we can get it later.
+        with pd.HDFStore(self.root / 'latest.h5') as store:
+            store['df'] = df
+
+        # Summarize by VM.
+        by_vm = df.groupby('machine').count()
+        txt = df.set_caption('Errors By VM').render()
+        doc = etree.HTML(txt)
+        table = doc.xpath('body/table')[0]
+
+        etree.SubElement(self.body, 'hr')
+        div = etree.SubElement(self.body, 'div', id='by_vm', name='by_vm')
+        h1 = etree.SubElement(div, 'h1')
+        h1.text = 'Summary by VM'
+        div.append(table)
+
+        self.doc.getroottree().write(str(self.root / 'index.html'),
+                                     encoding='utf-8', pretty_print=True)
 
     def retrieve_server_logs(self, server):
         """

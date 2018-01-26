@@ -1,8 +1,9 @@
 # Standard library imports
 import argparse
 import datetime
+import pathlib
 
-from .logs import DailySummary
+from .logs import SummarizeAgsLogs
 from .plot_stats import AGSServiceStatisticsPlotsViaMPL
 from .stats import CollectAgsStats, CollectAgsUsageRequests
 from .rest import AgsRestAdmin
@@ -181,6 +182,29 @@ def set_ags():
     obj.set_parameter(args.value)
 
 
+class SummarizeAgsLogsOutputAction(argparse.Action):
+    """
+    """
+    def __init__(self, option_strings, dest, nargs=None, **kwargs):
+        if nargs is not None:
+            raise ValueError("nargs not allowed")
+        super(SummarizeAgsLogsOutputAction, self).__init__(
+            option_strings, dest, **kwargs
+        )
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if values is not None:
+            p = pathlib.Path(values)
+        else:
+            # This section is why we need an Action class.  If this argument
+            # is not supplied (the usual case), we want to write to the ncep
+            # internal web root and append the project as the base directory.
+            path = ("/mnt/intra_wwwdev/ncep/ncepintradev/htdocs/ncep_common"
+                    "/nowcoast/ags_logs/")
+            p = pathlib.Path(path) / namespace.project / namespace.site
+            p = p / namespace.tier
+        setattr(namespace, self.dest, p)
+
 def summarize_ags_logs():
     """
     Console script interface for summarizing the ags logs for a day.
@@ -203,28 +227,24 @@ def summarize_ags_logs():
                         help='The start date and hour - format YYYY-MM-DDTHH',
                         type=valid_date_time)
 
-    parser.add_argument('stopdate',
-                        help='The stop date and hour- format YYYY-MM-DDTHH',
-                        type=valid_date_time)
+    parser.add_argument('--nhours',
+                        help='Collect logs for this many hours',
+                        type=int, default=24)
+
+    help = ("Save summary results to a directory.  If no argument is "
+            "supplied, the output is written to "
+            "/mnt/intra_wwwdev/ncep/ncepintradev/htdocs/ncep_common"
+            "/nowcoast/$project")
+    parser.add_argument('--output', help=help,
+                        action=SummarizeAgsLogsOutputAction)
 
     choices = ["SEVERE", "WARNING", "INFO", "FINE", "VERBOSE", "DEBUG", "OFF"]
     parser.add_argument('--level', choices=choices, default='SEVERE')
 
-    help = (
-        "Save dataframe results to file.  If the output filename\n"
-        "ends in 'csv', then the output file is created as a CSV\n"
-        "file.  If the output filename ends in 'pkl', then the\n"
-        "output is 'pickled' and should be reloaded with\n"
-        "\n"
-        ">>> import pickle\n"
-        ">>> with open(output_file, mode='rb') as f:\n"
-        "...     df = pickle.load(f)"
-    )
-    parser.add_argument('--output', help=help)
-
     args = parser.parse_args()
 
-    obj = DailySummary(args.project, args.site.upper(), args.tier,
-                       args.startdate, args.stopdate, level=args.level,
-                       output=args.output)
+    stopdate = args.startdate + datetime.timedelta(hours=args.nhours)
+
+    obj = SummarizeAgsLogs(args.project, args.site.upper(), args.tier,
+                           args.startdate, stopdate, args.level, args.output)
     obj.run()
