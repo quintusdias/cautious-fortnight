@@ -1,8 +1,6 @@
 # Standard library imports
 import http.client as httplib
 import json
-import pathlib
-import pickle
 import urllib
 
 # 3rd party library imports
@@ -49,6 +47,44 @@ class SummarizeAgsLogs(AgsRestAdminBase):
 
         # start the document
         self.doc = etree.Element('html')
+
+        # Add some CSS.
+        header = etree.SubElement(self.doc, 'head')
+        style = etree.SubElement(header, 'style', type='text/css')
+
+        # Write the global table styles.  We do this here instead of using
+        # the dataframe option because we only need do it once.
+        style.text = (
+            "\n"
+            "table {\n"
+            "    border-collapse: collapse;\n"
+            "}\n"
+            "table td {\n"
+            "    border-right: 1px solid #99CCCC;\n"
+            "    border-bottom:  1px solid #99CCCC;\n"
+            "    text-align:  right;\n"
+            "}\n"
+            "table th {\n"
+            "    border-right: 3px solid #99CCCC;\n"
+            "    border-bottom:  1px solid #99CCCC;\n"
+            "    padding-right:  .3em;\n"
+            "}\n"
+            "table th[scope=\"col\"] {\n"
+            "    border-right: 1px solid #99CCCC;\n"
+            "    border-bottom:  3px solid #99CCCC;\n"
+            "    padding-right:  .3em;\n"
+            "}\n"
+            "table th[scope=\"col\"]:first-child {\n"
+            "    border-right: 3px solid #99CCCC;\n"
+            "}\n"
+            "table th[scope=\"col\"]:last-child {\n"
+            "    border-right: 0;\n"
+            "}\n"
+            "table tr:last-child th {\n"
+            "    border-bottom: 0;\n"
+            "}\n"
+        )
+
         self.body = etree.SubElement(self.doc, 'body')
 
         # Append a table of contents.
@@ -69,15 +105,22 @@ class SummarizeAgsLogs(AgsRestAdminBase):
 
         self.write_output(df)
 
-    def write_output(df):
+    def write_output(self, df):
 
         # First just save the data so we can get it later.
         with pd.HDFStore(self.root / 'latest.h5') as store:
             store['df'] = df
 
-        # Summarize by VM.
-        by_vm = df.groupby('machine').count()
-        txt = df.set_caption('Errors By VM').render()
+        # Summarize by VM and by code.
+        # Upon counting, all the columns count the same things, so just take
+        # any column.  Choose elapsed for no particular reason.
+        df = df.groupby(['machine', 'code']).count()['elapsed'].unstack()
+
+        # Add a nan-aware sum as the final columndf.
+        df['total errors'] = df.sum(axis=1)
+
+        # All of the columns count the same thing, so just take any column.
+        txt = df.style.set_caption('Errors By VM').render()
         doc = etree.HTML(txt)
         table = doc.xpath('body/table')[0]
 
@@ -85,6 +128,12 @@ class SummarizeAgsLogs(AgsRestAdminBase):
         div = etree.SubElement(self.body, 'div', id='by_vm', name='by_vm')
         h1 = etree.SubElement(div, 'h1')
         h1.text = 'Summary by VM'
+
+        h2 = etree.SubElement(div, 'h2')
+        h2.text = (f"Date Range: "
+                   f"{self.startTime.strftime('%Y-%m-%dT%H:%M')} - "
+                   f"{self.endTime.strftime('%Y-%m-%dT%H:%M')}")
+
         div.append(table)
 
         self.doc.getroottree().write(str(self.root / 'index.html'),

@@ -193,17 +193,18 @@ class SummarizeAgsLogsOutputAction(argparse.Action):
         )
 
     def __call__(self, parser, namespace, values, option_string=None):
-        if values is not None:
+        expected = ("/mnt/intra_wwwdev/ncep/ncepintradev/htdocs/ncep_common"
+                    "/nowcoast/ags_logs")
+        if values != expected:
             p = pathlib.Path(values)
         else:
             # This section is why we need an Action class.  If this argument
             # is not supplied (the usual case), we want to write to the ncep
             # internal web root and append the project as the base directory.
-            path = ("/mnt/intra_wwwdev/ncep/ncepintradev/htdocs/ncep_common"
-                    "/nowcoast/ags_logs/")
-            p = pathlib.Path(path) / namespace.project / namespace.site
+            p = pathlib.Path(expected) / namespace.project / namespace.site
             p = p / namespace.tier
         setattr(namespace, self.dest, p)
+
 
 def summarize_ags_logs():
     """
