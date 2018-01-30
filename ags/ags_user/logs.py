@@ -50,6 +50,12 @@ class SummarizeAgsLogs(AgsRestAdminBase):
 
         # Add some CSS.
         header = etree.SubElement(self.doc, 'head')
+
+        # Make the document refresh every 60 seconds.                           
+        meta = etree.SubElement(header, 'meta')                                 
+        meta.attrib['http-equiv'] = 'refresh'                                   
+        meta.attrib['content'] = 60
+
         style = etree.SubElement(header, 'style', type='text/css')
 
         # Write the global table styles.  We do this here instead of using
