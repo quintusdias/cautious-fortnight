@@ -54,7 +54,7 @@ class SummarizeAgsLogs(AgsRestAdminBase):
         # Make the document refresh every 60 seconds.                           
         meta = etree.SubElement(header, 'meta')                                 
         meta.attrib['http-equiv'] = 'refresh'                                   
-        meta.attrib['content'] = 60
+        meta.attrib['content'] = '60'
 
         style = etree.SubElement(header, 'style', type='text/css')
 
