@@ -3,7 +3,7 @@ import argparse
 import datetime
 import pathlib
 
-from .big_brother import BBFlagHistory, ArcSocCounts
+from .big_brother import BBFlagHistory
 from .check_mk import CheckCheckMK
 from .daily_log_merge import DailyApacheLogCount, DailyApacheLogCountPlot
 from .daily_log import ApacheLogBinner
@@ -132,27 +132,6 @@ def ccmk():
 
     obj = CheckCheckMK(args.machines, args.service, args.timerange,
                        args.output)
-    obj.run()
-
-
-def collect_arcsoc_counts():
-    """
-    Collect arcsoc counts each server.
-    """
-    description = "Command line utility for collecting arcsoc counts..."
-    parser = argparse.ArgumentParser(description=description)
-
-    parser.add_argument('site',
-                        choices=['CPRK', 'BLDR'],
-                        help='Process this site''s arcsoc counts.')
-
-    parser.add_argument('project',
-                        choices=['idpgis', 'nowcoast'],
-                        help='Process this project''s arcsoc counts.')
-
-    args = parser.parse_args()
-
-    obj = ArcSocCounts(args.site, args.project)
     obj.run()
 
 
