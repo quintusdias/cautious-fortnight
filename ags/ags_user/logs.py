@@ -6,6 +6,7 @@ import urllib
 # 3rd party library imports
 import pandas as pd
 from lxml import etree
+import matplotlib.pyplot as plt
 
 # Local imports
 from .rest import AgsRestAdminBase
@@ -117,7 +118,44 @@ class SummarizeAgsLogs(AgsRestAdminBase):
         with pd.HDFStore(self.root / 'latest.h5') as store:
             store['df'] = df
 
-        # Summarize by VM and by code.
+        self.write_daily_summary_by_vm_and_code(df)
+        self.write_hourly_summary(df)
+
+        # Last thing is to just write the HTML to file.
+        self.doc.getroottree().write(str(self.root / 'index.html'),
+                                     encoding='utf-8', pretty_print=True)
+
+    def write_hourly_summary(self, df):
+        """
+        Summarize by the hour.
+        """
+        # Upon counting, all the columns count the same things, so just take
+        # any column.  Choose elapsed for no particular reason.
+        df = df.groupby([df.index.day, df.index.hour]).count()
+
+        fig, ax = plt.subplots()
+        df['code'].plot(ax=ax)
+        ax.set_title('Total Errors')
+
+        path = self.root / 'hourly_summary.png'
+        fig.savefig(str(path))
+
+        etree.SubElement(self.body, 'hr')
+        a = etree.SubElement(self.body, 'a', name='summary_by_hour')
+        div = etree.SubElement(self.body, 'div', id='by_hour', name='by_hour')
+        h1 = etree.SubElement(div, 'h1')
+        h1.text = 'Summary by Hour'
+        img = etree.SubElement(div, 'img', src=path.name)
+
+        # Link the DIV into the table of contents.
+        li = etree.SubElement(self.toc, 'li')
+        a = etree.SubElement(li, 'a', href='#summary_by_hour')
+        a.text = 'Summary by Hour'
+
+    def write_daily_summary_by_vm_and_code(self, df):
+        """
+        Summarize by VM and by code.
+        """
         # Upon counting, all the columns count the same things, so just take
         # any column.  Choose elapsed for no particular reason.
         df = df.groupby(['machine', 'code']).count()['elapsed'].unstack()
@@ -131,6 +169,7 @@ class SummarizeAgsLogs(AgsRestAdminBase):
         table = doc.xpath('body/table')[0]
 
         etree.SubElement(self.body, 'hr')
+        a = etree.SubElement(self.body, 'a', name='summary_by_vm')
         div = etree.SubElement(self.body, 'div', id='by_vm', name='by_vm')
         h1 = etree.SubElement(div, 'h1')
         h1.text = 'Summary by VM'
@@ -142,8 +181,10 @@ class SummarizeAgsLogs(AgsRestAdminBase):
 
         div.append(table)
 
-        self.doc.getroottree().write(str(self.root / 'index.html'),
-                                     encoding='utf-8', pretty_print=True)
+        # Link the DIV into the table of contents.
+        li = etree.SubElement(self.toc, 'li')
+        a = etree.SubElement(li, 'a', href='#summary_by_vm')
+        a.text = 'Summary by VM'
 
     def retrieve_server_logs(self, server):
         """
