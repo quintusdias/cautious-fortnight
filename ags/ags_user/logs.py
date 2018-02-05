@@ -1,4 +1,5 @@
 # Standard library imports
+import datetime as dt
 import http.client as httplib
 import json
 import urllib
@@ -52,9 +53,9 @@ class SummarizeAgsLogs(AgsRestAdminBase):
         # Add some CSS.
         header = etree.SubElement(self.doc, 'head')
 
-        # Make the document refresh every 60 seconds.                           
-        meta = etree.SubElement(header, 'meta')                                 
-        meta.attrib['http-equiv'] = 'refresh'                                   
+        # Make the document refresh every 60 seconds.
+        meta = etree.SubElement(header, 'meta')
+        meta.attrib['http-equiv'] = 'refresh'
         meta.attrib['content'] = '60'
 
         style = etree.SubElement(header, 'style', type='text/css')
@@ -133,6 +134,12 @@ class SummarizeAgsLogs(AgsRestAdminBase):
         # any column.  Choose elapsed for no particular reason.
         df = df.groupby([df.index.day, df.index.hour]).count()
 
+        # Reset the index to be a normal by-the-hour index instead of a
+        # multi-index.  That way the datetime information comes out on the
+        # x-axis instead of "time,time".
+        values = [self.startTime + dt.timedelta(hours=j) for j in range(24)]
+        df.index = pd.DatetimeIndex(values)
+
         fig, ax = plt.subplots()
         df['code'].plot(ax=ax)
         ax.set_title('Total Errors')
@@ -145,7 +152,7 @@ class SummarizeAgsLogs(AgsRestAdminBase):
         div = etree.SubElement(self.body, 'div', id='by_hour', name='by_hour')
         h1 = etree.SubElement(div, 'h1')
         h1.text = 'Summary by Hour'
-        img = etree.SubElement(div, 'img', src=path.name)
+        etree.SubElement(div, 'img', src=path.name)
 
         # Link the DIV into the table of contents.
         li = etree.SubElement(self.toc, 'li')
