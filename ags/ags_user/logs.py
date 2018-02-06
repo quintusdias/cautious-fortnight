@@ -137,7 +137,11 @@ class SummarizeAgsLogs(AgsRestAdminBase):
         # Reset the index to be a normal by-the-hour index instead of a
         # multi-index.  That way the datetime information comes out on the
         # x-axis instead of "time,time".
-        values = [self.startTime + dt.timedelta(hours=j) for j in range(24)]
+        values = [
+            dt.datetime(self.startTime.year, self.startTime.month,
+                        day, hour, 0, 0)
+            for day, hour in df.index
+        ]
         df.index = pd.DatetimeIndex(values)
 
         fig, ax = plt.subplots()
