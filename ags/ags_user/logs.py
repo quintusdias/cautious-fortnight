@@ -113,12 +113,34 @@ class SummarizeAgsLogs(AgsRestAdminBase):
 
         self.write_output(df)
 
-    def write_output(self, df):
-
+    def write_hdf5(self, df):
+        """
+        Store the dataframe as an HDF5 file that we can access later if
+        necessary.  Then link it into the output HTML.
+        """
         # First just save the data so we can get it later.
         with pd.HDFStore(self.root / 'latest.h5') as store:
             store['df'] = df
 
+        # Link to the HDF5 file.
+        div = etree.SubElement(self.body, 'div')
+        p = etree.SubElement(div, 'p')
+        p.text = 'The error messages are stored in a pandas dataframe ('
+        a = etree.SubElement(p, 'a', href='latest.h5')
+        a.text = 'latest.h5'
+        a.tail = ').  To read after downloading, try the following:'
+        pre = etree.SubElement(div, 'pre')
+        pre.text = (
+            ">>> import pandas as pd\n"
+            ">>> with pd.HDFStore('latest.h5') as store: df = store['df']"
+        )
+
+    def write_output(self, df):
+        """
+        Create the output document content.
+        """
+
+        self.write_hdf5(df)
         self.write_daily_summary_by_vm_and_code(df)
         self.write_hourly_summary(df)
 
