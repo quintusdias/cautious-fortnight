@@ -245,49 +245,61 @@ class SummarizeAgsLogs(AgsRestAdminBase):
                 'machines': [server],
             },
         }
-        params = urllib.parse.urlencode(params)
 
-        httpConn = httplib.HTTPConnection(server, self.ags_port)
-        httpConn.request('POST', log_query_url, params, self.headers)
-        response = httpConn.getresponse()
-        if (response.status != 200):
-            httpConn.close()
-            msg = ("Error while fetching log info from the "
-                   "admin URL.  Please check the URL and try again.")
-            raise RuntimeError(msg)
+        # msg = "Requesting [{} - {}]"
+        # print(msg.format(dt.datetime.fromtimestamp(params['startTime']/1000),
+        #                  dt.datetime.fromtimestamp(params['endTime']/1000)))
 
-        rawdata = response.read()
-        data = json.loads(rawdata)
+        lst = []
+        count = 0
+        while True:
+            # Loop until arcgis server says it's done.
+            encoded_params = urllib.parse.urlencode(params)
 
-        # url = f"http://{server}:{self.ags_port}/arcgis/admin/logs/query"
+            httpConn = httplib.HTTPConnection(server, self.ags_port)
+            httpConn.request('POST', log_query_url, encoded_params, self.headers)
+            response = httpConn.getresponse()
+            if (response.status != 200):
+                httpConn.close()
+                msg = ("Error while fetching log info from the "
+                       "admin URL.  Please check the URL and try again.")
+                raise RuntimeError(msg)
 
-        # # Supply the log level, filter, token, and return format
-        # params = {
-        #     'startTime': int(self.startTime.timestamp() * 1000),
-        #     'endTime': int(self.endTime.timestamp() * 1000),
-        #     'level': self.level,
-        #     'token': self.token,
-        #     'f': 'json',
-        #     'pageSize': 10000,
-        #     'filter': {
-        #         'server': '*',
-        #         'machines': [server],
-        #     },
-        # }
+            rawdata = response.read()
+            data = json.loads(rawdata)
 
-        # r = requests.post(url, params=params, headers=self.headers)
-        # r.raise_for_status()
+            # msg = "Retrieved [{} - {}]"
+            # print(msg.format(dt.datetime.fromtimestamp(data['endTime']/1000),
+            #                  dt.datetime.fromtimestamp(data['startTime']/1000)))
 
-        # data = r.json()
 
-        if data['hasMore']:
-            print(f'{server} actually has more')
+            df = pd.DataFrame(data['logMessages'])
+            try:
+                df['time'] = pd.to_datetime(df['time'], unit='ms')
+            except KeyError:
+                print(server, "No data")
+                return
 
-        df = pd.DataFrame(data['logMessages'])
-        try:
-            df['time'] = pd.to_datetime(df['time'], unit='ms')
-        except KeyError:
-            print(server, "No data")
-            return
+            lst.append(df.set_index('time'))
 
-        return df.set_index('time')
+            if not data['hasMore']:
+                break
+
+            # Ok there is more.  According to
+            # 
+            # http://resources.arcgis.com/en/help/server-admin-api/logsQuery.html
+            #
+            # to get the next set of records, pass the "endTime" member as
+            # the "startTime" parameter for the next request. Time can be
+            # specified in milliseconds since UNIX epoch, or as an ArcGIS
+            # Server timestamp.
+            #
+            # Not true!
+            #
+            # params['startTime'] = data['endTime']
+            params['startTime'] = data['startTime']
+            print(f"{count} ", end='')
+
+        # Concatenate the dataframes.
+        df = pd.concat(lst)
+        return df
