@@ -41,7 +41,11 @@ class GenerateRESTinput(object):
         with gzip.GzipFile(self.apache_log_file) as gz:
             for idx, line in enumerate(gz):
 
-                data = self.parser(line.decode('utf-8'))
+                try:
+                    data = self.parser(line.decode('utf-8'))
+                except UnicodeDecodeError:
+                    # If we can't parse the data, then what's the point?
+                    continue
 
                 # What service?
                 parts = data['request_url_path'].split('/')
@@ -117,7 +121,11 @@ class GenerateRESTinput(object):
                 else:
                     layers = params['layers'][0]
 
-                x1, y1, x2, y2 = [float(x) for x in bbox.split(',')]
+                try:
+                    x1, y1, x2, y2 = [float(x) for x in bbox.split(',')]
+                except ValueError:
+                    # Probably a bad bounding box.  Just skip it.
+                    continue
                 bbox = f"{x1:.4f},{y1:.4f},{x2:.4f},{y1:.4f}"
 
                 # If we don't already know about it, open a new file for

@@ -1,4 +1,5 @@
 import datetime as dt
+import itertools
 import pathlib
 
 import matplotlib.patches as mpatches
@@ -40,8 +41,8 @@ class ProcessIngestUnits(object):
             'rtgssthr', 'sfc',  'warnings', 'akcoastal', 
         ]
         self.side2 = [
-            'dewpt_rhm', 'pop12_qpf_snow', 'goes_i3', 'goes_i4', 'wgust_wind',
-            '24hr', '48hr', '72hr', 'rtma', 'gmgsi_lir', 
+            'dewpt_rhm', 'pop12_qpf_snow', 'goes_i2', 'goes_i3', 'goes_i4',
+            'wgust_wind', '24hr', '48hr', '72hr', 'rtma', 'gmgsi_lir', 
             'dbofs', 'estofs', 'gomofs', 'lmofs', 'loofs', 'lsofs', 'ngofs',
             'nyofs', 'sfbofs', 'tbofs', 'sport', 'lightning', 'rtma', 
             'hazards', 'basereflect'
@@ -69,9 +70,21 @@ class ProcessIngestUnits(object):
         unique_ingests = df.ingest.unique()
         print(unique_ingests)
 
-        # Map the ingests to a unique color
-        colors = sns.color_palette(n_colors=unique_ingests.shape[0])
-        cmap = {ingest: color for ingest, color in zip(unique_ingests, colors)}
+        # Map the ingests to a unique color and hatch pattern
+        n_colors = min(unique_ingests.shape[0], 7)
+        colors = sns.color_palette(n_colors=n_colors)
+
+        hatches = (None, '-', '+', '\\', 'O')
+
+        # cmap = {ingest: color for ingest, color in zip(unique_ingests, colors)}
+        cmap = {}
+        color_it = itertools.cycle(colors)
+        for idx, ingest in enumerate(unique_ingests):
+            color = next(color_it)
+            cmap['ingest'] = {
+                'color': color,
+                'hatch': hatches[idx // len(colors)]
+            }
 
         actives = {}
         coords = []
@@ -107,7 +120,8 @@ class ProcessIngestUnits(object):
                 'y': current_level, 
                 'width': row['end'].timestamp() - row['start'].timestamp(),
                 'height': 1,
-                'facecolor': cmap[row['ingest']],
+                'facecolor': cmap[row['ingest']]['color'],
+                'hatch': cmap[row['ingest']]['hatch'],
                 'label': row['ingest'],
             }
             coords.append(patch_coords)
@@ -131,7 +145,7 @@ class ProcessIngestUnits(object):
                     actives[idx] = None
     
 
-        for patch_coords in coords:
+        for idx, patch_coords in enumerate(coords):
             xy = patch_coords['x'], patch_coords['y']
             width = patch_coords['width']
             height = patch_coords['height']
@@ -223,13 +237,13 @@ class ProcessIngestUnits(object):
                 command_succeeded = False
 
     def process_log(self, path):
-        print(path)
         # Some paths should always be skipped.
         if '.snapshot' in str(path):
             return
         if 'wine' in str(path):
             return
 
+        print(path)
         ingest = self.frobnosticate_ingest(path)
 
         if ingest in self.exclude:
