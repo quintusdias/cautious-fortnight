@@ -106,17 +106,31 @@ def ccmk():
                    "from Check_MK.")
     parser = argparse.ArgumentParser(description=description)
 
-    help = ("Query Check_MK for these VMs.  This argument should be a "
-            "fully-enumerated regular expression such as "
-            "\"vm-bldr-gisapp-op[1,2][a,b]\"")
-    parser.add_argument('--machines', help=help, nargs='*')
+    help = "Project"
+    choices = ['nowcoast', 'idpgis', 'ridge2']
+    parser.add_argument('project', help=help, choices=choices)
 
-    help = "Query this Check_MK service."
+    help = "Site"
+    choices = ['cprk', 'bldr']
+    parser.add_argument('site', help=help, choices=choices)
+
+    help = "Tier"
+    choices = ['dev', 'qa', 'op']
+    parser.add_argument('tier', help=help, choices=choices)
+
+    help = "VM type"
+    choices = [
+        'application-server', 'compute-farm', 'tomcat', 'db-reader',
+        'db-master', 'geowebcache'
+    ]
+    parser.add_argument('vmtype', help=help, choices=choices)
+
+    help = "Query this Check_MK metric."
     choices = [
         'CPU_load', 'CPU_utilization', 'Memory_used', 'fs__opt',
         'PostgreSQL_DB_postgres_Statistics:2'
     ]
-    parser.add_argument('service', help=help, choices=choices)
+    parser.add_argument('metric', help=help, choices=choices)
 
     help = "Time range - YYYY-MM-DDTHH"
     parser.add_argument('--timerange', help=help, nargs=2,
@@ -130,8 +144,8 @@ def ccmk():
 
     args = parser.parse_args()
 
-    obj = CheckCheckMK(args.machines, args.service, args.timerange,
-                       args.output)
+    obj = CheckCheckMK(args.project, args.site, args.tier, args.vmtype,
+                       args.metric, args.timerange, args.output)
     obj.run()
 
 

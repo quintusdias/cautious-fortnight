@@ -16,8 +16,8 @@ class CheckCheckMK(object):
     """
     Attributes
     ----------
-    parameter : str
-        Get plots from Check_MK for this parameter.
+    metric : str
+        Get plots from Check_MK for this metric.
     machines : list
         Get plots for each machine in this list.
     s : requests.Session
@@ -25,14 +25,14 @@ class CheckCheckMK(object):
     timerange : 2-tuple
         Start and stop time for queries.
     """
-    def __init__(self, machines, parameter, timerange, output_root):
+    def __init__(self, project, site, tier, vmtype, metric, timerange,
+                 output_root):
 
-        if not type(machines) == list:
-            machines = list(machines)
-        self.machines = self.expand_machines(machines)
         self.read_config()
+        machines = self.config['servers'][project][site][tier][vmtype]
+        self.machines = [machine + '.ncep.noaa.gov' for machine in machines]
 
-        self.parameter = parameter
+        self.metric = metric
         self.timerange = tuple(timerange)
 
         self.output_root = pathlib.Path(output_root)
@@ -55,49 +55,6 @@ class CheckCheckMK(object):
             raise RuntimeError(msg)
         with path.open(mode='rt') as f:
             self.config = yaml.load(f)
-
-    def expand_machines(self, machines_in):
-
-        # Expand the machines
-        machines = []
-        for machine in machines_in:
-            print(machine)
-
-            regex = re.compile('[[][\w]+[]]')
-            parts = [m for m in regex.finditer(machine)]
-            if len(parts) == 0:
-                # No expandable regex found, it must be a single machine name.
-                machines.append(machine)
-                continue
-
-            # This is the expandable part to be blown up by itertools.
-            iterables = [m.group()[1:-1] for m in parts]
-
-            # construct the full list.
-            pattern = '(?P<n0>[\w.-]*)'
-            for idx, iterable in enumerate(iterables):
-                pattern += f'(?P<i{idx + 1}>[[]{iterable}[]])'
-                pattern += f'(?P<n{idx + 1}>[\w.-]*)'
-
-            regex = re.compile(pattern)
-            m = regex.match(machine)
-
-            args = []
-            for part in m.groups():
-                if part == '':
-                    pass
-                elif part[0] == '[':
-                    # an iterable:
-                    args.append(part[1:-1])
-                else:
-                    # Must make this part an iterable.
-                    args.append([part])
-            args = tuple(args)
-
-            tuples = list(itertools.product(*args))
-            machines.extend([''.join(t) for t in tuples])
-
-        return machines
 
     def log_into_check_mk(self):
 
@@ -149,19 +106,19 @@ class CheckCheckMK(object):
         )
 
         try:
-            parameter, source = self.parameter.split(':')
+            metric, source = self.metric.split(':')
         except ValueError:
-            # If no ":" is there, then the source is 0 and the parameter is
+            # If no ":" is there, then the source is 0 and the metric is
             # what was originally specified.
             source = 0
-            parameter = self.parameter
+            metric = self.metric
         else:
             source = int(source)
 
         params = {
             'baseurl': 'https://vm-lnx-checkmk.ncep.noaa.gov/ncep/check_mk/',
             'source': source,
-            'srv': parameter,
+            'srv': metric,
             'theme': 'multisite',
             'view': 0,
             'start': int(self.timerange[0].timestamp()),

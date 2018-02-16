@@ -2,7 +2,6 @@ from setuptools import setup
 
 scripts = [
     'bin_daily_apache_log_file',
-    'ccmk',
     'collect_ags_stats',
     'collect_arcsoc_counts',
     'count_nco_log_items',
