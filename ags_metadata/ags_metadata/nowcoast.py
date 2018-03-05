@@ -14,8 +14,8 @@ _REGEX_NAMESPACE = {'re': "http://exslt.org/regular-expressions"}
 
 class NowCoastRestToIso(RestToIso):
 
-    def __init__(self, config_file, **kwargs):
-        super().__init__(config_file, **kwargs)
+    def __init__(self, config_file, verbose='info'):
+        super().__init__(config_file, verbose=verbose)
 
     def _retrieve_rest_references(self):
         """
@@ -119,13 +119,24 @@ class NowCoastRestToIso(RestToIso):
         try to get it from the service metadata
         """
 
+        keyword_path = (
+            'gmi:MI_Metadata',
+            'gmd:identificationInfo',
+            'srv:SV_ServiceIdentification',
+            'gmd:abstract'
+        )
+
         try:
-            text = self.retrieve_configuration_file_value('abstract')
+            text = self.retrieve_configuration_file_value(keyword_path)
         except KeyError:
             try:
                 text = self._extract_nowcoast_abstract()
             except etree.XMLSyntaxError:
                 # We have no information available.  Just use the service name.
+                text = f"{self.folder}/{self.service}.{self.service_type}"
+            except AttributeError as e:
+                # We have no information available.  Just use the service name.
+                self.logger.critical(repr(e))
                 text = f"{self.folder}/{self.service}.{self.service_type}"
 
         # Include the time information if appropriate.
@@ -158,8 +169,20 @@ class NowCoastRestToIso(RestToIso):
         """
         root = self.get_element(const.TIME_PERIOD)
 
+        keyword_path = (
+            'gmi:MI_Metadata',
+            'gmd:identificationInfo',
+            'srv:SV_ServiceIdentification',
+            'srv:extent',
+            'gmd:EX_Extent',
+            'gmd:temporalElement',
+            'gmd:EX_TemporalExtent',
+            'gmd:extent',
+            'gml:TimePeriod'
+        )
+
         try:
-            time_period = self.retrieve_configuration_file_value('time_period')
+            time_period = self.retrieve_configuration_file_value(keyword_path)
         except KeyError:
             # The user didn't specify this, so delete it.
             root.getparent().remove(root)
@@ -172,14 +195,14 @@ class NowCoastRestToIso(RestToIso):
         # No description at the moment.  It is optional anyway.
 
         elt = root.xpath('gml:beginPosition', namespaces=self.root.nsmap)[0]
-        elt.attrib['indeterminatePosition'] = time_period['begin_position']
+        elt.attrib['indeterminatePosition'] = time_period['gml:beginPosition']
 
         elt = root.xpath('gml:endPosition', namespaces=self.root.nsmap)[0]
-        elt.attrib['indeterminatePosition'] = time_period['end_position']
+        elt.attrib['indeterminatePosition'] = time_period['gml:endPosition']
 
         elt = root.xpath('gml:timeInterval', namespaces=self.root.nsmap)[0]
         if 'time_interval' in time_period.keys():
-            elt.text = str(time_period['time_interval'])
+            elt.text = str(time_period['gml:timeInterval'])
         else:
             # delete it.
             elt.getparent().remove(elt)
@@ -202,14 +225,3 @@ class NowCoastRestToIso(RestToIso):
 
         elt = self.get_element(const.TITLE)
         elt.text = text
-
-    def update_file_identifier(self):
-        """
-        A unique phrase or string which uniquely identifies the metadata file.
-        """
-        elt = self.get_element(const.FILE_IDENTIFIER)
-
-        # Using the hostname this way allows us to uniquely differentiate
-        # records between tiers.
-        hostname = self.config['server'].split('.')[0]
-        elt.text = f'gov.noaa.nos.ocs.{hostname}:operational_{self.service}'

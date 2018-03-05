@@ -1,0 +1,17 @@
+---
+project: nowCOAST
+server: nowcoast.ncep.noaa.gov
+services:
+  nowcoast:
+    service: mapoverlays_admin_fedgov
+      gmi:MI_Metadata:
+        gmd:fileIdentifier: gov.noaa.nos.ocs.nowcoast:mapoverlays_admin_fedgov
+        gmd:identificationInfo:
+          srv:SV_ServiceIdentification:
+            gmd:citation:
+              gmd:CI_Citation:
+                gmd:date__creation:  2015-09-21
+                gmd:date__publication:  2015-09-21
+          gmd:descriptiveKeywords__gcmd_place: [
+            "CONTINENT > NORTH AMERICA > UNITED STATES OF AMERICA",
+          ]

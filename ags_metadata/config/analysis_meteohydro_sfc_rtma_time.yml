@@ -48,33 +48,8 @@ services:
             gmd:lineage:
               gmd:LI_Lineage:
                 gmd:source: >
-                  The source files are in GRIB2 format, which contain
-                  pixel values representing the precipitation amount
-                  in millimeters.
-                gmd:statement: >
-                  This data is generated from the latest qualitative
-                  precipitation estimate outputs in NWS operations at
-                  NOAA Integrated Dissemination Program.
-                gmd:processStep: [
-                  'The rasters are rescaled using GDAL to convert to
-                  inches, then reprojected into Web Mercator for storage
-                  and inclusion in map services.',
-
-                  'The start time of each accumulation is equal to valid
-                  time minus the accumulation period (e.g., a  1-hour
-                  QPE valid at 1400 UTC has a start time of 1300 UTC).',
-
-                  'The end time is equal to valid time plus a decided
-                  number of minutes.  The number of minutes to add should
-                  be at least equal to the product delay + the script
-                  run time + the script update frequency.',
-                ]
-        gmd:dataQualityInfo:
-          gmd:DQ_DataQuality:
-            gmd:lineage:
-              gmd:LI_Lineage:
-                gmd:source: >
                   The source files are in GRIB2 format.
                 gmd:statement: >
                   This data is generated from the latest analyses from the production suite
                   at NCEP.
+

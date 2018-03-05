@@ -1,0 +1,97 @@
+---
+project: nowCOAST
+server: nowcoast.ncep.noaa.gov
+services:
+  nowcoast:
+    service: obs_meteocean_insitu_sfc_time
+      gmi:MI_Metadata:
+        gmd:fileIdentifier: gov.noaa.nos.ocs.nowcoast:obs_meteocean_insitu_sfc_time
+        gmd:identificationInfo:
+          srv:SV_ServiceIdentification:
+            gmd:citation:
+              gmd:CI_Citation:
+                gmd:date__creation:  2015-09-21
+                gmd:date__publication:  2015-09-21
+            srv:extent:
+              gmd:EX_Extent:
+                gmd:temporalElement:
+                  gmd:EX_TemporalExtent:
+                    gmd:extent:
+                      gml:TimePeriod:
+                        gml:beginPosition: before
+                        gml:endPosition: after
+                        gml:timeInterval: 60
+          gmd:descriptiveKeywords__gcmd_place: [
+            "CONTINENT > NORTH AMERICA > UNITED STATES OF AMERICA",
+          ]
+          gmd:descriptiveKeywords__wmo_theme: [
+            'weatherObservations',
+            'meteorology',
+            'synopticMeteorology',
+            'observationPlatform'
+          ]
+        gmd:dataQualityInfo:
+          gmd:DQ_DataQuality:
+            gmd:lineage:
+              gmd:LI_Lineage:
+                gmd:source: >
+                  The MADIS source files are in netCDF format.  The NESDIS
+                  source files are in shapefile format.
+                gmd:statement: >
+                  The maps of near-real-time surface weather and ocean
+                  observations are based on non-restricted data obtained
+                  from the NWS Family of Services courtesy of NESDIS/OPSD
+                  and also the NWS Meteorological Assimilation Data Ingest
+                  System (MADIS). The data includes observations from
+                  terrestrial and maritime observing stations from the
+                  U.S.A. and other countries. For terrestrial networks,
+                  the platforms include but are not limited to ASOS,
+                  AWOS, RAWS, non-automated stations, U.S. Climate
+                  Reference Networks, many U.S. Geological Survey
+                  Stations via NWS HADS, several state DOT Road Weather
+                  Information Systems, and U.S. Historical Climatology
+                  Network-Modernization. For maritime areas, the
+                  platforms include NOS/CO-OPS National Water Level
+                  Observation Network (NWLON), NOS/CO-OPS Physical
+                  Oceanographic Real-Time System (PORTS), NWS/NDBC
+                  Fixed Buoys, NDBC Coastal-Marine Automated Network
+                  (C-MAN), drifting buoys, ferries, Regional Ocean
+                  Observing System (ROOS) coastal stations and buoys,
+                  and ships participating in the Voluntary Ship Observing
+                  (VOS) Program. Observations from MADIS are updated
+                  approximately every 10 minutes in the map service and
+                  those from NESDIS are updated every hour. However,
+                  not all stations report that frequently. Many stations
+                  only report once per hour sometime between 15 minutes
+                  before the hour and 30 minutes past the hour. For
+                  these stations, new observations will not appear
+                  until approximately 23 minutes past top of the hour
+                  for land-based stations and 33 minutes past the top
+                  of the hour for maritime stations.
+                gmd:processStep: [
+                  'Each MADIS ingest execution will result in one or more
+                  new datasets being imported and all old datasets being
+                  dropped from the database. The current system time and
+                  the configured projections are used to determine which
+                  time periods of data will be extracted from the MADIS
+                  netCDF files, but no matter what time period is being
+                  processed, only the latest observation from a unique
+                  station record will be generated.',
+
+                  "Surface weather/ocean observations are also
+                  incorporated from NESDIS, which publishes land
+                  and maritime observations in separate shapefiles.
+                  NESDIS shapefiles are updated hourly, with the land
+                  observations available by approximately :15 minutes
+                  past the hour and the maritime observations available
+                  by approximately :25 minutes past the hour.  The data
+                  ingest routine can be configured to retain any number
+                  of hours of NESDIS data; each hour's land/maritime data
+                  will be stored in separate tables imported directly
+                  from the source shapefiles with no alterations to
+                  the attributes. Old shapefiles are deleted at the
+                  beginning of each run, and old tables are removed from
+                  the database once they pass the maximum retention age.
+                  If a shapefile has already been imported into the
+                  database, it is not downloaded again."
+                ]
