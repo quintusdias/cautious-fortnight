@@ -1,0 +1,230 @@
+---
+project: portlandmapsdotcom
+server: https://www.portlandmaps.com
+# Replace this with whatever makes sense on your system.
+template: /export/nco-lw-jevans2/jevans/git/nowcoast-metadata/config/portlandmaps.xml
+services:
+    Public:
+        Aerial_Photos_Summer_1996:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Aerial_Photos_Summer_1998:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Aerial_Photos_Summer_2000:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Aerial_Photos_Summer_2003:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Aerial_Photos_Summer_2005:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Aerial_Photos_Summer_2006:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Aerial_Photos_Summer_2007:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Aerial_Photos_Summer_2008:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Aerial_Photos_Summer_2009:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Aerial_Photos_Summer_2010:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Aerial_Photos_Summer_2011:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Aerial_Photos_Summer_2012:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Aerial_Photos_Summer_2013:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        # Missing its service description
+        # Aerial_Photos_Summer_2014:
+        #     creation_date: 2016-01-01
+        #     publication_date: 2016-01-02
+        Aerial_Photos_Summer_2015:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Aerial_Photos_Winter_2005:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Aerial_Photos_Winter_2012:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Auditor_IPR:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Basemap_Aerial_Overlay:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        # Basemap_Blank:
+        #     creation_date: 2016-01-01
+        #     publication_date: 2016-01-02
+        Basemap_Color_Buildings:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Basemap_Color_Complete_Aerial:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Basemap_Color_Complete:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Basemap_Color_Labels:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Basemap_Color_Taxlot_Labels:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Basemap_Color:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Basemap_Gray_Complete:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        BDS_Land_Use_Case:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        BDS_Permit_Commercial_Construction:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        # BDS_Permit_Commercial_Demo:
+        #     creation_date: 2016-01-01
+        #     publication_date: 2016-01-02
+        BDS_Permit_General:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        BDS_Permit_Residential_Construction:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        BDS_Permit_Residential_Demo:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        BDS_URM:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        BDS_Permit_Commercial_Construction:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        BES_Invaders_Overlay:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        BES_Misc:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        BES_SWSP_Overlays:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Boundaries:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Boundary:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Capital_Improvement_Projects:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        COP_OpenData:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        CROPS:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Crime:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Fire_MDT_Data_Monitor:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        # Hazard:
+        #     creation_date: 2016-01-01
+        #     publication_date: 2016-01-02
+        LiDAR_DEM_2008:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        # Mapdrawer_Layers:
+        #     creation_date: 2016-01-01
+        #     publication_date: 2016-01-02
+        # MJ_Applications:
+        #     creation_date: 2016-01-01
+        #     publication_date: 2016-01-02
+        Parcel_Dimensions:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Park_Amenities:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        # Parks_Misc:
+        # 
+        # No EPSG code that that seems too close.  2269 is pretty close but
+        # not quite.
+        #     creation_date: 2016-01-01
+        #     publication_date: 2016-01-02
+        Parks_PTB_Basemap:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        PBEM_CommunityDisaster_Base:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        PBEM_CommunityDisaster_Hazards:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        PBEM_CommunityDisaster_Resources:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        PBOT_Street_Light_Replacement_Grid:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        PBOT_Street_Light_Replacement:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Public_Safety_Boundaries:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        # RWCP:
+        #     creation_date: 2016-01-01
+        #     publication_date: 2016-01-02
+        # Snow_and_Ice:
+        #     creation_date: 2016-01-01
+        #     publication_date: 2016-01-02
+        Stormwater_System_Plan:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        # Street_Tree_Inventory_Basemap_Overlays:
+        #     creation_date: 2016-01-01
+        #     publication_date: 2016-01-02
+        TaxParcel_Dimensions:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Transit:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Transportation_Signals_Base:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Transportation_System_Plan:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        # Transportation:
+        #     creation_date: 2016-01-01
+        #     publication_date: 2016-01-02
+        Utilities_Sewer_Dynamic:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Utilities_Sewer_Easements:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Utilities_Sewer:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        # Utilities_Water:
+        #     creation_date: 2016-01-01
+        #     publication_date: 2016-01-02
+        Zoning:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02

@@ -1,0 +1,555 @@
+---
+project: IDP-GIS
+server: idpgis.ncep.noaa.gov
+# Replace this with whatever makes sense on your system.
+template: config/idpgis.xml
+protocol: https
+verify_ssl_cert: false
+log_level: info
+services:
+    NMFS:
+        EFHAreasProtectedFromFishing:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        EFH_MapperData:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        EFH_Only:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        EFH_Salmon_Data_25m:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        HAPC:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+    NOAA:
+        MPA_Inventory_Fishing:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        MPA_Inventory_Generalized:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        MPA_Inventory_Government_Level:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        MPA_Inventory_National_System:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        MPA_Inventory_ONMS_only:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        MPA_Inventory_Primary_Conservation_Focus:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        MPA_Inventory_Protection_Level:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        MPA_Inventory:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        NOAA_Estuarine_Bathymetry:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        NOAA_Medium_Resolution_Shoreline:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+    NOS_Biogeo_Biomapper:
+        AS_Dynamic:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        AS_Imagery:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        Biogeo_BenthicHabitat:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        BUIS_Dynamic:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        CNMI_Dynamic:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        CNMI_Imagery:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        Guam_Dynamic:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        Guam_Imagery:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        Hawaii_Dynamic:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        Hawaii_Imagery:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        Jobos_Dynamic:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        Jobos_Imagery:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        MI_Dynamic:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        MI_Imagery:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        NER_Dynamic:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        NY_Biogeo_Assessment:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        Palau_Dynamic:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        Palau_Imagery:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        Palmyra_Dynamic:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        Palmyra_Imagery:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        PR_Dynamic:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        PR_Imagery:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        STEER_Dynamic:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        # STEER_Imagery:
+        #     creation_date: 2016-03-28
+        #     publication_date: 2016-03-28
+        StJ_Dynamic:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        StJ_Imagery:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        SWPR_Dynamic:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        SWPR_Imagery:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        USVI_Dynamic:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        USVI_Imagery:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        Vieques_Dynamic:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        Vieques_Imagery:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        WA_MSP:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+    NOS_ESI:
+        ESI_Alabama_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Alabama_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Alabama_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Aleutians_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Aleutians_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_AmericanSamoa_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_AmericanSamoa_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_AmericanSamoa_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_BristolBay_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_BristolBay_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_CentralCalifornia_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_CentralCalifornia_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_CentralCalifornia_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_ColumbiaRiver_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_ColumbiaRiver_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_ColumbiaRiver_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_CookInlet_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_CookInlet_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_DelawareBay_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_DelawareBay_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_DelawareBay_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_FloridaPanhandle_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_FloridaPanhandle_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_FloridaPeninsular_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_FloridaPeninsular_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Georgia_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Georgia_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Georgia_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Guam_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Guam_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Guam_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Hawaii_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Hawaii_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Hawaii_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_HudsonRiver_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_HudsonRiver_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_HudsonRiver_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Kodiak_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Kodiak_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_LongIsland_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_LongIsland_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_LongIsland_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Louisiana_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Louisiana_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Louisiana_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Maryland_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Maryland_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Maryland_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Mississippi_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Mississippi_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Mississippi_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_NorthCarolina_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_NorthCarolina_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_NorthCarolina_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_NorthernCalifornia_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_NorthernCalifornia_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_NorthernCalifornia_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_NorthSlope_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_NorthSlope_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_NorthwestArctic_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_NorthwestArctic_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_PrinceWilliamSound_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_PrinceWilliamSound_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_PuertoRico_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_PuertoRico_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_PuertoRico_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_PugetSound_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_PugetSound_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_RI_CT_NY_NJ_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_RI_CT_NY_NJ_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_SanFrancisco_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_SanFrancisco_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_SanFrancisco_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Shoreline_Aggregate:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Shoreline_Carto:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Shoreline_Most_Sensitive:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Shoreline:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_SouthCarolina_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_SouthCarolina_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_SouthCarolina_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_SoutheastAlaska_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_SoutheastAlaska_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_SouthernCalifornia_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_SouthernCalifornia_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_SouthernCalifornia_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_SouthFlorida_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_SouthFlorida_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_SouthFlorida_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_TexasUpperCoast_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_TexasUpperCoast_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_TexasUpperCoast_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Virginia_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Virginia_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_Virginia_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_VirginIslands_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_VirginIslands_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_VirginIslands_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_WesternAlaska_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_WesternAlaska_TandE_Data:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        ESI_WestFlorida_Maps:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+    NOS_Observations:
+        CO_OPS_Products:
+            creation_date: 2016-07-07
+            publication_date: 2016-07-07
+        CO_OPS_Stations:
+            creation_date: 2016-07-07
+            publication_date: 2016-07-07
+    NWS_Climate_Outlooks:
+        cpc_6_10_day_outlk:
+            creation_date: 2016-07-07
+            publication_date: 2016-07-07
+        cpc_8_14_day_outlk:
+            creation_date: 2016-07-07
+            publication_date: 2016-07-07
+        cpc_cmorph_dly_025deg:
+            creation_date: 2016-07-07
+            publication_date: 2016-07-07
+        cpc_drought_outlk:
+            creation_date: 2016-07-07
+            publication_date: 2016-07-07
+        cpc_gfs_precip_anom:
+            creation_date: 2016-07-07
+            publication_date: 2016-07-07
+        cpc_mthly_precip_outlk:
+            creation_date: 2016-07-07
+            publication_date: 2016-07-07
+        cpc_mthly_temp_outlk:
+            creation_date: 2016-07-07
+            publication_date: 2016-07-07
+        cpc_sea_precip_outlk:
+            creation_date: 2016-07-07
+            publication_date: 2016-07-07
+        cpc_sea_temp_outlk:
+            creation_date: 2016-07-07
+            publication_date: 2016-07-07
+        cpc_weather_hazards:
+            creation_date: 2016-07-07
+            publication_date: 2016-07-07
+        cpc_wkly_sst:
+            creation_date: 2016-07-07
+            publication_date: 2016-07-07
+        us_drought_monitor:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+    NWS_Forecasts_Guidance_Warnings:
+        natl_fcst_wx_chart:
+            creation_date: 2016-07-07
+            publication_date: 2016-07-07
+        NDFD_temp:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        NDGD_Air_Quality:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        NHC_Atl_trop_cyclones_active:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        NHC_Atl_trop_cyclones:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        NHC_E_Pac_trop_cyclones_active:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        NHC_E_Pac_trop_cyclones:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        rfc_hourly_qpe:
+            creation_date: 2017-12-14
+            publication_date: 2017-12-14
+        rfc_grid_qpf:
+            creation_date: 2016-07-07
+            publication_date: 2016-07-07
+        sig_riv_fld_outlk:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        SPC_wx_outlks:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        watch_warn_adv:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        wpc_qpf:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+    NWS_Observations:
+        ahps_riv_gauges:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        NOHRSC_Snow_Analysis:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+        radar_base_reflectivity:
+            creation_date: 2016-03-28
+            publication_date: 2016-03-28
+    radar:
+        radar_base_reflectivity_time:
+            creation_date: 2017-05-03
+            publication_date: 2017-05-03

@@ -1,0 +1,25 @@
+This map service is time-enabled, meaning that each individual layer contains time-varying data and can be utilized by clients capable of making map requests that include a time component.
+
+In addition to ArcGIS Server REST access, time-enabled OGC WMS 1.3.0 access is also provided by this service.
+
+This particular service can be queried with or without the use of a time component. If the time parameter is specified in a request, the data or imagery most relevant to the provided time value, if any, will be returned. If the time parameter is not specified in a request, the latest data or imagery valid for the present system time will be returned to the client. If the time parameter is not specified and no data or imagery is available for the present time, no data will be returned.
+
+This service is configured with time coverage support, meaning that the service will always return the most relevant available data, if any, to the specified time value. For example, if the service contains data valid today at 12:00 and 12:10 UTC, but a map request specifies a time value of today at 12:07 UTC, the data valid at 12:10 UTC will be returned to the user. This behavior allows more flexibility for users, especially when displaying multiple time-enabled layers together despite slight differences in temporal resolution or update frequency.
+
+When interacting with this time-enabled service, only a single instantaneous time value should be specified in each request. If instead a time range is specified in a request (i.e. separate start time and end time values are given), the data returned may be different than what was intended.
+
+Care must be taken to ensure the time value specified in each request falls within the current time coverage of the service. Because this service is frequently updated as new data becomes available, the user must periodically determine the service's time extent. However, due to software limitations, the time extent of the service and map layers as advertised by ArcGIS Server does not always provide the most up-to-date start and end times of available data. Instead, users have three options for determining the latest time extent of the service:
+
+    1.  Issue a returnUpdates=true request (ArcGIS REST protocol only) for an individual layer or for the service itself, which will return the current start and end times of available data, in epoch time format (milliseconds since 00:00 January 1, 1970). To see an example, click on the "Return Updates" link at the bottom of the REST Service page under "Supported Operations". Refer to the ArcGIS REST API Map Service Documentation for more information.
+
+    2.  Issue an Identify (ArcGIS REST) or GetFeatureInfo (WMS) request against the proper layer corresponding with the target dataset. For raster data, this would be the "Image Footprints with Time Attributes" layer in the same group as the target "Image" layer being displayed. For vector (point, line, or polygon) data, the target layer can be queried directly. In either case, the attributes returned for the matching raster(s) or vector feature(s) will include the following:
+
+        validtime: Valid timestamp.
+        starttime: Display start time.
+        endtime: Display end time.
+        reftime: Reference time (sometimes referred to as issuance time, cycle time, or initialization time).
+        projmins: Number of minutes from reference time to valid time.
+        desigreftime: Designated reference time; used as a common reference time for all items when individual reference times do not match.
+        desigprojmins: Number of minutes from designated reference time to valid time.
+
+    3.  Query the nowCOAST LayerInfo web service, which has been created to provide additional information about each data layer in a service, including a list of all available "time stops" (i.e. "valid times"), individual timestamps, or the valid time of a layer's latest available data (i.e. "Product Time"). For more information about the LayerInfo web service, including examples of various types of requests, refer to the nowCOAST LayerInfo Help Documentation.

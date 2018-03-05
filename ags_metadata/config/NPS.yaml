@@ -1,0 +1,60 @@
+---
+project: nps
+server: mapservices.nps.gov
+# Replace this with whatever makes sense on your system.
+log_level: info
+protocol: https
+template: config/nps.xml
+verify_ssl_cert: false
+services:
+    # akr:
+    #     se_aplic:
+    #         creation_date: 2016-01-01
+    #         publication_date: 2016-01-02
+    cultural_resources:
+        nhl_public:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        nrhp_locations:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+    Hydro:
+        NationwideRiversInventory:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+    ser:
+        Guilford_Courthouse_Battle:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Mammoth_Cave_Cemeteries:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        Mammoth_Cave_Topography:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+    upde:
+        # UPDE_Corridor_Boundary:
+        #     creation_date: 2016-01-01
+        #     publication_date: 2016-01-02
+        UPDE_Designations:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        UPDE_FloodRisk:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        UPDE_Slope:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        UPDE_Towns:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        UPDE_Vegetation:
+            creation_date: 2016-01-01
+            publication_date: 2016-01-02
+        # UPDE_Zoning:
+        #     creation_date: 2016-01-01
+        #     publication_date: 2016-01-02
+    # Wilderness:
+        # Wilderness:
+        #     creation_date: 2016-01-01
+        #     publication_date: 2016-01-02

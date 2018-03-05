@@ -1,0 +1,41 @@
+---
+project: nowCOAST
+server: http://ncesridev.ncep.noaa.gov
+# Replace this with whatever makes sense on your system.
+template: /export/nco-lw-jevans2/jevans/git/nowcoast-metadata/config/ncesridev.xml
+services:
+  nowcoast:
+    sat_meteo_imagery_time:
+      descriptive_keywords__gcmd_place: [
+          "CONTINENT > NORTH AMERICA > UNITED STATES OF AMERICA",
+          "CONTINENT > NORTH AMERICA > UNITED STATES OF AMERICA > ALASKA",
+          "CONTINENT > NORTH AMERICA > UNITED STATES OF AMERICA > GUAM",
+          "CONTINENT > NORTH AMERICA > UNITED STATES OF AMERICA > HAWAII",
+          "CONTINENT > NORTH AMERICA > UNITED STATES OF AMERICA > PUERTO RICO",
+      ]
+      md_spatialrepresentationtypecode: grid
+      creation_date: 2017-03-21
+      publication_date: 2017-04-04
+      time_period: 
+        begin_position: before
+        end_position: now
+        time_interval: 15   # updated every 15 minutes
+      descriptive_keywords__wmo_theme: [
+          'weatherObservations',
+          'meteorology',
+          'synopticMeteorology',
+          'satelliteObservation']
+      topic_category: ['climatologyMeteorologyAtmosphere']
+      lineage_source: >
+          The GOES source files are in GeoTIFF format.  The GMGSI source files are in netCDF format.
+      lineage_statement: >
+          The source files are obtained from NCO, who obtains them from NESDIS.
+      process_steps: [
+          "The ingest is configured to parse directory listings from NCO Common Area where the imagery products reside and compare to the list of images already in the local Mosaic Dataset, and obtain/process any recent imagery not already processed. Because data that's already been processed will not be reprocessed,  this can be run as often as necessary to ensure the latest imagery is always present locally while avoiding unnecessary reprocessing (if no new imagery is available, the ingest should complete in a matter of seconds). ",
+          'Once images are downloaded, they are processed as necessary (in some cases, the images are cropped to avoid overlap with other regions) and reprojected to Web Mercator (EPSG:3857) and stored in the appropriate Mosaic Dataset.',
+          'Several hours of imagery is stored according to the configuration parameters defined below. As of December 2016, the latest four hours of imagery is retained at all times.',
+          'Like other time-aware datasets, each image is technically valid at an instantaneous time, but the series of valid times for each product/region is stretched to form a seamless time coverage such that at any given time (within the time coverage), one image for each product/region will be chosen for display. For example, if there are GOES East - Visible images valid at 12:15 and 12:45 UTC, the end time of the 12:15 image is set to 12:30 and the start time of the 12:45 image is set to 1230 plus one millisecond. '
+      ]
+      upstream_references: [
+          "https://data.noaa.gov/harvest/object/0ff8d110-aaa0-4fa5-afec-a0ccff3ecd13", 
+      ]

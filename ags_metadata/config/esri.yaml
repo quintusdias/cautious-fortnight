@@ -1,0 +1,88 @@
+---
+project: esri
+server: http://sampleserver1.arcgisonline.com
+# Replace this with whatever makes sense on your system.
+template: /export/nco-lw-jevans2/jevans/git/nowcoast-metadata/config/esri.xml
+services:
+    Demographics:
+        ESRI_Census_USA:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+        ESRI_Population_World:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+    Louisville:
+        LOJIC_LandRecords_Louisville:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+        LOJIC_PublicSafety_Louisville:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+    Petroleum:
+        KGS_OilGasFields_Kansas:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+    PublicSafety:
+        PublicSafetyBasemap:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+        PublicSafetyFeedSample:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+        PublicSafetyHazardsandRisks:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+        PublicSafetyOperationalLayers:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+    Specialty:
+        ESRI_StateCityHighway_USA:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+        ESRI_StatesCitiesRivers_USA:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+        SuperTuesdaySample:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+    TaxParcel:
+        AssessorsBasemap:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+        AssessorsLiveLayers:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+        AssessorsParcelCharacteristics:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+        AssessorsValueAnalysis:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+        ConsumerFocusedPublicAccessMap:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+        TaxParcelQuery:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+        IndustryFocusedPublicAccessMap:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+    WaterTemplate:
+        LocalGovernmentInfrastructureBasemap:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+        WaterDistributionAdministrativeReport:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+        WaterDistributionInventoryReport:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+        WaterDistributionNetwork:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+        WaterDistributionOperations:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
+        WaterDistributionPerformanceReport:
+            creation_date: 2016-01-01        
+            publication_date: 2016-01-02
