@@ -23,7 +23,7 @@ kwargs = {
         'tables>=3.3.0',
         'scikit-image',
     ],
-    'version': '0.0.1',
+    'version': '0.0.2',
 }
 
 setup(**kwargs)
