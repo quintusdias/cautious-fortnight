@@ -6,6 +6,14 @@ import apache_log_parser
 import pyproj
 
 
+class NotValidWMSError(IOError):
+    """
+    Raise this exception when we either do not have a WMS request or the WMS
+    request has something wrong with it.
+    """
+    pass
+
+
 class GenerateWMSinput(object):
     """
     """
@@ -19,80 +27,71 @@ class GenerateWMSinput(object):
         self.wgs84 = pyproj.Proj(init='EPSG:4326')
         self.epsg3857 = pyproj.Proj(init='EPSG:3857')
 
+    def process_line(self, line):
+        """
+        Extract the width and height of the box in pixels.  Also extract the
+        bounding box.
+        """
+        data = self.parser(line.decode('utf-8'))
+
+        # Only keep successful requests.
+        if int(data['status']) >= 400:
+            raise NotValidWMSError("HTTP error code")
+
+        params = {
+            x.lower(): [
+                y.lower()
+                for y in data['request_url_query_dict'][x]
+            ]
+            for x in data['request_url_query_dict'].keys()
+        }
+
+        if 'getmap' not in params['request']:
+            raise NotValidWMSError("Possibly valid WMS, but not a map draw.")
+
+        crs = params['crs'][0]
+
+        width = int(params['width'][0])
+        height = int(params['height'][0])
+
+        bbox = params['bbox'][0]
+
+        coords = bbox.split(',')
+        if len(coords) != 4:
+            raise NotValidWMSError("Not a valid bounding box.")
+
+        return {
+            'width': width,
+            'height': height,
+            'bbox': bbox,
+            'layers': params['layers'][0],
+            'crs': params['crs'][0],
+            'version': params['version'][0],
+        }
+
     def run(self):
 
-        success_count = 0
         wms_count = 0
 
         with open(self.output_csv_file, mode='wt') as of:
             with gzip.GzipFile(self.apache_log_file) as gz:
                 for idx, line in enumerate(gz):
 
-                    data = self.parser(line.decode('utf-8'))
-
-                    # Only keep successful requests.
-                    if int(data['status']) >= 400:
-                        continue
-
                     if idx % 10000 == 0:
-                        print(idx, wms_count, success_count)
-                        print(line.decode('utf-8'))
-
-                    params = {
-                        x.lower(): [
-                            y.lower()
-                            for y in data['request_url_query_dict'][x]
-                        ]
-                        for x in data['request_url_query_dict'].keys()
-                    }
+                        print(f"{idx:<8}:{wms_count:<8} {line.decode('utf-8')}")
 
                     try:
-                        if 'getmap' not in params['request']:
-                            continue
-                    except KeyError:
+                        params = self.process_line(line)
+                    except:
                         continue
-
-                    wms_count += 1
-
-                    if 'bbox' not in params.keys():
-                        # no point to a request like this!!!
-                        continue
-
-                    # We'll just do version 1.3.0 of WMS.
-                    version = params['version'][0]
-                    if not version.startswith('1.3'):
-                        continue
-
-                    if 'crs' in params.keys():
-                        crs = params['crs'][0]
-                    # elif 'srs' in params.keys():
-                    #     crs = params['srs'][0]
                     else:
-                        # Must be invalid???
-                        continue
+                        wms_count += 1
 
-                    width = int(params['width'][0])
-                    height = int(params['height'][0])
-                    bbox = params['bbox'][0]
-
-                    # if crs not in
-                    # ['crs:84', 'epsg:4326', 'epsg:3857', 'epsg:4269']:
-                    if crs not in ['crs:84', 'epsg:4326', 'epsg:3857']:
-                        continue
-                        # raise RuntimeError(line.decode('utf-8'))
-
-                    if crs == 'epsg:3857':
-                        # Transform into WGS84 but remember that for WMS 1.3.0,
-                        # the bounding box ordering must be y/x.
-                        x1, y1, x2, y2 = [float(x) for x in bbox.split(',')]
-                        lon1, lat1 = pyproj.transform(self.epsg3857,
-                                                      self.wgs84,
-                                                      x1, y1)
-                        lon2, lat2 = pyproj.transform(self.epsg3857,
-                                                      self.wgs84,
-                                                      x2, y2)
-                        bbox = f"{lat1},{lon1},{lat2},{lon2}"
-
-                    of.write(f"{width}|{height}|{bbox}\n")
-
-                    success_count += 1
+                    of.write((
+                        f"{params['crs']}|"
+                        f"{params['version']}|"
+                        f"{params['width']}|"
+                        f"{params['height']}|"
+                        f"{params['layers']}|"
+                        f"{params['bbox']}\n"
+                    ))
