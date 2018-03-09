@@ -1,5 +1,4 @@
 # Standard library imports
-import datetime
 import itertools
 import pathlib
 
@@ -13,134 +12,11 @@ import seaborn as sns
 sns.set_style('darkgrid')
 import yaml
 
-
-def convert_bytes(r):
-    """
-    Convert bytes column.
-
-    JMETER usually provides a "bytes" field which gives the length of
-    the payload delivered by the HTTP request.
-
-    The problem comes when HTTP requests fail, as the column values
-    can get interchanged.  When that happens, the resulting value may
-    not be convertible to integer.  By using this converter function,
-    we can catch such instances and just give them a -1 value.
-
-    Parameters
-    ----------
-    r : str
-        Value from bytes column of JMETER results file.
-
-    Returns
-    -------
-    bool
-        Either True or False, the success or failure of the HTTP request.
-    """
-    try:
-        return int(r)
-    except ValueError:
-        return -1
-
-
-def convert_success(item):
-    """
-    Convert success field.
-
-    JMETER usually provides a "success" field which is either "true"
-    or "false".  By specifying it as boolean, it can automatically be
-    converted into True or False.
-
-    The problem comes when HTTP requests fail, as the column values can
-    get interchanged.  When that happens, the resulting value is often
-    "text", which classifies as neither True nor False.  By using this
-    converter function, we can catch such instances and classify them
-    as False.
-
-    Parameters
-    ----------
-    item : str
-        Value from success column of JMETER results file.
-
-    Returns
-    -------
-    bool
-        Either True or False, the success or failure of the HTTP request.
-    """
-    if item == 'true':
-        return True
-    else:
-        return False
-
-
-def convert_response(r):
-    """
-    Provide integer reponse code.
-
-    The responseCode value in a JMETER log file should be the typical
-    HTTP 200 value.
-
-    Sometimes, though, it is not.  It seems that when JMETER encounters
-    a bad request, instead of a 500 or 404 or what-have-you, the
-    reponse code column value is "Export map image with bounding box".
-    This causes pandas to complain about mixed datatype columns, which
-    is memory-intensive and slows things down.  Since all we really
-    care about is success or failure, we will catch such exceptional
-    rows and return -1 instead.
-
-    Parameters
-    ----------
-    str
-        Value from responseCode column of JMETER results file, usually
-        '200'.
-
-    Returns
-    -------
-    int
-        Either 200 for success or -1 for a fail.
-    """
-    try:
-        return int(r)
-    except (TypeError, ValueError):
-        return -1
-
-
-def convert_timestamp(t):
-    """
-    Convert from milliseconds after the epoch to native datetime.
-
-    Parameters
-    ----------
-    t : str
-        Milliseconds after the epoch.
-
-    Returns
-    -------
-    datetime.datetime
-        Standard python datetime value.
-    """
-    try:
-        ts = datetime.datetime.utcfromtimestamp(float(t) / 1000.0)
-    except (OSError, ValueError, OverflowError) as e:
-        print(repr(e))
-        # Saw this once with a mangled line.
-        #
-        # 1508256351508273690379,1220,EXPORT,200,OK,
-        # export wwa_meteoceanhydro_shortduration_hazards_warnings_time 8-1,
-        # bin,true,3242,1,23,233
-        #
-        return None
-    if ts.year > 2100:
-        # Have seen one instance where a timestamp got corrupted.
-        return None
-    else:
-        return ts
-
-
-def convert_bool(t):
-    try:
-        return bool(t)
-    except Exception as e:
-        return False
+# Local imports
+from .converters import (
+    convert_bytes, convert_response, convert_bool, convert_timestamp,
+    convert_datatype
+)
 
 
 class Summarize(object):
@@ -371,7 +247,7 @@ class Summarize(object):
         """
         Create a plot for the throughput and write a nice table.
         """
-        df = self.df['error_rate'].unstack() / 1000
+        df = self.df['error_rate'].unstack()
         self._reset_index_to_num_threads(df)
 
         # Create the plot
@@ -426,16 +302,16 @@ class Summarize(object):
                     bbox_extra_artists=(lgd,),
                     bbox_inches='tight')
 
-        # Create the overall throughput plot.                                   
-        fig, ax = plt.subplots()                                                
-        overall_df = df.sum(axis=1)                                                     
-        overall_df.plot(ax=ax)                                                          
+        # Create the overall throughput plot.
+        fig, ax = plt.subplots()
+        overall_df = df.sum(axis=1)
+        overall_df.plot(ax=ax)
         self._set_colors_and_linestyles(ax)
 
-        ax.set_title(f'Overall Throughput: Max = {overall_df.max():.0f}')               
-        ax.set_ylabel('tr/sec')                                                 
-        output_file = str(self.output_dir / 'throughput_overall.png')           
-        fig.savefig(output_file)    
+        ax.set_title(f'Overall Throughput: Max = {overall_df.max():.0f}')
+        ax.set_ylabel('tr/sec')
+        output_file = str(self.output_dir / 'throughput_overall.png')
+        fig.savefig(output_file)
 
         # Create the HTML for the table.
         table_html_str = (df.style
@@ -472,6 +348,7 @@ class Summarize(object):
             'converters': {
                 'allThreads': convert_response,
                 'bytes': convert_bytes,
+                'dataType': convert_datatype,
                 'grpThreads': convert_response,
                 'responseCode': convert_response,
                 'success': convert_bool,
@@ -485,7 +362,7 @@ class Summarize(object):
 
         s = df.sum(numeric_only=True)
 
-        s['throughput'] = s['success']
+        s['throughput'] = s['dataType']
         s['throughput'] /= (self.config['intervals'][run_level] * 60)
 
         s['ntrans'] = df.shape[0]
@@ -499,15 +376,17 @@ class Summarize(object):
         # All the data is collected.
         index = pd.MultiIndex.from_tuples(self.index_tuples,
                                           names=['run_level', 'service'])
-        columns = ['elapsed', 'responseCode', 'success', 'bytes', 'grpThreads',
-                   'allThreads', 'latency', 'throughput', 'ntrans']
+        columns = [
+            'elapsed', 'responseCode', 'dataType', 'success', 'bytes',
+            'grpThreads', 'allThreads', 'latency', 'throughput', 'ntrans'
+        ]
         df = pd.DataFrame(self.data, index=index, columns=columns)
 
         # These are just averages.
         df['bytes'] /= df['ntrans']
         df['elapsed'] /= df['ntrans']
         df['latency'] /= df['ntrans']
-        df['error_rate'] = (1 - df['success'] / df['ntrans']) * 100
+        df['error_rate'] = (1 - df['dataType'] / df['ntrans']) * 100
 
         # Only keep what we need.
         keepers = [
