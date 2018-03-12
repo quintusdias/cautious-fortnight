@@ -72,20 +72,13 @@ class Summarize(object):
         self.summarize_to_dataframe()
         self.write_output()
 
-    def write_output(self):
+    def write_css(self):
         """
-        Write the HTML, plots, and tables describing the load test results.
+        Write the CSS for the summarizing HTML.
         """
-        self.output_dir.mkdir(exist_ok=True)
-
-        self.doc = etree.Element('html')
-
-        header = etree.SubElement(self.doc, 'head')
-        style = etree.SubElement(header, 'style', type='text/css')
-
         # Write the global table styles.  We do this here instead of using
         # the dataframe option because we only need do it once.
-        style.text = (
+        text = (
             "\n"
             "table {\n"
             "    border-collapse: collapse;\n"
@@ -116,6 +109,24 @@ class Summarize(object):
             "}\n"
         )
 
+        path = self.output_dir / 'styles.css'
+        with path.open(mode='wt') as f:
+            f.write(text)
+
+
+    def write_output(self):
+        """
+        Write the HTML, plots, and tables describing the load test results.
+        """
+        self.output_dir.mkdir(exist_ok=True)
+
+        self.write_css()
+
+        self.doc = etree.Element('html')
+
+        header = etree.SubElement(self.doc, 'head')
+        etree.SubElement(header, 'link', rel='stylesheet', href='styles.css')
+
         body = etree.SubElement(self.doc, 'body')
         self.toc = etree.SubElement(body, 'ul', id='toc')
 
@@ -125,7 +136,8 @@ class Summarize(object):
         self._generate_error_rate_div(body)
         self._generate_elapsed_div(body)
 
-        self.doc.getroottree().write(str(self.output_dir / 'index.html'),
+        output_file = str(self.output_dir / 'index.html')
+        self.doc.getroottree().write(output_file,
                                      encoding='utf-8', pretty_print=True)
 
     def _add_loadtest_configuration(self, body):
@@ -340,9 +352,8 @@ class Summarize(object):
         folder, service, service_type = testunit['service'].split('/')
 
         root = pathlib.Path('.')
-        path = root / f"{self.config['output_root']}" / f"{run_level:02d}"
-        path = path / folder / service / f"{service_type}.csv"
-        print(f'Processing {path} ... ')
+        root = root / f"{self.config['output_root']}" / f"{run_level:02d}"
+        path = root / folder / service / f"{service_type}.csv"
 
         kwargs = {
             'converters': {
@@ -358,6 +369,15 @@ class Summarize(object):
             'error_bad_lines': False,
             'warn_bad_lines': True,
         }
+
+        if not path.exists():
+            path = root / folder / service / f"{service_type}.csv.gz"
+            if path.exists():
+                kwargs['compression'] = 'gzip'
+            else:
+                raise RuntimeError(f'Could not find {path}.')
+
+        print(f'Processing {path} ... ')
         df = pd.read_csv(path, **kwargs)
 
         s = df.sum(numeric_only=True)
