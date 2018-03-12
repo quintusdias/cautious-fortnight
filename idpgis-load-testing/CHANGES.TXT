@@ -1,5 +1,3 @@
-2017-12-14T19H - v0.1.1
-    REST input generation writes CSV files for any service detected.
-
-2017-12-14T17H - v0.1.0
-    Rewrite to full python package.
+2018-03-12T15H - v0.1.1
+    Refactor CSS in summary.
+    Handle compressed CSV files.
