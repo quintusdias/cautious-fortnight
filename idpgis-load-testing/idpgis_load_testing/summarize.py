@@ -195,10 +195,10 @@ class Summarize(object):
                     bbox_inches='tight')
 
         # Create the HTML for the table.
-        table_html_str = (df.style
-                            .format("{:.0f}")
-                            .set_caption("Bytes")
-                            .render())
+        table_html_str = (df.T.style
+                              .format("{:.0f}")
+                              .set_caption("Bytes")
+                              .render())
         table_doc = etree.HTML(table_html_str)
         table = table_doc.xpath('body/table')[0]
 
@@ -235,10 +235,10 @@ class Summarize(object):
                     bbox_inches='tight')
 
         # Create the HTML for the table.
-        table_html_str = (df.style
-                            .format("{:.1f}")
-                            .set_caption("Elapsed")
-                            .render())
+        table_html_str = (df.T.style
+                              .format("{:.1f}")
+                              .set_caption("Elapsed")
+                              .render())
         table_doc = etree.HTML(table_html_str)
         table = table_doc.xpath('body/table')[0]
 
@@ -275,10 +275,10 @@ class Summarize(object):
                     bbox_inches='tight')
 
         # Create the HTML for the table.
-        table_html_str = (df.style
-                            .format("{:.1f}")
-                            .set_caption("Error Rate")
-                            .render())
+        table_html_str = (df.T.style
+                              .format("{:.1f}")
+                              .set_caption("Error Rate")
+                              .render())
         table_doc = etree.HTML(table_html_str)
         table = table_doc.xpath('body/table')[0]
 
@@ -326,10 +326,10 @@ class Summarize(object):
         fig.savefig(output_file)
 
         # Create the HTML for the table.
-        table_html_str = (df.style
-                            .format("{:.1f}")
-                            .set_caption("Throughput")
-                            .render())
+        table_html_str = (df.T.style
+                              .format("{:.1f}")
+                              .set_caption("Throughput")
+                              .render())
         table_doc = etree.HTML(table_html_str)
         table = table_doc.xpath('body/table')[0]
 
