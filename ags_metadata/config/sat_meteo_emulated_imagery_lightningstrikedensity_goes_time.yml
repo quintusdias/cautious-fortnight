@@ -1,0 +1,66 @@
+---
+project: nowCOAST
+server: nowcoast.ncep.noaa.gov
+services:
+  nowcoast:
+    service: radar_meteo_imagery_nexrad_time
+      gmi:MI_Metadata:
+        gmd:fileIdentifier: gov.noaa.nos.ocs.nowcoast:radar_meteo_imagery_nexrad_time
+        gmd:identificationInfo:
+          srv:SV_ServiceIdentification:
+            gmd:citation:
+              gmd:CI_Citation:
+                gmd:date__creation:  2015-09-21
+                gmd:date__publication:  2015-09-21
+            srv:extent:
+              gmd:EX_Extent:
+                gmd:temporalElement:
+                  gmd:EX_TemporalExtent:
+                    gmd:extent:
+                      gml:TimePeriod:
+                        gml:beginPosition: before
+                        gml:endPosition: now
+                        gml:timeInterval: 15
+          gmd:descriptiveKeywords__gcmd_place: [
+            "CONTINENT > NORTH AMERICA > UNITED STATES OF AMERICA",
+          ]
+          gmd:descriptiveKeywords__wmo_theme: [
+            'weatherObservations',
+            'meteorology',
+            'synopticMeteorology']
+          ]
+        gmd:distributionInfo:
+          gmd:MD_Distribution: 
+            gmd:transferOptions:
+              gmd:MD_DigitalTransferOptions:
+                gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry:
+                  gmd:CI_OnlineResource:
+                    gmd:linkage:
+                      gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=da53700b1f324cc685c4d3bcc00c12fc'
+                gmd:onLine__references:
+                  -
+                    gmd:name: >
+                      'A Physically Based Precipitation–Nonprecipitation
+                      Radar Echo Classifier Using Polarimetric and
+                      Environmental Data in a Real-Time National System'
+                    gmd:URL: 'http://journals.ametsoc.org/doi/full/10.1175/WAF-D-13-00072.1'
+                  -
+                    gmd:name: 'Radar Images for GIS Software'
+                    gmd:URL: 'http://www.srh.noaa.gov/jetstream/doppler/gis.htm'
+        gmd:dataQualityInfo:
+          gmd:DQ_DataQuality:
+            gmd:lineage:
+              gmd:LI_Lineage:
+                gmd:source: >
+                  The source files are in GRIB2 format.
+                gmd:statement: >
+                  The lightning strike density product from NWS/NCEP/OPC
+                  is considered a derived product or Level 5 product
+                  ("NOAA-generated products using lightning data as input
+                  but not displaying the contractor transmitted/provided
+                  lightning data") and is appropriate for public
+                  distribution.
+                gmd:processStep: [
+                  'GDAL is used to convert from GRIB2 to GeoTIFF.'
+                ]
+

@@ -1,0 +1,34 @@
+---
+project: nowCOAST
+server: nowcoast.ncep.noaa.gov
+services:
+  nowcoast:
+    service: guidance_natlcenters_meteoceanhydro_outlooks_time
+      gmi:MI_Metadata:
+        gmd:fileIdentifier: gov.noaa.nos.ocs.nowcoast:guidance_natlcenters_meteoceanhydro_outlooks_time
+        gmd:identificationInfo:
+          srv:SV_ServiceIdentification:
+            gmd:citation:
+              gmd:CI_Citation:
+                gmd:date__creation:  2015-09-21
+                gmd:date__publication:  2015-09-21
+            srv:extent:
+              gmd:EX_Extent:
+                gmd:temporalElement:
+                  gmd:EX_TemporalExtent:
+                    gmd:extent:
+                      gml:TimePeriod:
+                        gml:beginPosition: before
+                        gml:endPosition: after
+                        gml:timeInterval: 240
+          gmd:descriptiveKeywords__gcmd_place: [
+            "CONTINENT > NORTH AMERICA > CANADA",
+            "CONTINENT > NORTH AMERICA > UNITED STATES OF AMERICA",
+            "CONTINENT > NORTH AMERICA > MEXICO",
+            "OCEAN","ATLANTIC OCEAN","NORTH ATLANTIC OCEAN","CARIBBEAN SEA","PUERTO RICO",
+          ]
+          gmd:descriptiveKeywords__wmo_theme: [
+            'weatherForecasts',
+            'meteorology',
+            'synopticMeteorology'
+          ]

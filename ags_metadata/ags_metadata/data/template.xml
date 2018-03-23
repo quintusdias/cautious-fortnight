@@ -13,7 +13,7 @@
         xmlns:gmx="http://www.isotc211.org/2005/gmx" 
         xsi:schemaLocation="http://www.isotc211.org/2005/gmi http://www.ngdc.noaa.gov/metadata/published/xsd/schema.xsd">
   <gmd:fileIdentifier>
-    <gco:CharacterString>com.esri:</gco:CharacterString>
+    <gco:CharacterString></gco:CharacterString>
   </gmd:fileIdentifier>
   <gmd:language>
     <gco:CharacterString>eng; USA</gco:CharacterString>
@@ -25,7 +25,7 @@
   </gmd:characterSet>
   <gmd:hierarchyLevel>
     <gmd:MD_ScopeCode 
-    codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" 
+        codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" 
         codeListValue="service">service</gmd:MD_ScopeCode>
   </gmd:hierarchyLevel>
   <gmd:contact>
@@ -154,6 +154,21 @@
           <gmd:thesaurusName
               xlink:title="WMO CodeList (WMO_CategoryCode)"
               xlink:href="https://www.ngdc.noaa.gov/docucomp/6f8caad8-8177-4fb6-8b87-7ac98a3518ca">
+            <gmd:CI_Citation>
+                <gmd:title>
+                    <gco:CharacterString>WMO Dataset Keywords</gco:CharacterString>
+                </gmd:title>
+                <gmd:date>
+                    <gmd:CI_Date>
+                        <gmd:date>
+                            <gco:Date>2014-04-26</gco:Date>
+                        </gmd:date>
+                        <gmd:dateType>
+                            <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision"/>
+                        </gmd:dateType>
+                    </gmd:CI_Date>
+                </gmd:date>
+            </gmd:CI_Citation>
           </gmd:thesaurusName>
         </gmd:MD_Keywords>
       </gmd:descriptiveKeywords>
@@ -172,7 +187,7 @@
                 <gmd:date>
                     <gmd:CI_Date>
                         <gmd:date>
-                            <gco:Date></gco:Date>
+                            <gco:Date>2017-07-25</gco:Date>
                         </gmd:date>
                         <gmd:dateType>
                             <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision"/>
@@ -274,7 +289,7 @@
         <gco:LocalName>ArcGIS Map Service</gco:LocalName>
       </srv:serviceType>
       <srv:serviceTypeVersion>
-        <gco:CharacterString>10.2</gco:CharacterString>
+        <gco:CharacterString></gco:CharacterString>
       </srv:serviceTypeVersion>
       <srv:extent>
         <gmd:EX_Extent>

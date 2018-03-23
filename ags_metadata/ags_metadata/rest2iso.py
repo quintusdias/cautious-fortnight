@@ -37,6 +37,7 @@ def process_text_element(item):
     return text
 
 
+# Just map the method indicated by the user to a level in the logging package.
 _logging_level = {
     'debug': logging.DEBUG,
     'warning': logging.WARNING,
@@ -60,8 +61,15 @@ class RestToIso(object):
         Complete ISO 19115-2 document
     """
 
-    def __init__(self, config_file):
-
+    def __init__(self, config_file, verbose='info'):
+        """
+        Parameters
+        ----------
+        config_file : str or path
+            path to YAML configuration file
+        verbose : str
+            corresponds to a logging package log level
+        """
         self.validate = True
         self.parser = etree.XMLParser(remove_blank_text=True)
 
@@ -72,15 +80,14 @@ class RestToIso(object):
 
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
-        log_level = self.config['log_level'].lower()
-        self.logger.setLevel(_logging_level[log_level])
+        self.logger.setLevel(_logging_level[verbose])
 
         # DEV and QA sites have trouble with SSL certs.  We allow for this
         # check to be suppressed.
-        self.session.verify = self.config['verify_ssl_cert']
+        # self.session.verify = self.config['verify_ssl_cert']
+        self.session.verify = False
 
-        self.base_url = (f"{self.config['protocol']}:/"
-                         f"/{self.config['server']}"
+        self.base_url = (f"https://{self.config['server']}"
                          f"/arcgis/rest/services/")
 
         self.output_directory = self.config['server']
@@ -137,20 +144,26 @@ class RestToIso(object):
         # Assumption is that a template file has been supplied.
         """
         The template is an XML file that has all the required elements present,
-        but possibly not filled out.
+        but not filled out.
         """
-        self.tree = etree.parse(self.config['template'], self.parser)
+        template = pkg.resource_filename(__name__, 'data/template.xml')
+        self.tree = etree.parse(template, self.parser)
         self.root = self.tree.getroot()
 
-    def retrieve_configuration_file_value(self, keyword):
+    def retrieve_configuration_file_value(self, keyword_path):
         """
         Go through each configuration until we find the keyword.
         """
-        value = self.config['services'][self.folder][self.service][keyword]
-        if keyword in [
-            'publication_date',
-            'creation_date',
-            'revision_date'
+        # Drill down until we get the final value
+        config = self.service_config
+        for keyword in keyword_path:
+            config = config[keyword]
+
+        value = config
+
+        if keyword_path[-1] in [
+            'gmd:date__publication',
+            'gmd:date__creation',
         ]:
             # It may be a datetime, it may be a string.  We want to
             # convert it to a string.
@@ -220,7 +233,7 @@ class RestToIso(object):
 
     def run(self):
 
-        if not self.config['verify_ssl_cert']:
+        if not self.session.verify:
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')
                 self._run()
@@ -247,9 +260,13 @@ class RestToIso(object):
         self.logger.info(f'Processing {self.folder}...')
 
         # Are we configured for it?
-        if self.folder not in self.config['services'].keys():
-            self.logger.warn(f'Skipping folder {self.folder}...')
+        if self.folder not in [folder['name'] for folder in self.config['folder']]:
+            # self.logger.warn(f'Skipping folder {self.folder}...')
             return
+
+        config = [folder for folder in self.config['folder']
+                  if folder['name'] == self.folder]
+        config = config[0]
 
         url = f"{self.base_url}/{self.folder}"
         r = self.session.get(url, params={'f': 'pjson'})
@@ -265,19 +282,19 @@ class RestToIso(object):
         path = os.path.join(self.output_directory, self.folder)
         os.makedirs(path, exist_ok=True)
 
-        for jitem in jservices:
-            self.process_service(jitem)
+        for json_service_item in jservices:
+            self.process_service(config, json_service_item)
 
-    def process_service(self, j_service_item):
+    def process_service(self, folder_config, json_service_item):
+        """
+        Construct metadata for a service within a directory.
+        """
 
-        parts = j_service_item['name'].split('/')
+        parts = json_service_item['name'].split('/')
         service = '/'.join(parts[1:])
 
         self.service = service
-        self.service_type = j_service_item['type']
-
-        msg = f"Processing {self.folder}/{self.service}.{self.service_type}..."
-        self.logger.info(msg)
+        self.service_type = json_service_item['type']
 
         if self.service_type not in ['MapServer', 'ImageServer']:
             msg = 'Skipping {} service types...'.format(self.service_type)
@@ -285,11 +302,21 @@ class RestToIso(object):
             return
 
         # Are we configured for it?
-        if self.service not in self.config['services'][self.folder].keys():
-            msg = 'Skipping {}/{}, not in config file...'
-            msg = msg.format(self.folder, self.service)
-            self.logger.warn(msg)
+        configs = [
+            item for item in folder_config['service']
+            if item['name'] in json_service_item['name']
+        ]
+        if len(configs) == 0:
+            # No item in the configuration file for this service.
+            # msg = 'Skipping {}/{}, not in config file...'
+            # msg = msg.format(self.folder, self.service)
+            # self.logger.warn(msg)
             return
+
+        msg = f"Processing {self.folder}/{self.service}.{self.service_type}..."
+        self.logger.info(msg)
+
+        self.service_config = configs[0]
 
         self.load_template()
 
@@ -336,8 +363,15 @@ class RestToIso(object):
         The service description can be extracted as HTML.  Join the <P> content
         together to make the abstract.
         """
+        keyword_path = (
+            'gmi:MI_Metadata',
+            'gmd:identificationInfo',
+            'srv:SV_ServiceIdentification',
+            'gmd:abstract'
+        )
+
         try:
-            text = self.retrieve_configuration_file_value('abstract')
+            text = self.retrieve_configuration_file_value(keyword_path)
         except KeyError:
             try:
                 doc = etree.HTML(self.json['serviceDescription'])
@@ -356,46 +390,56 @@ class RestToIso(object):
         elt.getparent().remove(elt)
 
     def update_browse_graphic(self):
+        """
+        Fill in the gmd:MD_BrowseGraphic element.
+
+        Just use the export image for this.
+        """
         doc = etree.HTML(self.rest_html)
         try:
             elt = doc.xpath('//a[text()="Export Map"]')[0]
         except IndexError:
             elt = doc.xpath('//a[text()="Export Image"]')[0]
-        url = self.config['server'] + elt.attrib['href']
+        finally:
+            # The HREF attribute has the path.
+            path = elt.attrib['href']
 
+        # Append the response format, because otherwise an HTML page is
+        # returned.
         elt = self.root.xpath(const.BROWSE_GRAPHIC_FILENAME,
                               namespaces=self.root.nsmap)[0]
+        elt.text = f"https://{self.config['server']}{path}&f=image"
 
-        # Add "f=image" because otherwise we get an HTML page.
-        # Force the issue.
-        elt.text = url + '&f=image'
 
         elt = self.root.xpath(const.BROWSE_GRAPHIC_FILETYPE,
                               namespaces=self.root.nsmap)[0]
         elt.text = 'PNG'
 
     def update_contains_operations_wms_get_capabilities(self):
+        """
+        Fills in the srv:connectPoint element - WMS operations performed by
+        the service.
+        """
 
         # WMS Connect point URL
         elt = self.get_element(const.WMS_CONNECT_POINT_URL)
-        url = ('{server}/arcgis/services/{folder}/{service}/MapServer'
-               '/WMSServer?request=GetCapabilities%26service=WMS')
-        url = url.format(server=self.config['server'], service=self.service,
-                         folder=self.folder)
+        url = (
+            f"http://{self.config['server']}"
+            f"/arcgis/services/{self.folder}/{self.service}/MapServer"
+            f"/WMSServer?request=GetCapabilities%26service=WMS"
+        )
         elt.text = url
 
         # WMS Connect point name
         elt = self.get_element(const.WMS_CONNECT_POINT_NAME)
-        text = '{project} {service} Map Service'
-        elt.text = text.format(project=self.config['project'],
-                               service=self.service)
+        elt.text = f"{self.config['project']} {self.service} Connect Point"
 
         # WMS Connect point description
         elt = self.get_element(const.WMS_CONNECT_POINT_DESCRIPTION)
-        text = ('GetCapabilities endpoint for OGC Web Map Service for '
-                '{project} {service} Map Service')
-        elt.text = text.format(project=self.config['project'],
-                               service=self.service)
+        elt.text = (
+            f"WMS GetCapabilities endpoint for "
+            f"{self.config['project']} {self.service} OGC Web Map Service"
+        )
 
     def update_citation(self):
         self.update_title()
@@ -407,27 +451,23 @@ class RestToIso(object):
         """
         Date identifies when the resource was brought into existance.
 
-        This is a bit tricky.  It should be specified by the user via the
-        configuration file.  For most nowCOAST services, it is when nowCOAST
-        went live, Sept 21, 2015.  The inundation service came later, though.
+        It should be specified by the user via the configuration file.  For
+        most nowCOAST services, it is when nowCOAST went live, Sept 21, 2015.
+        The inundation service came later, though.
         """
         elt = self.get_element(const.CREATION_DATE)
-        try:
-            date = self.retrieve_configuration_file_value('creation_date')
-        except KeyError:
-            pass
-        else:
-            # Use the configuration file value.
-            elt.text = date
-            return
 
-        # Nothing in the configuration file.
-        # Is there anything already in the template?   If so, keep it.
-        if len(elt.text) > 0:
-            return
+        keyword_path = (
+            'gmi:MI_Metadata',
+            'gmd:identificationInfo',
+            'srv:SV_ServiceIdentification',
+            'gmd:citation',
+            'gmd:CI_Citation',
+            'gmd:date__creation'
+        )
 
-        # Assume today.
-        elt.text = dt.datetime.now().strftime('%Y-%m-%d')
+        date = self.retrieve_configuration_file_value(keyword_path)
+        elt.text = date
 
     def update_data_quality_info(self):
         self.update_lineage()
@@ -441,10 +481,24 @@ class RestToIso(object):
         self.update_descriptive_keywords__iso_temporal()
         self.update_descriptive_keywords__wmo_theme()
         self.update_aggregation_info()
+        self.update_service_type_and_service_version()
         self.update_geographic_bounding_box()
         self.update_temporal_extents()
         self.update_contains_operations_rest_endpoint()
         self.update_contains_operations_wms_get_capabilities()
+
+    def update_service_type_and_service_version(self):
+        """
+        Identify the ArcGIS server version.
+        """
+        path = '/'.join([
+            'gmd:identificationInfo',
+            'srv:SV_ServiceIdentification',
+            'srv:serviceTypeVersion',
+            'gco:CharacterString'
+        ])
+        elt = self.get_element(path)
+        elt.text = str(self.json['currentVersion'])
 
     def update_contact(self):
         """
@@ -453,23 +507,26 @@ class RestToIso(object):
         pass
 
     def update_contains_operations_rest_endpoint(self):
+        """
+        Fills in the srv:connectPoint element - REST operations performed by
+        the service.
+        """
         # Connect point URL
         elt = self.get_element(const.REST_ENDPOINT_CONNECT_POINT_URL)
-        url = '{server}/arcgis/rest/services/{folder}/{service}/MapServer'
-        url = url.format(server=self.config['server'],
-                         folder=self.folder,
-                         service=self.service)
+        url = (f"https://{self.config['server']}"
+               f"/arcgis/rest/services/{self.folder}/{self.service}/MapServer")
         elt.text = url
 
         # Connect point name
         elt = self.get_element(const.REST_ENDPOINT_CONNECT_POINT_NAME)
-        text = '{service} Map Service'
-        elt.text = text.format(service=self.service)
+        elt.text = f"{self.service} Map Service Connect Point"
 
         # Connect point description
         elt = self.get_element(const.REST_ENDPOINT_CONNECT_POINT_DESCRIPTION)
-        text = 'REST endpoint for {service} Map Service'
-        elt.text = text.format(service=self.service)
+        elt.text = (
+            f"REST endpoint for {self.config['project']} {self.service} "
+            f"Map Service"
+        )
 
     def update_datestamp(self):
         """
@@ -490,8 +547,14 @@ class RestToIso(object):
         """
         root = self.get_element(path)
 
+        keyword_path = (
+            'gmi:MI_Metadata',
+            'gmd:identificationInfo',
+            cfg_keyword
+        )
+
         try:
-            keywords = self.retrieve_configuration_file_value(cfg_keyword)
+            keywords = self.retrieve_configuration_file_value(keyword_path)
         except KeyError:
             # The user didn't specify this, so delete it.
             root.getparent().remove(root)
@@ -548,7 +611,7 @@ class RestToIso(object):
         Process keywords for the gmd:descriptiveKeywords, GCMD Place.
         """
         self._update_desc_keywords(const.DESCRIPTIVE_KEYWORDS__GCMD_PLACE,
-                                   'descriptive_keywords__gcmd_place')
+                                   'gmd:descriptiveKeywords__gcmd_place')
 
     def update_descriptive_keywords__iso_temporal(self):
         self._update_desc_keywords(const.DESCRIPTIVE_KEYWORDS__ISO_TEMPORAL,
@@ -559,7 +622,7 @@ class RestToIso(object):
         WMO keywords must be supplied via config file if at all.
         """
         self._update_desc_keywords(const.DESCRIPTIVE_KEYWORDS__WMO_THEME,
-                                   'descriptive_keywords__wmo_theme')
+                                   'gmd:descriptiveKeywords__wmo_theme')
 
     def update_distribution_info(self):
         self.update_transfer_options()
@@ -569,10 +632,19 @@ class RestToIso(object):
         A unique phrase or string which uniquely identifies the metadata file.
 
         The assumption is that the string "folder.service" being added to
-        what's already in the template will produce a usable identifier.
+        what's specified in the configuration file.  That makes this item
+        different from other elements; the other elements usually have there
+        content completely replaced.  Here we are just adding to it.
         """
         elt = self.get_element(const.FILE_IDENTIFIER)
-        elt.text += self.folder.lower() + '.' + self.service.lower()
+
+        keyword_path = (
+            "gmi:MI_Metadata",
+            "gmd:fileIdentifier",
+        )
+
+        prefix = self.retrieve_configuration_file_value(keyword_path)
+        elt.text = f"{prefix}:{self.folder}.{self.service}"
 
     def _get_extent(self):
         return self.json['fullExtent']
@@ -651,16 +723,28 @@ class RestToIso(object):
         root = self.get_element(const.TRANSFER_OPTIONS)
 
         try:
-            references = self.retrieve_configuration_file_value('references')
+            ymlpath = (
+                'gmi:MI_Metadata',
+                'gmd:distributionInfo',
+                'gmd:MD_Distribution',
+                'gmd:transferOptions',
+                'gmd:MD_DigitalTransferOptions',
+                'gmd:onLine__references',
+            )
+            references = self.retrieve_configuration_file_value(ymlpath)
         except KeyError:
-            references = self._retrieve_rest_references()
+            # Don't delete the root, just do nothing.  It's quite possible
+            # there aren't any specified.
+            return
 
         for idx, reference in enumerate(references):
-            self._append_reference(root, reference['URL'], reference['name'])
+            self._append_reference(root,
+                                   reference['gmd:URL'],
+                                   reference['gmd:name'])
 
     def update_wms_get_capabilities_for_download(self):
         """
-        Fill in the server URL.
+        Fill in the WMS portion of the MD_DigitalTransferOptions.
         """
         root = self.get_element(const.TRANSFER_OPTIONS)
         path = '/'.join([
@@ -671,10 +755,13 @@ class RestToIso(object):
         ])
         elt = self.get_element(path, root=root)
 
-        url = ('{server}/arcgis/services/{folder}/{service}/MapServer'
-               '/WMSServer?request=GetCapabilities%26service=WMS')
-        url = url.format(server=self.config['server'], service=self.service,
-                         folder=self.folder)
+        url = (
+            f"https://{self.config['server']}"
+            f"/arcgis/services/{self.folder}/{self.service}"
+            "/MapServer/WMSServer"
+            "?"
+            "request=GetCapabilities%26service=WMS"
+        )
 
         elt.text = url
 
@@ -687,19 +774,26 @@ class RestToIso(object):
         ])
         elt = self.get_element(path, root=root)
 
-        text = 'Capabilities file for the {project} {service} WMS'
+        text = 'Capabilities file for the {project} {service} WMS server'
         elt.text = text.format(project=self.config['project'],
                                service=self.service)
 
     def update_online_noaa_geoplatform_entry(self):
-        """
-        For now, delete this for IDP-GIS
-        """
         root = self.get_element(const.TRANSFER_OPTIONS__NOAA_GEOPLATFORM_ENTRY)
 
-        key = 'noaa_geoplatform_entry'
+        keyword_path = [
+            'gmi:MI_Metadata',
+            'gmd:distributionInfo',
+            'gmd:MD_Distribution',
+            'gmd:transferOptions',
+            'gmd:MD_DigitalTransferOptions',
+            'gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry',
+            'gmd:CI_OnlineResource',
+            'gmd:linkage',
+            'gmd:URL',
+        ]
         try:
-            value = self.retrieve_configuration_file_value(key)
+            value = self.retrieve_configuration_file_value(tuple(keyword_path))
         except KeyError:
             # The implication is that there is no such resource.
             # Delete the element.
@@ -714,22 +808,29 @@ class RestToIso(object):
         # Update the name.
         path = 'gmd:CI_OnlineResource/gmd:name/gco:CharacterString'
         elt = self.get_element(path, root=root)
-        fmt = 'NOAA GeoPlatform Entry for {project} {service} Map Service'
-        elt.text = fmt.format(service=self.service,
-                              project=self.config['project'])
+        text = (
+            f"NOAA GeoPlatform Entry for "
+            f"{self.config['project']} {self.folder}/{self.service} "
+            f"Map Service"
+        )
+        elt.text = text
 
     def update_publication_date(self):
         """
         Date identifies when the resource was issued.
-
-        This seems to be the same as creation date.
         """
         elt = self.get_element(const.PUBLICATION_DATE)
-        try:
-            date = self.retrieve_configuration_file_value('publication_date')
-        except KeyError:
-            # Just keep what is in the template.
-            return
+
+        keyword_path = (
+            'gmi:MI_Metadata',
+            'gmd:identificationInfo',
+            'srv:SV_ServiceIdentification',
+            'gmd:citation',
+            'gmd:CI_Citation',
+            'gmd:date__publication'
+        )
+
+        date = self.retrieve_configuration_file_value(keyword_path)
         elt.text = date
 
     def update_revision_date(self):
@@ -782,7 +883,15 @@ class RestToIso(object):
         There could be a series of process steps.
         """
         try:
-            steps = self.retrieve_configuration_file_value('process_steps')
+            path = (
+                'gmi:MI_Metadata',
+                'gmd:dataQualityInfo',
+                'gmd:DQ_DataQuality',
+                'gmd:lineage',
+                'gmd:LI_Lineage',
+                'gmd:processStep'
+            )
+            steps = self.retrieve_configuration_file_value(path)
         except KeyError:
             # Just ignore this element if we don't find it in the configuration
             # file.
@@ -815,7 +924,15 @@ class RestToIso(object):
     def update_lineage_source(self):
         elt = self.get_element(const.LINEAGE_SOURCE)
         try:
-            source = self.retrieve_configuration_file_value('lineage_source')
+            path = (
+                'gmi:MI_Metadata',
+                'gmd:dataQualityInfo',
+                'gmd:DQ_DataQuality',
+                'gmd:lineage',
+                'gmd:LI_Lineage',
+                'gmd:source'
+            )
+            source = self.retrieve_configuration_file_value(path)
         except KeyError:
             # The user didn't specify this, so delete it.
             elt.getparent().remove(elt)
@@ -825,7 +942,15 @@ class RestToIso(object):
     def update_lineage_statement(self):
         elt = self.get_element(const.LINEAGE_STATEMENT)
         try:
-            txt = self.retrieve_configuration_file_value('lineage_statement')
+            path = (
+                'gmi:MI_Metadata',
+                'gmd:dataQualityInfo',
+                'gmd:DQ_DataQuality',
+                'gmd:lineage',
+                'gmd:LI_Lineage',
+                'gmd:statement'
+            )
+            txt = self.retrieve_configuration_file_value(path)
         except KeyError:
             # keep the default
             return

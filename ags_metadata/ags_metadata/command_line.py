@@ -18,8 +18,13 @@ def rest2iso():
     }
     parser = argparse.ArgumentParser(**kwargs)
 
-    help = 'YAML configuration file.'
+    help = 'YAML configuration file'
     parser.add_argument('config', type=str, help=help)
+
+    help = 'Log level'
+    choices = ['debug', 'info', 'warning', 'error', 'critical']
+    parser.add_argument('--verbose', help=help, default='info',
+                        choices=choices)
 
     args = parser.parse_args()
 
@@ -29,9 +34,9 @@ def rest2iso():
     project = config['project']
 
     if project.lower() == 'nowcoast':
-        obj = NowCoastRestToIso(args.config)
+        obj = NowCoastRestToIso(args.config, verbose=args.verbose)
     else:
-        obj = RestToIso(args.config)
+        obj = RestToIso(args.config, verbose=args.verbose)
 
     obj.run()
 

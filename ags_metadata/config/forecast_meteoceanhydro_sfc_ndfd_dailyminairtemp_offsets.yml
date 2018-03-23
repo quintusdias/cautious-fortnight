@@ -1,0 +1,70 @@
+---
+project: nowCOAST
+server: nowcoast.ncep.noaa.gov
+services:
+  nowcoast:
+    forecast_meteoceanhydro_sfc_ndfd_dailyminairtemp_offsets:
+      gmi:MI_Metadata:
+        gmd:fileIdentifier: gov.noaa.nos.ocs.nowcoast:forecast_meteoceanhydro_sfc_ndfd_dailyminairtemp_offsets
+        gmd:identificationInfo:
+          srv:SV_ServiceIdentification:
+            gmd:citation:
+              gmd:CI_Citation:
+                gmd:date__creation:  2015-09-21
+                gmd:date__publication:  2015-09-21
+            srv:extent:
+              gmd:EX_Extent:
+                gmd:temporalElement:
+                  gmd:EX_TemporalExtent:
+                    gmd:extent:
+                      gml:TimePeriod:
+                        gml:beginPosition: before
+                        gml:endPosition: after
+                        gml:timeInterval: 360
+          gmd:descriptiveKeywords__gcmd_place: [
+            "CONTINENT > NORTH AMERICA > UNITED STATES OF AMERICA",
+            "OCEAN> ATLANTIC OCEAN> NORTH ATLANTIC OCEAN> CARIBBEAN SEA> PUERTO RICO",
+            "OCEAN > PACIFIC OCEAN > WESTERN PACIFIC OCEAN > MICRONESIA > GUAM",
+          ]
+          gmd:descriptiveKeywords__wmo_theme: [
+            'weatherForecasts',
+            'meteorology',
+            'synopticMeteorology'
+          ]
+        gmd:distributionInfo:
+          gmd:MD_Distribution: 
+            gmd:transferOptions:
+              gmd:MD_DigitalTransferOptions:
+                gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry:
+                  gmd:CI_OnlineResource:
+                    gmd:linkage:
+                      gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=5068f32b0f0d4d57abd4a9b46007a726'
+        gmd:dataQualityInfo:
+          gmd:DQ_DataQuality:
+            gmd:lineage:
+              gmd:LI_Lineage:
+                gmd:source: >
+                  The source files are in GRIB2 format.
+                gmd:statement: >
+                  Generated from the latest NWS National Digital Forecast Database (NDFD) output.
+                gmd:processStep: [
+                  'Most variables are scalars, i.e., they are a grid of
+                  single values at each pixel, which can be stored as
+                  individual rasters. This is done by using degrib to
+                  convert each individual GRIB2 message to a *.flt/*.hdr
+                  floating point dataset, which is then optionally
+                  processed/transformed before being converted to GeoTIFF
+                  and reprojected to Web Mercator (EPSG:3857).',
+
+                  'In the case of Wind Velocity (Wind Speed + Wind
+                  Direction), with flowVis2D the wind field is visualized
+                  using curved wind barbs and stored as RGBA GeoTIFFs,
+                  which are then stored in Mosaic Datasets like any
+                  other raster. While this has its own limitations in
+                  resolution, it is faster to process and provides a
+                  new way of depicting flow fields. It also allows the
+                  creation of multiple "overviews" (*.ovr), which can
+                  be used by ArcGIS to display different rasters at
+                  different scales.'
+                ]
+

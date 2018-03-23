@@ -3,9 +3,9 @@ project: nowCOAST
 server: nowcoast.ncep.noaa.gov
 services:
   nowcoast:
-    analysis_meteohydro_sfc_rtma_time:
+    analysis_meteohydro_sfc_qpe_time:
       gmi:MI_Metadata:
-        gmd:fileIdentifier: gov.noaa.nos.ocs.nowcoast:analysis_meteohydro_sfc_rtma_time
+        gmd:fileIdentifier: gov.noaa.nos.ocs.nowcoast:analysis_meteohydro_sfc_qpe_time
         gmd:identificationInfo:
           srv:SV_ServiceIdentification:
             gmd:citation:
@@ -18,15 +18,11 @@ services:
                   gmd:EX_TemporalExtent:
                     gmd:extent:
                       gml:TimePeriod:
-                        gml:beginPosition: before
+                        gml:beginPosition: now
                         gml:endPosition: after
-                        gml:timeInterval: 60
+                        gml:timeInterval: 4
           gmd:descriptiveKeywords__gcmd_place: [
             "CONTINENT > NORTH AMERICA > UNITED STATES OF AMERICA",
-            "CONTINENT > NORTH AMERICA > UNITED STATES OF AMERICA > ALASKA",
-            "OCEAN > PACIFIC OCEAN > WESTERN PACIFIC OCEAN > MICRONESIA > GUAM",
-            "CONTINENT > NORTH AMERICA > UNITED STATES OF AMERICA > HAWAII",
-            "OCEAN> ATLANTIC OCEAN> NORTH ATLANTIC OCEAN> CARIBBEAN SEA> PUERTO RICO",
           ]
           gmd:descriptiveKeywords__wmo_theme: [
             'weatherForecasts',
@@ -42,7 +38,14 @@ services:
                 gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry:
                   gmd:CI_OnlineResource:
                     gmd:linkage:
-                      gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=1e0827df672b45f4987ce471b15dc792'
+                      gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=2b65b91dcfce4dddb235c61f62dc890d'
+                gmd:onLine__references:
+                  -
+                    gmd:name: 'MRMS - NSSL DEV'
+                    gmd:URL: 'http://nmq.ou.edu/'
+                  -
+                    gmd:name: 'Multi-Radar / Multi-Sensor System (MRMS)'
+                    gmd:URL: 'http://www.nssl.noaa.gov/projects/mrms'
         gmd:dataQualityInfo:
           gmd:DQ_DataQuality:
             gmd:lineage:
@@ -69,12 +72,3 @@ services:
                   be at least equal to the product delay + the script
                   run time + the script update frequency.',
                 ]
-        gmd:dataQualityInfo:
-          gmd:DQ_DataQuality:
-            gmd:lineage:
-              gmd:LI_Lineage:
-                gmd:source: >
-                  The source files are in GRIB2 format.
-                gmd:statement: >
-                  This data is generated from the latest analyses from the production suite
-                  at NCEP.
