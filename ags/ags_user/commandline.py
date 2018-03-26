@@ -182,37 +182,12 @@ def set_ags():
     obj.set_parameter(args.value)
 
 
-class SummarizeAgsLogsOutputAction(argparse.Action):
-    """
-    """
-    def __init__(self, option_strings, dest, nargs=None, **kwargs):
-        if nargs is not None:
-            raise ValueError("nargs not allowed")
-        super(SummarizeAgsLogsOutputAction, self).__init__(
-            option_strings, dest, **kwargs
-        )
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        expected = ("/mnt/intra_wwwdev/ncep/ncepintradev/htdocs/ncep_common"
-                    "/nowcoast/ags_logs")
-        if values != expected:
-            p = pathlib.Path(values)
-        else:
-            # This section is why we need an Action class.  If this argument
-            # is not supplied (the usual case), we want to write to the ncep
-            # internal web root and append the project as the base directory.
-            p = pathlib.Path(expected) / namespace.project / namespace.site
-            p = p / namespace.tier
-        setattr(namespace, self.dest, p)
-
-
 def summarize_ags_logs():
     """
     Console script interface for summarizing the ags logs for a day.
     """
     formatter_class = argparse.RawTextHelpFormatter
     parser = argparse.ArgumentParser(formatter_class=formatter_class)
-
     help = 'Project (need this to determine the services)'
     choices = ['idpgis', 'nowcoast']
 
@@ -236,8 +211,7 @@ def summarize_ags_logs():
             "supplied, the output is written to "
             "/mnt/intra_wwwdev/ncep/ncepintradev/htdocs/ncep_common"
             "/nowcoast/$project")
-    parser.add_argument('--output', help=help,
-                        action=SummarizeAgsLogsOutputAction)
+    parser.add_argument('output', help=help)
 
     choices = ["SEVERE", "WARNING", "INFO", "FINE", "VERBOSE", "DEBUG", "OFF"]
     parser.add_argument('--level', choices=choices, default='SEVERE')
@@ -247,5 +221,6 @@ def summarize_ags_logs():
     stopdate = args.startdate + datetime.timedelta(hours=args.nhours)
 
     obj = SummarizeAgsLogs(args.project, args.site.upper(), args.tier,
-                           args.startdate, stopdate, args.level, args.output)
+                           args.startdate, stopdate, args.level,
+                           output=pathlib.Path(args.output))
     obj.run()

@@ -1,0 +1,5 @@
+2018-03-26T16 - v0.0.2
+    Add simple get_logs function to ags_user package
+
+2018-01-23T13 - v0.0.1
+    Refactor ags_user package out from abusive_user_detection

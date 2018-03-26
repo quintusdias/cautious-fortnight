@@ -26,10 +26,13 @@ class SummarizeAgsLogs(AgsRestAdminBase):
         Will constitute the HTML for the output.
     output : path or str
         If None, save no output.  Otherwise write the results to CSV file.
+    df : pandas dataframe
+        Dataframe of the AGS logs
     """
-    def __init__(self, project, site, tier, startTime, endTime, level, output):
+    def __init__(self, project, site, tier, startTime, endTime, level,
+                 output=None):
         super().__init__()
-        self.site = site
+        self.site = site.upper()
         self.project = project
         self.tier = tier
         self.level = level
@@ -38,14 +41,20 @@ class SummarizeAgsLogs(AgsRestAdminBase):
         self.startTime = startTime
         self.endTime = endTime
 
-        self.root = output
-
-        self.root.mkdir(exist_ok=True, parents=True)
-
         self.servers = [
             server + '.ncep.noaa.gov'
-            for server in self.config[site][project][tier]
+            for server in self.config[self.site][self.project][self.tier]
         ]
+
+        self.root = output
+
+        self.setup_output()
+
+    def setup_output(self):
+        if self.root is None:
+            return
+
+        self.root.mkdir(exist_ok=True, parents=True)
 
         # start the document
         self.doc = etree.Element('html')
@@ -110,8 +119,10 @@ class SummarizeAgsLogs(AgsRestAdminBase):
             dfs.append(self.retrieve_server_logs(server))
         df = pd.concat(dfs)
         df.sort_index(inplace=True)
+        self.df = df
 
-        self.write_output(df)
+        if self.output is not None:
+            self.write_output(df)
 
     def write_hdf5(self, df):
         """
@@ -257,7 +268,8 @@ class SummarizeAgsLogs(AgsRestAdminBase):
             encoded_params = urllib.parse.urlencode(params)
 
             httpConn = httplib.HTTPConnection(server, self.ags_port)
-            httpConn.request('POST', log_query_url, encoded_params, self.headers)
+            httpConn.request('POST', log_query_url, encoded_params,
+                             self.headers)
             response = httpConn.getresponse()
             if (response.status != 200):
                 httpConn.close()
@@ -272,7 +284,6 @@ class SummarizeAgsLogs(AgsRestAdminBase):
             # print(msg.format(dt.datetime.fromtimestamp(data['endTime']/1000),
             #                  dt.datetime.fromtimestamp(data['startTime']/1000)))
 
-
             df = pd.DataFrame(data['logMessages'])
             try:
                 df['time'] = pd.to_datetime(df['time'], unit='ms')
@@ -286,7 +297,7 @@ class SummarizeAgsLogs(AgsRestAdminBase):
                 break
 
             # Ok there is more.  According to
-            # 
+            #
             # http://resources.arcgis.com/en/help/server-admin-api/logsQuery.html
             #
             # to get the next set of records, pass the "endTime" member as
@@ -303,3 +314,27 @@ class SummarizeAgsLogs(AgsRestAdminBase):
         # Concatenate the dataframes.
         df = pd.concat(lst)
         return df
+
+
+def get_logs(project='nowcoast', site='bldr', tier='op',
+             startTime=None, endTime=None, level='WARNING'):
+    """
+    Simple function for retrieving AGS logs.
+
+    Parameters
+    ----------
+    startTime, endTime : datetimes
+        If both are none, they default to specifying the last six hours.
+
+    Return Value
+    ------------
+    pandas dataframe of the log items
+    """
+
+    if startTime is None and endTime is None:
+        endTime = dt.datetime.now()
+        startTime = endTime - dt.timedelta(hours=6)
+
+    obj = SummarizeAgsLogs(project, site, tier, startTime, endTime, level)
+    obj.run()
+    return obj.df

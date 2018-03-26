@@ -29,11 +29,11 @@ kwargs = {
     'install_requires': [
         'apache_log_parser',
         'openpyxl>=2.4.0',
+        'matplotlib>=2.1.0',
         'pandas',
         'tables>=3.3.0',
-        'scikit-image',
     ],
-    'version': '0.0.1',
+    'version': '0.0.2rc1',
 }
 
 setup(**kwargs)

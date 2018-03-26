@@ -22,9 +22,9 @@ import gzip
 
 # Third party imports
 import apache_log_parser
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import skimage.io
 
 # Local imports
 from . import consts
@@ -218,5 +218,4 @@ class HeatMap(object):
 
         # scale to 0-255, save as a uint8 image.
         intensity = np.nan_to_num(intensity) * 255
-        skimage.io.imsave(self.outfile_base + '.png',
-                          intensity.astype(np.uint8))
+        plt.imsave(self.outfile_base + '.png', intensity.astype(np.uint8))
