@@ -15,50 +15,51 @@
 
     switch (monthstr) {
         case "Jan":
-	    month = 1
-	    break
+            month = "01"
+            break
         case "Feb":
-	    month = 2
-	    break
+            month = "02"
+            break
         case "Mar":
-	    month = 3
-	    break
+            month = "03"
+            break
         case "Apr":
-	    month = 4
-	    break
+            month = "04"
+            break
         case "May":
-	    month = 5
-	    break
+            month = "05"
+            break
         case "Jun":
-	    month = 6
-	    break
+            month = "06"
+            break
         case "Jul":
-	    month = 7
-	    break
+            month = "07"
+            break
         case "Aug":
-	    month = 8
-	    break
+            month = "08"
+            break
         case "Sep":
-	    month = 9
-	    break
+            month = "09"
+            break
         case "Oct":
-	    month = 10
-	    break
+            month = "10"
+            break
         case "Nov":
-	    month = 11
-	    break
+            month = "11"
+            break
         case "Dec":
-	    month = 12
-	    break
+            month = "12"
+            break
     }
-    date = mktime(sprintf("%s %s %s 0 0 0", year, month, day))
+    #date = mktime(sprintf("%s %s %s 0 0 0", year, month, day))
+    #count[date] += 1
+    date = sprintf("%s-%s-%s", year, month, day)
     count[date] += 1
 }
 
 END {
     for (dt in count) {
-        datestr = strftime("%Y-%m-%d", dt)
-        printf "%12s %20s\n", datestr, count[dt]
+        printf "%12s %20s\n", dt, count[dt]
     }
 }
 
