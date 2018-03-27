@@ -38,10 +38,6 @@ folder:
             gmd:MD_Distribution: 
               gmd:transferOptions:
                 gmd:MD_DigitalTransferOptions:
-                  gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry:
-                    gmd:CI_OnlineResource:
-                      gmd:linkage:
-                        gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=2b65b91dcfce4dddb235c61f62dc890d'
                   gmd:onLine__references:
                     -
                       gmd:name: 'MRMS - NSSL DEV'
@@ -108,14 +104,6 @@ folder:
               'synopticMeteorology',
               'marineMeteorology'
             ]
-          gmd:distributionInfo:
-            gmd:MD_Distribution: 
-              gmd:transferOptions:
-                gmd:MD_DigitalTransferOptions:
-                  gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry:
-                    gmd:CI_OnlineResource:
-                      gmd:linkage:
-                        gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=1e0827df672b45f4987ce471b15dc792'
           gmd:dataQualityInfo:
             gmd:DQ_DataQuality:
               gmd:lineage:
@@ -296,14 +284,6 @@ folder:
               'meteorology',
               'synopticMeteorology'
             ]
-          gmd:distributionInfo:
-            gmd:MD_Distribution: 
-              gmd:transferOptions:
-                gmd:MD_DigitalTransferOptions:
-                  gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry:
-                    gmd:CI_OnlineResource:
-                      gmd:linkage:
-                        gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=5068f32b0f0d4d57abd4a9b46007a726'
           gmd:dataQualityInfo:
             gmd:DQ_DataQuality:
               gmd:lineage:
@@ -362,14 +342,6 @@ folder:
               'meteorology',
               'synopticMeteorology'
             ]
-          gmd:distributionInfo:
-            gmd:MD_Distribution: 
-              gmd:transferOptions:
-                gmd:MD_DigitalTransferOptions:
-                  gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry:
-                    gmd:CI_OnlineResource:
-                      gmd:linkage:
-                        gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=5068f32b0f0d4d57abd4a9b46007a726'
           gmd:dataQualityInfo:
             gmd:DQ_DataQuality:
               gmd:lineage:
@@ -428,14 +400,6 @@ folder:
               'meteorology',
               'synopticMeteorology'
             ]
-          gmd:distributionInfo:
-            gmd:MD_Distribution: 
-              gmd:transferOptions:
-                gmd:MD_DigitalTransferOptions:
-                  gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry:
-                    gmd:CI_OnlineResource:
-                      gmd:linkage:
-                        gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=5068f32b0f0d4d57abd4a9b46007a726'
           gmd:dataQualityInfo:
             gmd:DQ_DataQuality:
               gmd:lineage:
@@ -493,14 +457,6 @@ folder:
               'meteorology',
               'synopticMeteorology'
             ]
-          gmd:distributionInfo:
-            gmd:MD_Distribution: 
-              gmd:transferOptions:
-                gmd:MD_DigitalTransferOptions:
-                  gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry:
-                    gmd:CI_OnlineResource:
-                      gmd:linkage:
-                        gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=5068f32b0f0d4d57abd4a9b46007a726'
           gmd:dataQualityInfo:
             gmd:DQ_DataQuality:
               gmd:lineage:
@@ -558,14 +514,6 @@ folder:
               'meteorology',
               'synopticMeteorology'
             ]
-          gmd:distributionInfo:
-            gmd:MD_Distribution: 
-              gmd:transferOptions:
-                gmd:MD_DigitalTransferOptions:
-                  gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry:
-                    gmd:CI_OnlineResource:
-                      gmd:linkage:
-                        gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=5068f32b0f0d4d57abd4a9b46007a726'
           gmd:dataQualityInfo:
             gmd:DQ_DataQuality:
               gmd:lineage:
@@ -623,14 +571,6 @@ folder:
               'meteorology',
               'synopticMeteorology'
             ]
-          gmd:distributionInfo:
-            gmd:MD_Distribution: 
-              gmd:transferOptions:
-                gmd:MD_DigitalTransferOptions:
-                  gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry:
-                    gmd:CI_OnlineResource:
-                      gmd:linkage:
-                        gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=5068f32b0f0d4d57abd4a9b46007a726'
           gmd:dataQualityInfo:
             gmd:DQ_DataQuality:
               gmd:lineage:
@@ -688,14 +628,6 @@ folder:
               'meteorology',
               'synopticMeteorology'
             ]
-          gmd:distributionInfo:
-            gmd:MD_Distribution: 
-              gmd:transferOptions:
-                gmd:MD_DigitalTransferOptions:
-                  gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry:
-                    gmd:CI_OnlineResource:
-                      gmd:linkage:
-                        gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=5068f32b0f0d4d57abd4a9b46007a726'
           gmd:dataQualityInfo:
             gmd:DQ_DataQuality:
               gmd:lineage:
@@ -753,14 +685,6 @@ folder:
               'meteorology',
               'synopticMeteorology'
             ]
-          gmd:distributionInfo:
-            gmd:MD_Distribution: 
-              gmd:transferOptions:
-                gmd:MD_DigitalTransferOptions:
-                  gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry:
-                    gmd:CI_OnlineResource:
-                      gmd:linkage:
-                        gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=5068f32b0f0d4d57abd4a9b46007a726'
           gmd:dataQualityInfo:
             gmd:DQ_DataQuality:
               gmd:lineage:
@@ -818,14 +742,6 @@ folder:
               'meteorology',
               'synopticMeteorology'
             ]
-          gmd:distributionInfo:
-            gmd:MD_Distribution: 
-              gmd:transferOptions:
-                gmd:MD_DigitalTransferOptions:
-                  gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry:
-                    gmd:CI_OnlineResource:
-                      gmd:linkage:
-                        gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=5068f32b0f0d4d57abd4a9b46007a726'
           gmd:dataQualityInfo:
             gmd:DQ_DataQuality:
               gmd:lineage:
@@ -2566,10 +2482,6 @@ folder:
             gmd:MD_Distribution: 
               gmd:transferOptions:
                 gmd:MD_DigitalTransferOptions:
-                  gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry:
-                    gmd:CI_OnlineResource:
-                      gmd:linkage:
-                        gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=da53700b1f324cc685c4d3bcc00c12fc'
                   gmd:onLine__references:
                     -
                       gmd:name: >
@@ -2775,14 +2687,6 @@ folder:
               'weatherForecasts',
               'meteorology',
             ]
-          gmd:distributionInfo:
-            gmd:MD_Distribution: 
-              gmd:transferOptions:
-                gmd:MD_DigitalTransferOptions:
-                  gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry:
-                    gmd:CI_OnlineResource:
-                      gmd:linkage:
-                        gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=3c780d2934024873b6046d4a4eee806a'
           gmd:dataQualityInfo:
             gmd:DQ_DataQuality:
               gmd:lineage:
@@ -2896,14 +2800,6 @@ folder:
               'weatherForecasts',
               'meteorology',
             ]
-          gmd:distributionInfo:
-            gmd:MD_Distribution: 
-              gmd:transferOptions:
-                gmd:MD_DigitalTransferOptions:
-                  gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry:
-                    gmd:CI_OnlineResource:
-                      gmd:linkage:
-                        gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=47873e04cd2f45749f974d518fc61773'
           gmd:dataQualityInfo:
             gmd:DQ_DataQuality:
               gmd:lineage:
@@ -3025,10 +2921,6 @@ folder:
             gmd:MD_Distribution: 
               gmd:transferOptions:
                 gmd:MD_DigitalTransferOptions:
-                  gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry:
-                    gmd:CI_OnlineResource:
-                      gmd:linkage:
-                        gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=c1787b8616c1435d8ac3e2cf206eabb2'
                   gmd:onLine__references:
                     -
                       gmd:name: >
@@ -3279,10 +3171,6 @@ folder:
             gmd:MD_Distribution: 
               gmd:transferOptions:
                 gmd:MD_DigitalTransferOptions:
-                  gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry:
-                    gmd:CI_OnlineResource:
-                      gmd:linkage:
-                        gmd:URL: 'http://noaa.maps.arcgis.com/home/item.html?id=10dc113cdf7f46f5878ebae4a7c5d708'
                   gmd:onLine__references:
                     -
                       gmd:name: >

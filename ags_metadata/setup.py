@@ -10,6 +10,7 @@ kwargs = {
         'console_scripts': [
             'rest2iso=ags_metadata.command_line:rest2iso',
             'iso2html=ags_metadata.command_line:iso191152_to_html',
+            'update-iso=ags_metadata.command_line:update_iso',
         ]
     },
     'packages': ['ags_metadata'],

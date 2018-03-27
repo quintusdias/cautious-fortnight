@@ -523,10 +523,6 @@
             codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_MaintenanceFrequencyCode" 
             codeListValue="asNeeded"/>
       </gmd:maintenanceAndUpdateFrequency>
-      <gmd:maintenanceNote>
-          <gco:CharacterString>
-          </gco:CharacterString>
-      </gmd:maintenanceNote>
     </gmd:MD_MaintenanceInformation>
   </gmd:metadataMaintenance>
 </gmi:MI_Metadata>
