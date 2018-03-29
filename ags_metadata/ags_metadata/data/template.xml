@@ -198,17 +198,6 @@
           </gmd:thesaurusName>
         </gmd:MD_Keywords>
       </gmd:descriptiveKeywords>
-      <gmd:descriptiveKeywords xlink:title="ISO Temporal">
-        <gmd:MD_Keywords>
-          <gmd:type>
-            <gmd:MD_KeywordTypeCode
-                codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode"
-                codeListValue="temporal"
-                codeSpace="ISOTC211/19115">temporal</gmd:MD_KeywordTypeCode>
-          </gmd:type>
-          <gmd:thesaurusName gco:nilReason="missing"/>
-        </gmd:MD_Keywords>
-      </gmd:descriptiveKeywords>
       <gmd:descriptiveKeywords xlink:title="NASA GCMD">
         <gmd:MD_Keywords>
           <gmd:keyword>
@@ -271,20 +260,6 @@
           </gmd:useLimitation>
         </gmd:MD_Constraints>
       </gmd:resourceConstraints>
-      <gmd:aggregationInfo>
-          <gmd:MD_AggregateInformation>
-              <gmd:aggregateDataSetName>
-                  <gmd:CI_Citation>
-                  </gmd:CI_Citation>
-              </gmd:aggregateDataSetName>
-              <gmd:associationType>
-                  <gmd:DS_AssociationTypeCode
-                      codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#DS_AssociationTypeCode"
-                      codeListValue="largerWorkCitation"
-                      codeSpace="002">largerWorkCitation</gmd:DS_AssociationTypeCode>
-              </gmd:associationType>
-          </gmd:MD_AggregateInformation>
-      </gmd:aggregationInfo>
       <srv:serviceType>
         <gco:LocalName>ArcGIS Map Service</gco:LocalName>
       </srv:serviceType>

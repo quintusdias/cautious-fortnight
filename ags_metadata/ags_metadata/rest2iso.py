@@ -396,13 +396,6 @@ class RestToIso(object):
         elt = self.get_element(const.ABSTRACT)
         elt.text = text
 
-    def update_aggregation_info(self):
-        """
-        Just remove it for the moment.
-        """
-        elt = self.get_element(const.AGGREGATION_INFO)
-        elt.getparent().remove(elt)
-
     def update_browse_graphic(self):
         """
         Fill in the gmd:MD_BrowseGraphic element.
@@ -492,9 +485,7 @@ class RestToIso(object):
         self.update_browse_graphic()
         self.update_descriptive_keywords()
         self.update_descriptive_keywords__gcmd_place()
-        # self.update_descriptive_keywords__iso_temporal()
         self.update_descriptive_keywords__wmo_theme()
-        # self.update_aggregation_info()
         self.update_service_type_and_service_version()
         self.update_geographic_bounding_box()
         self.update_temporal_extents()
@@ -620,10 +611,6 @@ class RestToIso(object):
         """
         self._update_desc_keywords(const.DESCRIPTIVE_KEYWORDS__GCMD_PLACE,
                                    'gmd:descriptiveKeywords__gcmd_place')
-
-    def update_descriptive_keywords__iso_temporal(self):
-        self._update_desc_keywords(const.DESCRIPTIVE_KEYWORDS__ISO_TEMPORAL,
-                                   'gmd:descriptive_keywords__iso_temporal')
 
     def update_descriptive_keywords__wmo_theme(self):
         """
