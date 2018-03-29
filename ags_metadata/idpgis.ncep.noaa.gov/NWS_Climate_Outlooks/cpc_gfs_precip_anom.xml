@@ -1,0 +1,384 @@
+<gmi:MI_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gmi="http://www.isotc211.org/2005/gmi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gsr="http://www.isotc211.org/2005/gsr" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:gmx="http://www.isotc211.org/2005/gmx" xsi:schemaLocation="http://www.isotc211.org/2005/gmi http://www.ngdc.noaa.gov/metadata/published/xsd/schema.xsd">
+  <gmd:fileIdentifier>
+    <gco:CharacterString>gov.noaa.nws.idpgis:NWS_Climate_Outlooks.cpc_gfs_precip_anom</gco:CharacterString>
+  </gmd:fileIdentifier>
+  <gmd:language>
+    <gco:CharacterString>eng; USA</gco:CharacterString>
+  </gmd:language>
+  <gmd:characterSet>
+    <gmd:MD_CharacterSetCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="utf8">utf8</gmd:MD_CharacterSetCode>
+  </gmd:characterSet>
+  <gmd:hierarchyLevel>
+    <gmd:MD_ScopeCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="service">service</gmd:MD_ScopeCode>
+  </gmd:hierarchyLevel>
+  <gmd:contact>
+  </gmd:contact>
+  <gmd:dateStamp>
+    <gco:Date>2018-03-29</gco:Date>
+  </gmd:dateStamp>
+  <gmd:metadataStandardName>
+    <gco:CharacterString>2003/Cor.1:2006 (ISO 19115), 2007 (ISO/TS 19139)</gco:CharacterString>
+  </gmd:metadataStandardName>
+  <gmd:metadataStandardVersion>
+    <gco:CharacterString>ISO 19115-2:2009(E)</gco:CharacterString>
+  </gmd:metadataStandardVersion>
+  <gmd:referenceSystemInfo xlink:title="World Geodetic System 1984" xlink:href="https://www.ngdc.noaa.gov/docucomp/2504d000-8345-11e1-b0c4-0800200c9a66">
+  </gmd:referenceSystemInfo>
+  <gmd:identificationInfo>
+    <srv:SV_ServiceIdentification xmlns:srv="http://www.isotc211.org/2005/srv" xsi:schemaLocation="http://www.isotc211.org/2005/gmi  http://www.ngdc.noaa.gov/metadata/published/xsd/schema/srv/serviceMetadata.xsd">
+      <gmd:citation>
+        <gmd:CI_Citation>
+          <gmd:title>
+            <gco:CharacterString>Map Service for "Global Forecast System (GFS) Precipitation Analysis"</gco:CharacterString>
+          </gmd:title>
+          <gmd:date>
+            <gmd:CI_Date>
+              <gmd:date>
+                <gco:Date>2016-07-07</gco:Date>
+              </gmd:date>
+              <gmd:dateType>
+                <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
+              </gmd:dateType>
+            </gmd:CI_Date>
+          </gmd:date>
+          <gmd:date>
+            <gmd:CI_Date>
+              <gmd:date>
+                <gco:Date>2016-07-07</gco:Date>
+              </gmd:date>
+              <gmd:dateType>
+                <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+              </gmd:dateType>
+            </gmd:CI_Date>
+          </gmd:date>
+          <gmd:date>
+            <gmd:CI_Date>
+              <gmd:date>
+                <gco:Date>2018-03-29</gco:Date>
+              </gmd:date>
+              <gmd:dateType>
+                <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision">revision</gmd:CI_DateTypeCode>
+              </gmd:dateType>
+            </gmd:CI_Date>
+          </gmd:date>
+          <gmd:citedResponsibleParty/>
+          <gmd:presentationForm>
+            <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital">mapDigital</gmd:CI_PresentationFormCode>
+          </gmd:presentationForm>
+        </gmd:CI_Citation>
+      </gmd:citation>
+      <gmd:abstract>
+        <gco:CharacterString></gco:CharacterString>
+      </gmd:abstract>
+      <gmd:purpose>
+        <gco:CharacterString/>
+      </gmd:purpose>
+      <gmd:status>
+        <gmd:MD_ProgressCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ProgressCode" codeListValue="onGoing"/>
+      </gmd:status>
+      <gmd:pointOfContact> </gmd:pointOfContact>
+      <gmd:resourceMaintenance>
+        <gmd:MD_MaintenanceInformation>
+          <gmd:maintenanceAndUpdateFrequency>
+            <gmd:MD_MaintenanceFrequencyCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_MaintenanceFrequencyCode" codeListValue="asNeeded">asNeeded</gmd:MD_MaintenanceFrequencyCode>
+          </gmd:maintenanceAndUpdateFrequency>
+        </gmd:MD_MaintenanceInformation>
+      </gmd:resourceMaintenance>
+      <gmd:graphicOverview>
+        <gmd:MD_BrowseGraphic>
+          <gmd:fileName>
+            <gco:CharacterString>https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Climate_Outlooks/cpc_gfs_precip_anom/MapServer/export?bbox=-352.0301873791338,-508.60073825610357,476.0222426498039,637.933395630118&amp;f=image</gco:CharacterString>
+          </gmd:fileName>
+          <gmd:fileType>
+            <gco:CharacterString>PNG</gco:CharacterString>
+          </gmd:fileType>
+        </gmd:MD_BrowseGraphic>
+      </gmd:graphicOverview>
+      <gmd:descriptiveKeywords>
+        <gmd:MD_Keywords>
+          <gmd:keyword>
+            <gco:CharacterString>Precipitation</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>GFS</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme" codeSpace="ISOTC211/19115">theme</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName>
+            <gmd:CI_Citation>
+              <gmd:title>
+                <gco:CharacterString/>
+              </gmd:title>
+              <gmd:date gco:nilReason="unknown"/>
+            </gmd:CI_Citation>
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:descriptiveKeywords xlink:title="NASA GCMD">
+        <gmd:MD_Keywords>
+          <gmd:keyword>
+            <gco:CharacterString>DATA ANALYSIS AND VISUALIZATION &gt; GEOGRAPHIC INFORMATION SYSTEMS &gt; WEB-BASED GEOGRAPHIC INFORMATION SYSTEMS</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>WEB SERVICES &gt; INFORMATION MANAGEMENT SERVICES &gt; WEB MAP SERVICE</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>WEB SERVICES &gt; DATA APPLICATION SERVICES &gt; WEB PORTAL SERVICES</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName xlink:title="NASA/Global Change Master Directory (GCMD) Earth Science Services Keywords" xlink:href="https://www.ngdc.noaa.gov/docucomp/9f0de6e7-428b-11df-9879-0800200c9a66">
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:descriptiveKeywords xlink:title="GCMD Data Center">
+        <gmd:MD_Keywords>
+          <gmd:keyword>
+            <gco:CharacterString/>
+          </gmd:keyword>
+          <gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="dataCenter">dataCenter</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName xlink:title="GCMD Data Center Keywords" xlink:href="https://www.ngdc.noaa.gov/docucomp/9f0de6e6-428b-11df-9879-0800200c9a66">
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:resourceConstraints>
+        <gmd:MD_LegalConstraints>
+          <gmd:accessConstraints>
+            <gmd:MD_RestrictionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions">otherRestrictions</gmd:MD_RestrictionCode>
+          </gmd:accessConstraints>
+          <gmd:useConstraints>
+            <gmd:MD_RestrictionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions">otherRestrictions</gmd:MD_RestrictionCode>
+          </gmd:useConstraints>
+          <gmd:otherConstraints>
+            <gco:CharacterString/>
+          </gmd:otherConstraints>
+        </gmd:MD_LegalConstraints>
+      </gmd:resourceConstraints>
+      <gmd:resourceConstraints>
+        <gmd:MD_Constraints>
+          <gmd:useLimitation>
+            <gco:CharacterString/>
+          </gmd:useLimitation>
+        </gmd:MD_Constraints>
+      </gmd:resourceConstraints>
+      <srv:serviceType>
+        <gco:LocalName>ArcGIS Map Service</gco:LocalName>
+      </srv:serviceType>
+      <srv:serviceTypeVersion>
+        <gco:CharacterString>10.5</gco:CharacterString>
+      </srv:serviceTypeVersion>
+      <srv:extent>
+        <gmd:EX_Extent>
+          <gmd:geographicElement>
+            <gmd:EX_GeographicBoundingBox>
+              <gmd:extentTypeCode>
+                <gco:Boolean>1</gco:Boolean>
+              </gmd:extentTypeCode>
+              <gmd:westBoundLongitude>
+                <gco:Decimal>-180.5</gco:Decimal>
+              </gmd:westBoundLongitude>
+              <gmd:eastBoundLongitude>
+                <gco:Decimal>180.5</gco:Decimal>
+              </gmd:eastBoundLongitude>
+              <gmd:southBoundLatitude>
+                <gco:Decimal>-90.0</gco:Decimal>
+              </gmd:southBoundLatitude>
+              <gmd:northBoundLatitude>
+                <gco:Decimal>90.0</gco:Decimal>
+              </gmd:northBoundLatitude>
+            </gmd:EX_GeographicBoundingBox>
+          </gmd:geographicElement>
+          <gmd:temporalElement>
+            <gmd:EX_TemporalExtent>
+              <gmd:extent/>
+            </gmd:EX_TemporalExtent>
+          </gmd:temporalElement>
+        </gmd:EX_Extent>
+      </srv:extent>
+      <srv:couplingType>
+        <srv:SV_CouplingType codeList="http://www.tc211.org/ISO19139/resources/codeList.xml#SV_CouplingType" codeListValue="loose">loose</srv:SV_CouplingType>
+      </srv:couplingType>
+      <srv:containsOperations xlink:title="ArcGIS for Server REST Endpoint">
+        <srv:SV_OperationMetadata>
+          <srv:operationName>
+            <gco:CharacterString/>
+          </srv:operationName>
+          <srv:DCP gco:nilReason="unknown"/>
+          <srv:connectPoint>
+            <gmd:CI_OnlineResource>
+              <gmd:linkage>
+                <gmd:URL>https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Climate_Outlooks/cpc_gfs_precip_anom/MapServer</gmd:URL>
+              </gmd:linkage>
+              <gmd:protocol>
+                <gco:CharacterString>ESRI:ArcGIS</gco:CharacterString>
+              </gmd:protocol>
+              <gmd:applicationProfile>
+                <gco:CharacterString>ArcGIS Map Service</gco:CharacterString>
+              </gmd:applicationProfile>
+              <gmd:name>
+                <gco:CharacterString>cpc_gfs_precip_anom Map Service Connect Point</gco:CharacterString>
+              </gmd:name>
+              <gmd:description>
+                <gco:CharacterString>REST endpoint for IDP-GIS cpc_gfs_precip_anom Map Service</gco:CharacterString>
+              </gmd:description>
+              <gmd:function>
+                <gmd:CI_OnLineFunctionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">information</gmd:CI_OnLineFunctionCode>
+              </gmd:function>
+            </gmd:CI_OnlineResource>
+          </srv:connectPoint>
+        </srv:SV_OperationMetadata>
+      </srv:containsOperations>
+      <srv:containsOperations xlink:title="WMS Get Capabilities">
+        <srv:SV_OperationMetadata>
+          <srv:operationName>
+            <gco:CharacterString/>
+          </srv:operationName>
+          <srv:DCP/>
+          <srv:connectPoint>
+            <gmd:CI_OnlineResource>
+              <gmd:linkage>
+                <gmd:URL>http://idpgis.ncep.noaa.gov/arcgis/services/NWS_Climate_Outlooks/cpc_gfs_precip_anom/MapServer/WMSServer?request=GetCapabilities%26service=WMS</gmd:URL>
+              </gmd:linkage>
+              <gmd:protocol>
+                <gco:CharacterString>OGC:WMS</gco:CharacterString>
+              </gmd:protocol>
+              <gmd:applicationProfile>
+                <gco:CharacterString>Open Geospatial Consortium Web Map Service (WMS)</gco:CharacterString>
+              </gmd:applicationProfile>
+              <gmd:name>
+                <gco:CharacterString>IDP-GIS cpc_gfs_precip_anom Connect Point</gco:CharacterString>
+              </gmd:name>
+              <gmd:description>
+                <gco:CharacterString>WMS GetCapabilities endpoint for IDP-GIS cpc_gfs_precip_anom OGC Web Map Service</gco:CharacterString>
+              </gmd:description>
+              <gmd:function>
+                <gmd:CI_OnLineFunctionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download">download</gmd:CI_OnLineFunctionCode>
+              </gmd:function>
+            </gmd:CI_OnlineResource>
+          </srv:connectPoint>
+        </srv:SV_OperationMetadata>
+      </srv:containsOperations>
+    </srv:SV_ServiceIdentification>
+  </gmd:identificationInfo>
+  <gmd:distributionInfo>
+    <gmd:MD_Distribution>
+      <gmd:distributionFormat>
+        <gmd:MD_Format>
+          <gmd:name>
+            <gco:CharacterString>WMS</gco:CharacterString>
+          </gmd:name>
+          <gmd:version>
+            <gco:CharacterString/>
+          </gmd:version>
+        </gmd:MD_Format>
+      </gmd:distributionFormat>
+      <gmd:distributor>
+        <gmd:MD_Distributor>
+          <gmd:distributorContact>
+            <gmd:CI_ResponsibleParty>
+              <gmd:role>
+                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="distributor">distributor</gmd:CI_RoleCode>
+              </gmd:role>
+            </gmd:CI_ResponsibleParty>
+          </gmd:distributorContact>
+          <gmd:distributionOrderProcess>
+            <gmd:MD_StandardOrderProcess>
+              <gmd:fees>
+                <gco:CharacterString>Free</gco:CharacterString>
+              </gmd:fees>
+            </gmd:MD_StandardOrderProcess>
+          </gmd:distributionOrderProcess>
+        </gmd:MD_Distributor>
+      </gmd:distributor>
+      <gmd:transferOptions>
+        <gmd:MD_DigitalTransferOptions>
+          <!-- ##nc_template##: enter URL for ArcGIS Online/NOAA GeoPlatform entry for this map service, if any -->
+          <gmd:onLine xlink:title="NOAA GeoPlatform Entry">
+            <gmd:CI_OnlineResource>
+              <gmd:linkage>
+                <gmd:URL/>
+              </gmd:linkage>
+              <gmd:name>
+                <gco:CharacterString/>
+              </gmd:name>
+              <gmd:description>
+                <gco:CharacterString/>
+              </gmd:description>
+              <gmd:function>
+                <gmd:CI_OnLineFunctionCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">information</gmd:CI_OnLineFunctionCode>
+              </gmd:function>
+            </gmd:CI_OnlineResource>
+          </gmd:onLine>
+          <gmd:onLine>
+            <gmd:CI_OnlineResource id="WMS">
+              <gmd:linkage>
+                <gmd:URL>https://idpgis.ncep.noaa.gov/arcgis/services/NWS_Climate_Outlooks/cpc_gfs_precip_anom/MapServer/WMSServer?request=GetCapabilities%26service=WMS</gmd:URL>
+              </gmd:linkage>
+              <gmd:protocol>
+                <gco:CharacterString>https</gco:CharacterString>
+              </gmd:protocol>
+              <gmd:name>
+                <gco:CharacterString>Web Map Service (WMS) GetCapabilities</gco:CharacterString>
+              </gmd:name>
+              <gmd:description>
+                <gco:CharacterString>Capabilities file for the IDP-GIS cpc_gfs_precip_anom WMS server</gco:CharacterString>
+              </gmd:description>
+              <gmd:function>
+                <gmd:CI_OnLineFunctionCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download">download</gmd:CI_OnLineFunctionCode>
+              </gmd:function>
+            </gmd:CI_OnlineResource>
+          </gmd:onLine>
+        </gmd:MD_DigitalTransferOptions>
+      </gmd:transferOptions>
+    </gmd:MD_Distribution>
+  </gmd:distributionInfo>
+  <gmd:dataQualityInfo>
+    <gmd:DQ_DataQuality>
+      <gmd:scope>
+        <gmd:DQ_Scope>
+          <gmd:level>
+            <gmd:MD_ScopeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="service">service</gmd:MD_ScopeCode>
+          </gmd:level>
+        </gmd:DQ_Scope>
+      </gmd:scope>
+      <gmd:report>
+        <gmd:DQ_CompletenessCommission>
+          <gmd:evaluationMethodDescription gco:nilReason="inapplicable"/>
+          <gmd:result gco:nilReason="inapplicable"/>
+        </gmd:DQ_CompletenessCommission>
+      </gmd:report>
+      <gmd:lineage>
+        <gmd:LI_Lineage>
+          <gmd:statement>
+            <gco:CharacterString/>
+          </gmd:statement>
+          <gmd:processStep>
+            <gmd:LI_ProcessStep>
+              <gmd:description>
+                <gco:CharacterString/>
+              </gmd:description>
+              <gmd:processor>
+              </gmd:processor>
+            </gmd:LI_ProcessStep>
+          </gmd:processStep>
+          <gmd:source>
+            <gmi:LE_Source>
+              <gmd:description/>
+            </gmi:LE_Source>
+          </gmd:source>
+        </gmd:LI_Lineage>
+      </gmd:lineage>
+    </gmd:DQ_DataQuality>
+  </gmd:dataQualityInfo>
+  <gmd:metadataMaintenance>
+    <gmd:MD_MaintenanceInformation>
+      <gmd:maintenanceAndUpdateFrequency>
+        <gmd:MD_MaintenanceFrequencyCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_MaintenanceFrequencyCode" codeListValue="asNeeded"/>
+      </gmd:maintenanceAndUpdateFrequency>
+    </gmd:MD_MaintenanceInformation>
+  </gmd:metadataMaintenance>
+</gmi:MI_Metadata>
