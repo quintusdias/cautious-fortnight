@@ -1,6 +1,6 @@
 ---
 project: nowCOAST
-server: nowcoast.ncep.noaa.gov
+server: nowcoast.noaa.gov
 folder:
   -
     name: nowcoast
