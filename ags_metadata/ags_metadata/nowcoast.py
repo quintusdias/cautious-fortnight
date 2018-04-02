@@ -41,9 +41,11 @@ class NowCoastRestToIso(RestToIso):
 
         # Find <LI> elements whose <UL> parent directly follow an
         # <h4> or <h5> element whose text is "References".  Yeah!
-        path = (".//*[re:test(local-name(), 'h[45]')][text()='References']"
-                "/following-sibling::ul"
-                "/li")
+        path = (
+            ".//*[re:test(local-name(), 'h[45]')][text()='References']"
+            "/following-sibling::ul"
+            "/li"
+        )
         elts = doc.xpath(path, namespaces=_REGEX_NAMESPACE)
 
         for li in elts:

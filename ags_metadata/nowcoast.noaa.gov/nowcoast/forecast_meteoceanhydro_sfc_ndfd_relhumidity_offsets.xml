@@ -1,0 +1,558 @@
+<gmi:MI_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gmi="http://www.isotc211.org/2005/gmi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gsr="http://www.isotc211.org/2005/gsr" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:gmx="http://www.isotc211.org/2005/gmx" xsi:schemaLocation="http://www.isotc211.org/2005/gmi http://www.ngdc.noaa.gov/metadata/published/xsd/schema.xsd">
+  <gmd:fileIdentifier>
+    <gco:CharacterString>gov.noaa.nos.ocs.nowcoast:operational_forecast_meteoceanhydro_sfc_ndfd_relhumidity_offsets</gco:CharacterString>
+  </gmd:fileIdentifier>
+  <gmd:language>
+    <gco:CharacterString>eng; USA</gco:CharacterString>
+  </gmd:language>
+  <gmd:characterSet>
+    <gmd:MD_CharacterSetCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="utf8">utf8</gmd:MD_CharacterSetCode>
+  </gmd:characterSet>
+  <gmd:hierarchyLevel>
+    <gmd:MD_ScopeCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="service">service</gmd:MD_ScopeCode>
+  </gmd:hierarchyLevel>
+  <gmd:contact xlink:title="NOS IMO Lead Metadata Manager" xlink:href="https://www.ngdc.noaa.gov/docucomp/32d6e1a5-1415-4494-9512-0d3030c9c940">
+  </gmd:contact>
+  <gmd:dateStamp>
+    <gco:Date>2017-03-21</gco:Date>
+  </gmd:dateStamp>
+  <gmd:metadataStandardName>
+    <gco:CharacterString>2003/Cor.1:2006 (ISO 19115), 2007 (ISO/TS 19139)</gco:CharacterString>
+  </gmd:metadataStandardName>
+  <gmd:metadataStandardVersion>
+    <gco:CharacterString>ISO 19115-2:2009(E)</gco:CharacterString>
+  </gmd:metadataStandardVersion>
+  <gmd:referenceSystemInfo xlink:title="WGS 84 / Pseudo-Mercator" xlink:href="https://www.ngdc.noaa.gov/docucomp/1fa4653d-4cf6-4d5f-b226-24a2f7ec31b1">
+  </gmd:referenceSystemInfo>
+  <gmd:identificationInfo>
+    <srv:SV_ServiceIdentification xmlns:srv="http://www.isotc211.org/2005/srv" xsi:schemaLocation="http://www.isotc211.org/2005/gmi  http://www.ngdc.noaa.gov/metadata/published/xsd/schema/srv/serviceMetadata.xsd">
+      <gmd:citation>
+        <gmd:CI_Citation>
+          <gmd:title>
+            <gco:CharacterString>nowCOAST Map Service for NOAA NWS NDFD Gridded Forecasts of Surface Relative Humidity (%) (Time Offsets)</gco:CharacterString>
+          </gmd:title>
+          <gmd:date>
+            <gmd:CI_Date>
+              <gmd:date>
+                <gco:Date>2015-09-21</gco:Date>
+              </gmd:date>
+              <gmd:dateType>
+                <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
+              </gmd:dateType>
+            </gmd:CI_Date>
+          </gmd:date>
+          <gmd:date>
+            <gmd:CI_Date>
+              <gmd:date>
+                <gco:Date>2015-09-21</gco:Date>
+              </gmd:date>
+              <gmd:dateType>
+                <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+              </gmd:dateType>
+            </gmd:CI_Date>
+          </gmd:date>
+          <gmd:date>
+            <gmd:CI_Date>
+              <gmd:date>
+                <gco:Date>2017-03-21</gco:Date>
+              </gmd:date>
+              <gmd:dateType>
+                <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision">revision</gmd:CI_DateTypeCode>
+              </gmd:dateType>
+            </gmd:CI_Date>
+          </gmd:date>
+          <gmd:citedResponsibleParty xlink:title="DOC/NOAA/NOS/OCS nowCOAST Team" xlink:href="https://www.ngdc.noaa.gov/docucomp/6441d46e-f370-40bb-81ce-276651e9c661">
+            <gmd:CI_ResponsibleParty>
+              <gmd:role>
+                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="principalInvestigator">principalInvestigator</gmd:CI_RoleCode>
+              </gmd:role>
+            </gmd:CI_ResponsibleParty>
+          </gmd:citedResponsibleParty>
+          <gmd:citedResponsibleParty xlink:title="DOC/NOAA/NOS/OCS &gt; Office of Coast Survey, NOS, NOAA, Department of Commerce" xlink:href="https://www.ngdc.noaa.gov/docucomp/68070943-b376-49b4-bb5b-f2f2722195e6">
+            <gmd:CI_ResponsibleParty>
+              <gmd:role>
+                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="publisher">publisher</gmd:CI_RoleCode>
+              </gmd:role>
+            </gmd:CI_ResponsibleParty>
+          </gmd:citedResponsibleParty>
+          <gmd:presentationForm>
+            <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital">mapDigital</gmd:CI_PresentationFormCode>
+          </gmd:presentationForm>
+        </gmd:CI_Citation>
+      </gmd:citation>
+      <gmd:abstract>
+        <gco:CharacterString>Map Information:
+
+This nowCOAST time-offsets map service provides maps depicting the NWS Surface Relative Humidity forecasts from the  National Digital Forecast Database (NDFD) out to 3 days (NDFD has forecasts out to 7 days which are available via the time-enabled map service for NDFD elements). Each forecast is valid for the specified forecast projection hour with respect to the latest update time. The forecast is valid at 2m (6.6 ft.) above ground level. The increment and color scale used to display the NDFD RH forecasts were developed to highlight NWS local fire weather watch/red flag warning RH criteria at the low end (e.g. 15, 25, &amp; 35% thresholds) and important high end RH thresholds for other users (e.g. agricultural producers) such as  95%. The forecasts are updated in the nowCOAST map service four times per day. For more detailed information about layer update frequency and timing, please reference the   nowCOAST Dataset Update Schedule.
+
+
+This map service is time-enabled, meaning that each individual layer contains time-varying data and can be utilized by clients capable of making map requests that include a time component.
+
+In addition to ArcGIS Server REST access, time-enabled OGC WMS 1.3.0 access is also provided by this service.
+
+This particular service can be queried with or without the use of a time component. If the time parameter is specified in a request, the data or imagery most relevant to the provided time value, if any, will be returned. If the time parameter is not specified in a request, the latest data or imagery valid for the present system time will be returned to the client. If the time parameter is not specified and no data or imagery is available for the present time, no data will be returned.
+
+This service is configured with time coverage support, meaning that the service will always return the most relevant available data, if any, to the specified time value. For example, if the service contains data valid today at 12:00 and 12:10 UTC, but a map request specifies a time value of today at 12:07 UTC, the data valid at 12:10 UTC will be returned to the user. This behavior allows more flexibility for users, especially when displaying multiple time-enabled layers together despite slight differences in temporal resolution or update frequency.
+
+When interacting with this time-enabled service, only a single instantaneous time value should be specified in each request. If instead a time range is specified in a request (i.e. separate start time and end time values are given), the data returned may be different than what was intended.
+
+Care must be taken to ensure the time value specified in each request falls within the current time coverage of the service. Because this service is frequently updated as new data becomes available, the user must periodically determine the service's time extent. However, due to software limitations, the time extent of the service and map layers as advertised by ArcGIS Server does not always provide the most up-to-date start and end times of available data. Instead, users have three options for determining the latest time extent of the service:
+
+    1.  Issue a returnUpdates=true request (ArcGIS REST protocol only) for an individual layer or for the service itself, which will return the current start and end times of available data, in epoch time format (milliseconds since 00:00 January 1, 1970). To see an example, click on the "Return Updates" link at the bottom of the REST Service page under "Supported Operations". Refer to the ArcGIS REST API Map Service Documentation for more information.
+
+    2.  Issue an Identify (ArcGIS REST) or GetFeatureInfo (WMS) request against the proper layer corresponding with the target dataset. For raster data, this would be the "Image Footprints with Time Attributes" layer in the same group as the target "Image" layer being displayed. For vector (point, line, or polygon) data, the target layer can be queried directly. In either case, the attributes returned for the matching raster(s) or vector feature(s) will include the following:
+
+        validtime: Valid timestamp.
+        starttime: Display start time.
+        endtime: Display end time.
+        reftime: Reference time (sometimes referred to as issuance time, cycle time, or initialization time).
+        projmins: Number of minutes from reference time to valid time.
+        desigreftime: Designated reference time; used as a common reference time for all items when individual reference times do not match.
+        desigprojmins: Number of minutes from designated reference time to valid time.
+
+    3.  Query the nowCOAST LayerInfo web service, which has been created to provide additional information about each data layer in a service, including a list of all available "time stops" (i.e. "valid times"), individual timestamps, or the valid time of a layer's latest available data (i.e. "Product Time"). For more information about the LayerInfo web service, including examples of various types of requests, refer to the nowCOAST LayerInfo Help Documentation.
+</gco:CharacterString>
+      </gmd:abstract>
+      <gmd:purpose>
+          <gco:CharacterString>
+              Provide users with situational awareness/coastal intelligence of the recent past, present, and future environmental conditions for the coastal US.
+          </gco:CharacterString>
+      </gmd:purpose>
+      <gmd:status>
+        <gmd:MD_ProgressCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ProgressCode" codeListValue="onGoing"/>
+      </gmd:status>
+      <gmd:pointOfContact xlink:title="DOC/NOAA/NOS/OCS nowCOAST Team" xlink:href="https://www.ngdc.noaa.gov/docucomp/6441d46e-f370-40bb-81ce-276651e9c661">
+      </gmd:pointOfContact>
+      <gmd:resourceMaintenance>
+        <gmd:MD_MaintenanceInformation>
+          <gmd:maintenanceAndUpdateFrequency>
+            <gmd:MD_MaintenanceFrequencyCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_MaintenanceFrequencyCode" codeListValue="asNeeded">asNeeded</gmd:MD_MaintenanceFrequencyCode>
+          </gmd:maintenanceAndUpdateFrequency>
+        </gmd:MD_MaintenanceInformation>
+      </gmd:resourceMaintenance>
+      <gmd:graphicOverview>
+        <gmd:MD_BrowseGraphic>
+          <gmd:fileName>
+            <gco:CharacterString>https://nowcoast.noaa.gov/arcgis/rest/services/nowcoast/forecast_meteoceanhydro_sfc_ndfd_relhumidity_offsets/MapServer/export?bbox=-2.4700250922937177E7,-2.6679846055227406E7,2.4700260001345113E7,4.12088800353274E7&amp;f=image</gco:CharacterString>
+          </gmd:fileName>
+          <gmd:fileType>
+            <gco:CharacterString>PNG</gco:CharacterString>
+          </gmd:fileType>
+        </gmd:MD_BrowseGraphic>
+      </gmd:graphicOverview>
+      <gmd:descriptiveKeywords>
+        <gmd:MD_Keywords>
+          <gmd:keyword><gco:CharacterString>surface weather</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>relative humidity </gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>forecasts</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>gridded</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>mosaic</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>seamless</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>NDFD</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>NWS</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>NOAA</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>Meteorological Development Laboratory</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>Weather Forecast Office</gco:CharacterString></gmd:keyword><gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme" codeSpace="ISOTC211/19115">theme</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName>
+              <gmd:CI_Citation>
+                  <gmd:title>
+                      <gco:CharacterString/>
+                  </gmd:title>
+                  <gmd:date gco:nilReason="unknown"/>
+              </gmd:CI_Citation>
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:descriptiveKeywords xlink:title="WMO Theme">
+        <gmd:MD_Keywords>
+          <gmd:keyword><gco:CharacterString>weatherForecasts</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>meteorology</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>synopticMeteorology</gco:CharacterString></gmd:keyword><gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme" codeSpace="ISOTC211/19115">theme</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName xlink:title="WMO CodeList (WMO_CategoryCode)" xlink:href="https://www.ngdc.noaa.gov/docucomp/6f8caad8-8177-4fb6-8b87-7ac98a3518ca">
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:descriptiveKeywords xlink:title="GCMD Place">
+        <gmd:MD_Keywords>
+          <gmd:keyword><gco:CharacterString>CONTINENT &gt; NORTH AMERICA &gt; UNITED STATES OF AMERICA</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>OCEAN&gt; ATLANTIC OCEAN&gt; NORTH ATLANTIC OCEAN&gt; CARIBBEAN SEA&gt; PUERTO RICO</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>OCEAN &gt; PACIFIC OCEAN &gt; WESTERN PACIFIC OCEAN &gt; MICRONESIA &gt; GUAM</gco:CharacterString></gmd:keyword><gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="place">place</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName>
+            <gmd:CI_Citation>
+                <gmd:title>
+                    <gco:CharacterString>NASA/GCMD Location Keywords</gco:CharacterString>
+                </gmd:title>
+                <gmd:date>
+                    <gmd:CI_Date>
+                        <gmd:date>
+                            <gco:Date>2016-05-11</gco:Date>
+                        </gmd:date>
+                        <gmd:dateType>
+                            <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision"/>
+                        </gmd:dateType>
+                    </gmd:CI_Date>
+                </gmd:date>
+            </gmd:CI_Citation>
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:descriptiveKeywords xlink:title="NASA GCMD">
+        <gmd:MD_Keywords>
+          <gmd:keyword>
+            <gco:CharacterString>DATA ANALYSIS AND VISUALIZATION &gt; GEOGRAPHIC INFORMATION SYSTEMS &gt; WEB-BASED GEOGRAPHIC INFORMATION SYSTEMS</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>WEB SERVICES &gt; INFORMATION MANAGEMENT SERVICES &gt; WEB MAP SERVICE</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>WEB SERVICES &gt; DATA APPLICATION SERVICES &gt; WEB PORTAL SERVICES</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName xlink:title="NASA/Global Change Master Directory (GCMD) Earth Science Services Keywords" xlink:href="https://www.ngdc.noaa.gov/docucomp/9f0de6e7-428b-11df-9879-0800200c9a66">
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:descriptiveKeywords xlink:title="GCMD Data Center">
+        <gmd:MD_Keywords>
+          <gmd:keyword>
+            <gco:CharacterString>DOC/NOAA/NOS/OCS &gt; Office of Coast Survey, National Ocean Service, NOAA, U.S. Department of Commerce</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>DOC/NOAA/NWS/NCEP &gt; National Centers for Environmental Prediction, National Weather Service, NOAA, U.S. Department of Commerce</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="dataCenter">dataCenter</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName xlink:title="GCMD Data Center Keywords" xlink:href="https://www.ngdc.noaa.gov/docucomp/9f0de6e6-428b-11df-9879-0800200c9a66">
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:resourceConstraints>
+        <gmd:MD_LegalConstraints>
+          <gmd:accessConstraints>
+            <gmd:MD_RestrictionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions">otherRestrictions</gmd:MD_RestrictionCode>
+          </gmd:accessConstraints>
+          <gmd:useConstraints>
+            <gmd:MD_RestrictionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions">otherRestrictions</gmd:MD_RestrictionCode>
+          </gmd:useConstraints>
+          <gmd:otherConstraints>
+            <gco:CharacterString>Distribution Liability: NOAA makes no warranty regarding these data, expressed or implied, nor does the fact of distribution constitute such a warranty.  These data are not to be used for navigation.</gco:CharacterString>
+          </gmd:otherConstraints>
+        </gmd:MD_LegalConstraints>
+      </gmd:resourceConstraints>
+      <gmd:resourceConstraints>
+        <gmd:MD_Constraints>
+          <gmd:useLimitation>
+            <gco:CharacterString>This operational server maintains a current database of meteorological and hydrological data, historical data, and written information generated by the NWS or received from other official sources. In addition, this server accesses in realtime a selection of current official weather observations, forecasts, and warnings from U.S. government sources for use by the national and international community. In an effort to enhance the science, experimental products may be accessible on this server and care must be taken when using such products as they are intended for research use.  This server is available 24 hours a day, seven days a week . Timely delivery of data and products from this server through the Internet is not guaranteed.
+
+Use of NOAA/NWS Data and Products
+The information on National Weather Service (NWS) Web pages are in the public domain, unless specifically noted otherwise, and may be used without charge for any lawful purpose so long as you do not: 1) claim it is your own (e.g., by claiming copyright for NWS information -- see below), 2) use it in a manner that implies an endorsement or affiliation with NOAA/NWS, or 3) modify its content and then present it as official government material. You also cannot present information of your own in a way that makes it appear to be official government information.  Before using information obtained from any NWS Web page special attention should be given to the date and time of the data and products being displayed. 
+
+The user assumes the entire risk related to its use of information on NWS Web pages. NWS is provides such information "as is," and NWS disclaims any and all warranties, whether express or implied, including (without limitation) any implied warranties of merchantability or fitness for a particular purpose. In no event will NWS be liable to you or to any third party for any direct, indirect, incidental, consequential, special or exemplary damages or lost profit resulting from any use or misuse of this data.</gco:CharacterString>
+          </gmd:useLimitation>
+        </gmd:MD_Constraints>
+      </gmd:resourceConstraints>
+      <srv:serviceType>
+        <gco:LocalName>ArcGIS Map Service</gco:LocalName>
+      </srv:serviceType>
+      <srv:serviceTypeVersion>
+        <gco:CharacterString>10.2</gco:CharacterString>
+      </srv:serviceTypeVersion>
+      <srv:extent>
+        <gmd:EX_Extent>
+          <gmd:geographicElement>
+            <gmd:EX_GeographicBoundingBox>
+              <gmd:extentTypeCode>
+                <gco:Boolean>1</gco:Boolean>
+              </gmd:extentTypeCode>
+              <gmd:westBoundLongitude>
+                <gco:Decimal>-180</gco:Decimal>
+              </gmd:westBoundLongitude>
+              <gmd:eastBoundLongitude>
+                <gco:Decimal>180</gco:Decimal>
+              </gmd:eastBoundLongitude>
+              <gmd:southBoundLatitude>
+                <gco:Decimal>12.327437636382113</gco:Decimal>
+              </gmd:southBoundLatitude>
+              <gmd:northBoundLatitude>
+                <gco:Decimal>75.4891089994465</gco:Decimal>
+              </gmd:northBoundLatitude>
+            </gmd:EX_GeographicBoundingBox>
+          </gmd:geographicElement>
+          <gmd:temporalElement>
+            <gmd:EX_TemporalExtent>
+              <gmd:extent>
+                <gml:TimePeriod gml:id="timePeriod1">
+                  <gml:beginPosition indeterminatePosition="before"/>
+                  <gml:endPosition indeterminatePosition="after"/>
+                  <gml:timeInterval unit="minute">360</gml:timeInterval>
+                </gml:TimePeriod>
+              </gmd:extent>
+            </gmd:EX_TemporalExtent>
+          </gmd:temporalElement>
+        </gmd:EX_Extent>
+      </srv:extent>
+      <srv:couplingType>
+        <srv:SV_CouplingType codeList="http://www.tc211.org/ISO19139/resources/codeList.xml#SV_CouplingType" codeListValue="loose">loose</srv:SV_CouplingType>
+      </srv:couplingType>
+      <srv:containsOperations xlink:title="ArcGIS for Server REST Endpoint">
+        <srv:SV_OperationMetadata>
+          <srv:operationName>
+            <gco:CharacterString>ArcGIS for Server REST endpoint nowCOAST map service</gco:CharacterString>
+          </srv:operationName>
+          <srv:DCP gco:nilReason="unknown"/>
+          <srv:connectPoint>
+            <gmd:CI_OnlineResource>
+              <gmd:linkage>
+                <gmd:URL>https://nowcoast.noaa.gov/arcgis/rest/services/nowcoast/forecast_meteoceanhydro_sfc_ndfd_relhumidity_offsets/MapServer</gmd:URL>
+              </gmd:linkage>
+              <gmd:protocol>
+                <gco:CharacterString>ESRI:ArcGIS</gco:CharacterString>
+              </gmd:protocol>
+              <gmd:applicationProfile>
+                <gco:CharacterString>ArcGIS Map Service</gco:CharacterString>
+              </gmd:applicationProfile>
+              <gmd:name>
+                <gco:CharacterString>forecast_meteoceanhydro_sfc_ndfd_relhumidity_offsets Map Service</gco:CharacterString>
+              </gmd:name>
+              <gmd:description>
+                <gco:CharacterString>REST endpoint for forecast_meteoceanhydro_sfc_ndfd_relhumidity_offsets Map Service</gco:CharacterString>
+              </gmd:description>
+              <gmd:function>
+                <gmd:CI_OnLineFunctionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">information</gmd:CI_OnLineFunctionCode>
+              </gmd:function>
+            </gmd:CI_OnlineResource>
+          </srv:connectPoint>
+        </srv:SV_OperationMetadata>
+      </srv:containsOperations>
+      <srv:containsOperations xlink:title="WMS Get Capabilities">
+        <srv:SV_OperationMetadata>
+          <srv:operationName>
+            <gco:CharacterString>WMS Get Capabilities for nowCOAST map service</gco:CharacterString>
+          </srv:operationName>
+          <srv:DCP/>
+          <srv:connectPoint>
+            <gmd:CI_OnlineResource>
+              <gmd:linkage>
+                <gmd:URL>https://nowcoast.noaa.gov/arcgis/services/nowcoast/forecast_meteoceanhydro_sfc_ndfd_relhumidity_offsets/MapServer/WMSServer?request=GetCapabilities%26service=WMS</gmd:URL>
+              </gmd:linkage>
+              <gmd:protocol>
+                <gco:CharacterString>OGC:WMS</gco:CharacterString>
+              </gmd:protocol>
+              <gmd:applicationProfile>
+                <gco:CharacterString>Open Geospatial Consortium Web Map Service (WMS)</gco:CharacterString>
+              </gmd:applicationProfile>
+              <gmd:name>
+                <gco:CharacterString>nowCOAST forecast_meteoceanhydro_sfc_ndfd_relhumidity_offsets Map Service</gco:CharacterString>
+              </gmd:name>
+              <gmd:description>
+                <gco:CharacterString>GetCapabilities endpoint for OGC Web Map Service for nowCOAST forecast_meteoceanhydro_sfc_ndfd_relhumidity_offsets Map Service</gco:CharacterString>
+              </gmd:description>
+              <gmd:function>
+                <gmd:CI_OnLineFunctionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download">download</gmd:CI_OnLineFunctionCode>
+              </gmd:function>
+            </gmd:CI_OnlineResource>
+          </srv:connectPoint>
+        </srv:SV_OperationMetadata>
+      </srv:containsOperations>
+    </srv:SV_ServiceIdentification>
+  </gmd:identificationInfo>
+  <gmd:distributionInfo>
+    <gmd:MD_Distribution>
+      <gmd:distributionFormat>
+        <gmd:MD_Format>
+          <gmd:name>
+            <gco:CharacterString>WMS</gco:CharacterString>
+          </gmd:name>
+          <gmd:version>
+            <gco:CharacterString>1.3.0</gco:CharacterString>
+          </gmd:version>
+        </gmd:MD_Format>
+      </gmd:distributionFormat>
+      <gmd:distributor>
+        <gmd:MD_Distributor>
+          <gmd:distributorContact xlink:title="DOC/NOAA/NOS/OCS nowCOAST Team" xlink:href="https://www.ngdc.noaa.gov/docucomp/6441d46e-f370-40bb-81ce-276651e9c661">
+            <gmd:CI_ResponsibleParty>
+              <gmd:role>
+                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="distributor">distributor</gmd:CI_RoleCode>
+              </gmd:role>
+            </gmd:CI_ResponsibleParty>
+          </gmd:distributorContact>
+          <gmd:distributionOrderProcess>
+            <gmd:MD_StandardOrderProcess>
+              <gmd:fees>
+                <gco:CharacterString>Free</gco:CharacterString>
+              </gmd:fees>
+            </gmd:MD_StandardOrderProcess>
+          </gmd:distributionOrderProcess>
+        </gmd:MD_Distributor>
+      </gmd:distributor>
+      <gmd:transferOptions>
+        <gmd:MD_DigitalTransferOptions>
+          <gmd:onLine>
+            <gmd:CI_OnlineResource>
+              <gmd:linkage>
+                <gmd:URL>https://nowcoast.noaa.gov/</gmd:URL>
+              </gmd:linkage>
+              <gmd:protocol>
+                <gco:CharacterString>https</gco:CharacterString>
+              </gmd:protocol>
+              <gmd:name>
+                <gco:CharacterString>nowCOAST Map Viewer Application</gco:CharacterString>
+              </gmd:name>
+              <gmd:description>
+                <gco:CharacterString>Link to nowCOAST map viewer application for interactive use of nowCOAST map services</gco:CharacterString>
+              </gmd:description>
+              <gmd:function>
+                <gmd:CI_OnLineFunctionCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="search">search</gmd:CI_OnLineFunctionCode>
+              </gmd:function>
+            </gmd:CI_OnlineResource>
+          </gmd:onLine>
+          <gmd:onLine>
+            <gmd:CI_OnlineResource>
+              <gmd:linkage>
+                <gmd:URL>https://nowcoast.noaa.gov/help/#!section=mapservices</gmd:URL>
+              </gmd:linkage>
+              <gmd:protocol>
+                <gco:CharacterString>https</gco:CharacterString>
+              </gmd:protocol>
+              <gmd:name>
+                <gco:CharacterString>nowCOAST Map Services Information Page</gco:CharacterString>
+              </gmd:name>
+              <gmd:description>
+                <gco:CharacterString>Link to nowCOAST Info Depot page describing map services</gco:CharacterString>
+              </gmd:description>
+              <gmd:function>
+                <gmd:CI_OnLineFunctionCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">information</gmd:CI_OnLineFunctionCode>
+              </gmd:function>
+            </gmd:CI_OnlineResource>
+          </gmd:onLine>
+          <gmd:onLine>
+            <gmd:CI_OnlineResource>
+              <gmd:linkage>
+                <gmd:URL>https://nowcoast.noaa.gov/help/#!section=layerinfo</gmd:URL>
+              </gmd:linkage>
+              <gmd:protocol>
+                <gco:CharacterString>https</gco:CharacterString>
+              </gmd:protocol>
+              <gmd:name>
+                <gco:CharacterString>nowCOAST LayerInfo Web Service Information Page</gco:CharacterString>
+              </gmd:name>
+              <gmd:description>
+                <gco:CharacterString>Link to nowCOAST LayerInfo help and information page</gco:CharacterString>
+              </gmd:description>
+              <gmd:function>
+                <gmd:CI_OnLineFunctionCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">information</gmd:CI_OnLineFunctionCode>
+              </gmd:function>
+            </gmd:CI_OnlineResource>
+          </gmd:onLine>
+          <gmd:onLine>
+            <gmd:CI_OnlineResource>
+              <gmd:linkage>
+                <gmd:URL>https://nowcoast.noaa.gov/help/#!section=transitioning</gmd:URL>
+              </gmd:linkage>
+              <gmd:protocol>
+                <gco:CharacterString>https</gco:CharacterString>
+              </gmd:protocol>
+              <gmd:name>
+                <gco:CharacterString>nowCOAST 5.0 Transition Guide for ArcGIS Map Services</gco:CharacterString>
+              </gmd:name>
+              <gmd:description>
+                <gco:CharacterString>Information page useful for users to transition to nowCOAST's ArcGIS map services</gco:CharacterString>
+              </gmd:description>
+              <gmd:function>
+                <gmd:CI_OnLineFunctionCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">information</gmd:CI_OnLineFunctionCode>
+              </gmd:function>
+            </gmd:CI_OnlineResource>
+          </gmd:onLine>
+          <gmd:onLine>
+            <gmd:CI_OnlineResource>
+              <gmd:linkage>
+              <gmd:URL>https://nowcoast.noaa.gov/help/#!section=updateschedule</gmd:URL>
+              </gmd:linkage>
+              <gmd:protocol>
+                <gco:CharacterString>https</gco:CharacterString>
+              </gmd:protocol>
+              <gmd:name>
+                <gco:CharacterString>Map Layer Update Schedule</gco:CharacterString>
+              </gmd:name>
+              <gmd:description>
+                <gco:CharacterString>Information page useful for users to plan for data updates.</gco:CharacterString>
+              </gmd:description>
+              <gmd:function>
+                <gmd:CI_OnLineFunctionCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">information</gmd:CI_OnLineFunctionCode>
+              </gmd:function>
+            </gmd:CI_OnlineResource>
+          </gmd:onLine>
+          <gmd:onLine>
+            <gmd:CI_OnlineResource id="WMS">
+              <gmd:linkage>
+              <gmd:URL>https://nowcoast.noaa.gov/arcgis/services/nowcoast/forecast_meteoceanhydro_sfc_ndfd_relhumidity_offsets/MapServer/WMSServer?request=GetCapabilities%26service=WMS</gmd:URL>
+              </gmd:linkage>
+              <gmd:protocol>
+                <gco:CharacterString>https</gco:CharacterString>
+              </gmd:protocol>
+              <gmd:name>
+                <gco:CharacterString>Web Map Service (WMS) GetCapabilities</gco:CharacterString>
+              </gmd:name>
+              <gmd:description>
+                <gco:CharacterString>Capabilities file for the nowCOAST forecast_meteoceanhydro_sfc_ndfd_relhumidity_offsets WMS</gco:CharacterString>
+              </gmd:description>
+              <gmd:function>
+                <gmd:CI_OnLineFunctionCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download">download</gmd:CI_OnLineFunctionCode>
+              </gmd:function>
+            </gmd:CI_OnlineResource>
+          </gmd:onLine>
+        </gmd:MD_DigitalTransferOptions>
+      </gmd:transferOptions>
+    </gmd:MD_Distribution>
+  </gmd:distributionInfo>
+  <gmd:dataQualityInfo>
+    <gmd:DQ_DataQuality>
+      <gmd:scope>
+        <gmd:DQ_Scope>
+          <gmd:level>
+            <gmd:MD_ScopeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="service">service</gmd:MD_ScopeCode>
+          </gmd:level>
+        </gmd:DQ_Scope>
+      </gmd:scope>
+      <gmd:report>
+        <gmd:DQ_CompletenessCommission>
+          <gmd:evaluationMethodDescription gco:nilReason="inapplicable"/>
+          <gmd:result gco:nilReason="inapplicable"/>
+        </gmd:DQ_CompletenessCommission>
+      </gmd:report>
+      <gmd:lineage>
+        <gmd:LI_Lineage>
+          <gmd:statement>
+            <gco:CharacterString>Generated from the latest NWS National Digital Forecast Database (NDFD) output.
+</gco:CharacterString>
+          </gmd:statement>
+          <gmd:processStep>
+            <gmd:LI_ProcessStep>
+              <gmd:description>
+                <gco:CharacterString>Most variables are scalars, i.e., they are a grid of single values at each pixel, which can be stored as individual rasters. This is done by using degrib to convert each individual GRIB2 message to a *.flt/*.hdr floating point dataset, which is then optionally processed/transformed before being converted to GeoTIFF and reprojected to Web Mercator (EPSG:3857).</gco:CharacterString>
+              </gmd:description>
+              <gmd:processor xlink:title="DOC/NOAA/NOS/OCS nowCOAST Team" xlink:href="https://www.ngdc.noaa.gov/docucomp/6441d46e-f370-40bb-81ce-276651e9c661">
+              </gmd:processor>
+            </gmd:LI_ProcessStep>
+          </gmd:processStep>
+          <gmd:source>
+            <gmi:LE_Source>
+              <gmd:description>
+                <gco:CharacterString>The source files are in GRIB2 format.
+</gco:CharacterString>
+              </gmd:description>
+            </gmi:LE_Source>
+          </gmd:source>
+        </gmd:LI_Lineage>
+      </gmd:lineage>
+    </gmd:DQ_DataQuality>
+  </gmd:dataQualityInfo>
+  <gmd:metadataMaintenance>
+    <gmd:MD_MaintenanceInformation>
+      <gmd:maintenanceAndUpdateFrequency>
+        <gmd:MD_MaintenanceFrequencyCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_MaintenanceFrequencyCode" codeListValue="asNeeded"/>
+      </gmd:maintenanceAndUpdateFrequency>
+      <gmd:maintenanceNote>
+          <gco:CharacterString>
+              This metadata was automatically generated from service REST metadata using custom Python software.
+          </gco:CharacterString>
+      </gmd:maintenanceNote>
+    </gmd:MD_MaintenanceInformation>
+  </gmd:metadataMaintenance>
+</gmi:MI_Metadata>

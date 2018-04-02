@@ -1,14 +1,17 @@
 # Standard library imports...
 import copy
 import datetime as dt
+import itertools
 import logging
 import os
-import pkg_resources as pkg
+import pathlib
+import re
 import warnings
 
 # Third-party library imports ...
 from lxml import etree
 import osr
+import pkg_resources as pkg
 import pyproj
 import requests
 import yaml
@@ -16,6 +19,10 @@ import yaml
 # Local imports...
 from . import const
 from .validator import Validator
+
+
+# Use the EXSLT namespace for some more powerful XPATH paths.
+_REGEX_NAMESPACE = {'re': "http://exslt.org/regular-expressions"}
 
 
 def process_text_element(item):
@@ -61,7 +68,7 @@ class RestToIso(object):
         Complete ISO 19115-2 document
     """
 
-    def __init__(self, config_file, verbose='info'):
+    def __init__(self, config_file, verbose='info', output_root=None):
         """
         Parameters
         ----------
@@ -69,6 +76,8 @@ class RestToIso(object):
             path to YAML configuration file
         verbose : str
             corresponds to a logging package log level
+        output_root : str
+            Where to write the resulting records.
         """
         self.validate = True
         self.parser = etree.XMLParser(remove_blank_text=True)
@@ -90,7 +99,10 @@ class RestToIso(object):
         self.base_url = (f"https://{self.config['server']}"
                          f"/arcgis/rest/services/")
 
-        self.output_directory = self.config['server']
+        if output_root is None:
+            self.output_directory = pathlib.Path(self.config['server'])
+        else:
+            self.output_directory = pathlib.Path(output_root)
 
         self.validator = Validator()
 
@@ -279,8 +291,8 @@ class RestToIso(object):
 
         # Go ahead and create the output folder since we know we will
         # write to it.
-        path = os.path.join(self.output_directory, self.folder)
-        os.makedirs(path, exist_ok=True)
+        path = self.output_directory / self.folder
+        path.mkdir(parents=True, exist_ok=True)
 
         for json_service_item in jservices:
             self.process_service(config, json_service_item)
@@ -320,11 +332,14 @@ class RestToIso(object):
 
         self.load_template()
 
+        self._update_service()
+
+    def _update_service(self):
+
         self.load_service_metadata()
         self.load_srs()
 
         self.update_file_identifier()
-        self.update_contact()
         self.update_datestamp()
         self.update_reference_system_info()
         self.update_identification_info()
@@ -337,9 +352,8 @@ class RestToIso(object):
             self.validator.validate(self.root)
 
         # Write out to a file.
-        relname = os.path.basename(self.service) + '.xml'
-        filename = os.path.join(self.output_directory, self.folder, relname)
-        self.root.getroottree().write(filename, pretty_print=True)
+        path = self.output_directory / self.folder / (self.service + '.xml')
+        self.root.getroottree().write(str(path), pretty_print=True)
 
     def is_time_enabled(self):
         """
@@ -381,13 +395,6 @@ class RestToIso(object):
 
         elt = self.get_element(const.ABSTRACT)
         elt.text = text
-
-    def update_aggregation_info(self):
-        """
-        Just remove it for the moment.
-        """
-        elt = self.get_element(const.AGGREGATION_INFO)
-        elt.getparent().remove(elt)
 
     def update_browse_graphic(self):
         """
@@ -478,9 +485,7 @@ class RestToIso(object):
         self.update_browse_graphic()
         self.update_descriptive_keywords()
         self.update_descriptive_keywords__gcmd_place()
-        self.update_descriptive_keywords__iso_temporal()
         self.update_descriptive_keywords__wmo_theme()
-        self.update_aggregation_info()
         self.update_service_type_and_service_version()
         self.update_geographic_bounding_box()
         self.update_temporal_extents()
@@ -499,12 +504,6 @@ class RestToIso(object):
         ])
         elt = self.get_element(path)
         elt.text = str(self.json['currentVersion'])
-
-    def update_contact(self):
-        """
-        The assumption is that this is an external record.
-        """
-        pass
 
     def update_contains_operations_rest_endpoint(self):
         """
@@ -613,16 +612,15 @@ class RestToIso(object):
         self._update_desc_keywords(const.DESCRIPTIVE_KEYWORDS__GCMD_PLACE,
                                    'gmd:descriptiveKeywords__gcmd_place')
 
-    def update_descriptive_keywords__iso_temporal(self):
-        self._update_desc_keywords(const.DESCRIPTIVE_KEYWORDS__ISO_TEMPORAL,
-                                   'descriptive_keywords__iso_temporal')
-
     def update_descriptive_keywords__wmo_theme(self):
         """
         WMO keywords must be supplied via config file if at all.
         """
-        self._update_desc_keywords(const.DESCRIPTIVE_KEYWORDS__WMO_THEME,
-                                   'gmd:descriptiveKeywords__wmo_theme')
+        try:
+            self._update_desc_keywords(const.DESCRIPTIVE_KEYWORDS__WMO_THEME,
+                                       'gmd:descriptiveKeywords__wmo_theme')
+        except IndexError:
+            pass
 
     def update_distribution_info(self):
         self.update_transfer_options()
@@ -778,43 +776,6 @@ class RestToIso(object):
         elt.text = text.format(project=self.config['project'],
                                service=self.service)
 
-    def update_online_noaa_geoplatform_entry(self):
-        root = self.get_element(const.TRANSFER_OPTIONS__NOAA_GEOPLATFORM_ENTRY)
-
-        keyword_path = [
-            'gmi:MI_Metadata',
-            'gmd:distributionInfo',
-            'gmd:MD_Distribution',
-            'gmd:transferOptions',
-            'gmd:MD_DigitalTransferOptions',
-            'gmd:onLine__xlink:title__NOAA_GeoPlatform_Entry',
-            'gmd:CI_OnlineResource',
-            'gmd:linkage',
-            'gmd:URL',
-        ]
-        try:
-            value = self.retrieve_configuration_file_value(tuple(keyword_path))
-        except KeyError:
-            # The implication is that there is no such resource.
-            # Delete the element.
-            root.getparent().remove(root)
-            return
-
-        # Ok it should exist.  Update the URL.
-        elt = self.get_element('gmd:CI_OnlineResource/gmd:linkage/gmd:URL',
-                               root=root)
-        elt.text = value
-
-        # Update the name.
-        path = 'gmd:CI_OnlineResource/gmd:name/gco:CharacterString'
-        elt = self.get_element(path, root=root)
-        text = (
-            f"NOAA GeoPlatform Entry for "
-            f"{self.config['project']} {self.folder}/{self.service} "
-            f"Map Service"
-        )
-        elt.text = text
-
     def update_publication_date(self):
         """
         Date identifies when the resource was issued.
@@ -922,7 +883,10 @@ class RestToIso(object):
             elt.text = process_step
 
     def update_lineage_source(self):
-        elt = self.get_element(const.LINEAGE_SOURCE)
+        try:
+            elt = self.get_element(const.LINEAGE_SOURCE)
+        except IndexError:
+            return
         try:
             path = (
                 'gmi:MI_Metadata',
@@ -984,9 +948,228 @@ class RestToIso(object):
     def update_transfer_options(self):
         self.update_wms_get_capabilities_for_download()
         self.update_additional_references()
-        self.update_online_noaa_geoplatform_entry()
 
     def __str__(self):
         msg = etree.tostring(self.tree, encoding='utf-8', pretty_print=True)
         msg = msg.decode('utf-8')
         return msg
+
+
+class NowCoastRestToIso(RestToIso):
+
+    def __init__(self, config_file, verbose='info'):
+        super().__init__(config_file, verbose=verbose)
+
+    def _retrieve_rest_references(self):
+        """
+        Retrieve list of references defined in REST.  Each item returned is
+        a dictionary of the descriptive text and the URL for the reference.
+
+        We are looking for elements that look like
+
+        <h4>References</h4>
+        <ul>
+          <li> stuff1 (Available at <a href="URL">someplace1</a> </li>
+          <li> stuff2 (Available at <a href="URL">someplacer2</a> </li>
+          .
+          .
+          .
+        </ul>
+        """
+
+        references = []
+
+        # Try to get it from the REST data
+        doc = etree.HTML(self.json['serviceDescription'])
+
+        # Find <LI> elements whose <UL> parent directly follow an
+        # <h4> or <h5> element whose text is "References".  Yeah!
+        path = (
+            ".//*[re:test(local-name(), 'h[45]')][text()='References']"
+            "/following-sibling::ul"
+            "/li"
+        )
+        elts = doc.xpath(path, namespaces=_REGEX_NAMESPACE)
+
+        for li in elts:
+
+            # Is there a URL?
+            urls = li.xpath('a')
+            if len(urls) == 0:
+                # No URL present.  That's required, so just go on to the
+                # next.
+                continue
+
+            url = urls[0].attrib['href']
+
+            # Get rid of the leading text inside the parenthesis.  The
+            # URL follows this, which makes the <LI> mixed content.
+            text = re.sub('\s*\(Available\s+(at|from)\s+', '', li.text)
+
+            # Get rid of any tabs, newlines, or multiple spaces.
+            text = text.replace('\n', '')
+            text = text.replace('\t', '')
+            text = text.replace('\s{2,}', ' ')
+            self.logger.debug(text)
+
+            references.append({'URL': url, 'name': text})
+
+        return references
+
+    def _extract_nowcoast_abstract(self):
+        """
+        Extract the abstract from the service description HTML.
+        """
+
+        doc = etree.HTML(self.json['serviceDescription'])
+        div = doc.xpath('body/div')[0]
+
+        # lxml is easier than XPATH here.
+        def predicate(x):
+            x.text != "Time Information"
+
+        lst = []
+
+        # Find all the elements whose text is NOT "Time Information".
+        for elt in itertools.takewhile(predicate, div.iterchildren()):
+
+            # Change something like
+            #
+            # <h4>Stuff</h4>
+            #    <p>stuff explanation</p>
+            #
+            # into
+            #
+            # Stuff: stuff explanation
+            if elt.tag in ['h4', 'h5']:
+                text = elt.text + ':'
+            elif elt.tag == 'p':
+                text = process_text_element(elt)
+            else:
+                continue
+
+            lst.append(text)
+
+        text = '\n\n'.join(lst)
+
+        # Get rid of any sequences of two or more spaces.  Don't do that for
+        # any whitespace, because two newlines in a row might be ok.
+        text = re.sub('  {2,}', ' ', text)
+
+        return text
+
+    def update_abstract(self):
+        """
+        Try to get the configuration file setting first.  If it's not there,
+        try to get it from the service metadata
+        """
+
+        keyword_path = (
+            'gmi:MI_Metadata',
+            'gmd:identificationInfo',
+            'srv:SV_ServiceIdentification',
+            'gmd:abstract'
+        )
+
+        try:
+            text = self.retrieve_configuration_file_value(keyword_path)
+        except KeyError:
+            try:
+                text = self._extract_nowcoast_abstract()
+            except IndexError as e:
+                # We have no information available.  Just use the service name.
+                msg = (
+                    f"Unable to extract nowcoast abstract.  Using the service "
+                    f"name instead.\n\n"
+                    f"{repr(e)}"
+                )
+                self.logger.critical(msg)
+                text = f"{self.folder}/{self.service}.{self.service_type}"
+            except etree.XMLSyntaxError:
+                # We have no information available.  Just use the service name.
+                text = f"{self.folder}/{self.service}.{self.service_type}"
+            except AttributeError as e:
+                # We have no information available.  Just use the service name.
+                self.logger.critical(repr(e))
+                text = f"{self.folder}/{self.service}.{self.service_type}"
+
+        # Include the time information if appropriate.
+        if self.is_time_enabled():
+            text += '\n\n' + const.TIME_INFORMATION
+
+        elt = self.get_element(const.ABSTRACT)
+        elt.text = text
+
+    def update_temporal_extents(self):
+        """
+        Update the time period element.  The goal is to produce something like
+        this.
+
+        <gml:TimePeriod gml:id="timePeriod1">
+            <gml:beginPosition indeterminatePosition="now"/>
+            <gml:endPosition indeterminatePosition="after"/>
+            <gml:timeInterval unit="minute">1</gml:timeInterval>
+        </gml:TimePeriod>
+
+        """
+        try:
+            root = self.get_element(const.TIME_PERIOD)
+        except IndexError:
+            return
+
+        keyword_path = (
+            'gmi:MI_Metadata',
+            'gmd:identificationInfo',
+            'srv:SV_ServiceIdentification',
+            'srv:extent',
+            'gmd:EX_Extent',
+            'gmd:temporalElement',
+            'gmd:EX_TemporalExtent',
+            'gmd:extent',
+            'gml:TimePeriod'
+        )
+
+        try:
+            time_period = self.retrieve_configuration_file_value(keyword_path)
+        except KeyError:
+            # The user didn't specify this, so delete it.
+            root.getparent().remove(root)
+            return
+
+        # Set the ID
+        key = f"{{{self.root.nsmap['gml']}}}id"
+        root.attrib[key] = 'timePeriod1'
+
+        # No description at the moment.  It is optional anyway.
+
+        elt = root.xpath('gml:beginPosition', namespaces=self.root.nsmap)[0]
+        elt.attrib['indeterminatePosition'] = time_period['gml:beginPosition']
+
+        elt = root.xpath('gml:endPosition', namespaces=self.root.nsmap)[0]
+        elt.attrib['indeterminatePosition'] = time_period['gml:endPosition']
+
+        elt = root.xpath('gml:timeInterval', namespaces=self.root.nsmap)[0]
+        if 'time_interval' in time_period.keys():
+            elt.text = str(time_period['gml:timeInterval'])
+        else:
+            # delete it.
+            elt.getparent().remove(elt)
+
+    def update_title(self):
+        """
+        Name by which the cited resource is known.  The goal is for this to
+        look something like
+
+        <gmd:title>
+            <gco:CharacterString>
+                nowCOAST's Map Service for NOAA NWS Weather Warnings for
+                Short-Duration Hazards in Inland, Coastal,
+                and Maritime Areas (Time Enabled)
+            </gco:CharacterString>
+        </gmd:title>
+        """
+        text = (f"{self.config['project']} Map Service "
+                f"for {self.json['mapName']}")
+
+        elt = self.get_element(const.TITLE)
+        elt.text = text

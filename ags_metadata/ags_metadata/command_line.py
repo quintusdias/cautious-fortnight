@@ -7,7 +7,42 @@ import yaml
 # Local imports ...
 from . import RestToIso, NowCoastRestToIso
 from .to_html import ISO191152_to_HTML
+from .update_iso import NowCoastUpdateIso, UpdateIso
 
+
+def update_iso():
+    """
+    Update an existing ISO record against REST metadata and a configuration
+    file.
+    """
+    description = 'Update ISO 19115-2 metadata'
+    kwargs = {
+        'description': description,
+        'formatter_class': argparse.RawDescriptionHelpFormatter,
+    }
+    parser = argparse.ArgumentParser(**kwargs)
+
+    help = 'YAML configuration file'
+    parser.add_argument('config', type=str, help=help)
+
+    help = 'Root directory of existing XML records'
+    parser.add_argument('input', type=str, help=help)
+
+    help = 'Output directory of updated XML records'
+    parser.add_argument('output', type=str, help=help)
+
+    args = parser.parse_args()
+
+    # Get the project from the configuration file.
+    with open(args.config, 'rt') as f:
+        config = yaml.load(f.read())
+
+    if config['project'].lower() == 'nowcoast':
+        obj = NowCoastUpdateIso(args.config, args.input, args.output)
+    else:
+        obj = UpdateIso(args.config, args.input, args.output)
+
+    obj.run()
 
 def rest2iso():
 
