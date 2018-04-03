@@ -8,8 +8,6 @@ import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn as sns
-sns.set_style('darkgrid')
 import yaml
 
 # Local imports
@@ -49,8 +47,10 @@ class Summarize(object):
         with open(self.configfile, mode='rt') as f:
             self.config = yaml.load(f)
 
-        # Pre-compute the linestyles and colors.
-        colors = sns.color_palette(n_colors=6)
+        # As soon as we have the configuration file, we can determine what
+        # the line colors and styles will be.
+        colors = mpl.rcParams['axes.prop_cycle'].by_key()['color']
+
         linestyles = ['-', '--', ':', '-.']
         tuples = list(itertools.product(linestyles, colors))
         tuples = tuples[:len(self.config['testunits'])]
@@ -179,6 +179,7 @@ class Summarize(object):
         """
         Create a plot for the bandwidth and write a nice table.
         """
+        plt.style.use('seaborn-darkgrid')
         df = self.df['bytes'].unstack()
         self._reset_index_to_num_threads(df)
 

@@ -25,7 +25,7 @@ kwargs = {
     'install_requires': [
         'apache_log_parser>=1.7.0',
         'PyYAML>=3.12',
-        'lxml>=4.1.0',
+        'lxml>=3.7.0',
         'pandas>=0.21.0',
         'pyproj>=1.9.5',
     ],
