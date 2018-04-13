@@ -145,11 +145,11 @@ class GenerateHtmlFromTestSuite(object):
 
             test_documentation = inspect.getdoc(test)
 
-            # Working assumption is that there is a leading summary followed
-            # by a blank line followed by further documentation that includes
-            # a statement of the expected result.
+            # Working assumption is that there is a leading summary
+            # followed by optional additional paragraphs followed by a
+            # final paragraph stating the expected result.
             lst = test_documentation.split('\n\n')
-            h1 = lst[0]
+            h1 = '\n\n'.join(lst[0:-1])
 
             # Remove any leading 'SCENARIO:'
             h1 = re.sub('[A-Z]+:\s+', '', h1)
@@ -159,7 +159,7 @@ class GenerateHtmlFromTestSuite(object):
             if len(lst) == 1:
                 explanation = ''
             else:
-                explanation = '\n\n'.join(lst[1:])
+                explanation = lst[-1]
 
             # Remove any 'EXPECTED RESULT:'
             explanation = re.sub('[A-Z]+\s[A-Z]+:\s+', '', explanation)
@@ -190,7 +190,12 @@ class GenerateHtmlFromTestSuite(object):
             td.text = item['name']
 
             td = ET.SubElement(tr, 'td')
-            td.text = item['summary']
+            if '\n\n' in item['summary']:
+                for paragraph in item['summary'].split('\n\n'):
+                    p = ET.SubElement(td, 'p')
+                    p.text = paragraph
+            else:
+                td.text = item['summary']
 
             td = ET.SubElement(tr, 'td')
             td.text = item['explanation']
