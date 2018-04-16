@@ -97,6 +97,7 @@ class GenerateHtmlFromTestSuite(object):
 
         print(name)
         div = ET.Element('div')
+        hr = ET.SubElement(div, 'hr')
         h2 = ET.SubElement(div, 'h2')
         h2.text = name
 
@@ -104,6 +105,9 @@ class GenerateHtmlFromTestSuite(object):
 
             if not testsuitename.startswith('Test'):
                 continue
+
+            h3 = ET.SubElement(div, 'h3')
+            h3.text = testsuitename
 
             print("    ", testsuitename)
 
