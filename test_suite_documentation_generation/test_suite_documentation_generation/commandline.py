@@ -111,6 +111,9 @@ class GenerateHtmlFromTestSuite(object):
 
             print("    ", testsuitename)
 
+            p = ET.SubElement(div, 'p')
+            p.text = inspect.getdoc(testsuite)
+
             table = self.process_testsuite(testsuitename, testsuite)
             if table is not None:
                 div.append(table)
@@ -131,8 +134,6 @@ class GenerateHtmlFromTestSuite(object):
 
         table = ET.Element('table')
         table.set('border', '1')
-        caption = ET.SubElement(table, 'caption')
-        caption.text = inspect.getdoc(testsuite)
 
         obj = testsuite()
 
