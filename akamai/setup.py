@@ -21,9 +21,8 @@ kwargs = {
         'openpyxl>=2.4.0',
         'pandas',
         'tables>=3.3.0',
-        'scikit-image',
     ],
-    'version': '0.0.2',
+    'version': '0.1.0',
 }
 
 setup(**kwargs)
