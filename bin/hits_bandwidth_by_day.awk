@@ -6,8 +6,8 @@
 BEGIN {
     # We need to map the 3-char month strings into ordinal numbers because we
     # will need them to properly construct UNIX timestamps at the end.
-    m = split("Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec", monthstrs, "|")
-    for (i = 1; i < m; ++i) {
+    split("Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec", monthstrs, "|")
+    for (i = 1; i <= 12; ++i) {
         month[monthstrs[i]] = i
     }
 
