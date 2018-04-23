@@ -1,0 +1,6 @@
+2018-04-23 - v0.1.1
+    SRS must be a column in the CSV input files
+
+2018-03-12T21 - v0.1.0
+    Fix geowebcache metrics in case there is no geowebcache contribution.
+    Don't allow division by zero.
