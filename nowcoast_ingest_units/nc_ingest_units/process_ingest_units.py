@@ -74,14 +74,15 @@ class ProcessIngestUnits(object):
         n_colors = min(unique_ingests.shape[0], 7)
         colors = sns.color_palette(n_colors=n_colors)
 
-        hatches = (None, '-', '+', '\\', 'O')
+        hatches = (None, r'\\\\', '+', '-', 'O')
 
         # cmap = {ingest: color for ingest, color in zip(unique_ingests, colors)}
         cmap = {}
         color_it = itertools.cycle(colors)
         for idx, ingest in enumerate(unique_ingests):
             color = next(color_it)
-            cmap['ingest'] = {
+            print(idx)
+            cmap[ingest] = {
                 'color': color,
                 'hatch': hatches[idx // len(colors)]
             }
@@ -115,15 +116,19 @@ class ProcessIngestUnits(object):
                     current_level += 1
 
             # Compute the patch details
-            patch_coords = {
-                'x': row['start'].timestamp(), 
-                'y': current_level, 
-                'width': row['end'].timestamp() - row['start'].timestamp(),
-                'height': 1,
-                'facecolor': cmap[row['ingest']]['color'],
-                'hatch': cmap[row['ingest']]['hatch'],
-                'label': row['ingest'],
-            }
+            try:
+                patch_coords = {
+                    'x': row['start'].timestamp(), 
+                    'y': current_level, 
+                    'width': row['end'].timestamp() - row['start'].timestamp(),
+                    'height': 1,
+                    'facecolor': cmap[row['ingest']]['color'],
+                    'hatch': cmap[row['ingest']]['hatch'],
+                    'label': row['ingest'],
+                }
+            except KeyError:
+                import pdb; pdb.set_trace()
+                pass
             coords.append(patch_coords)
             actives[current_level] = row
     
@@ -145,14 +150,26 @@ class ProcessIngestUnits(object):
                     actives[idx] = None
     
 
+        encountered_labels = []
+
         for idx, patch_coords in enumerate(coords):
             xy = patch_coords['x'], patch_coords['y']
             width = patch_coords['width']
             height = patch_coords['height']
             facecolor = patch_coords['facecolor']
             # print(xy, width, height)
+
+            # See https://stackoverflow.com
+            # /questions/19385639/duplicate-items-in-legend-in-matplotlib
+            label = patch_coords['label']
+            if label in encountered_labels:
+                label = '_nolegend_'
+            else:
+                encountered_labels.append(label)
+
             p = mpatches.Rectangle(xy, width, height, facecolor=facecolor,
-                                   label=patch_coords['label'])
+                                   label=label)
+            p.set_hatch(patch_coords['hatch'])
             ax.add_patch(p)
     
         xmin = min([pc['x'] for pc in coords])
@@ -162,12 +179,7 @@ class ProcessIngestUnits(object):
         ax.set_xlim(left=xmin, right=xmax)
         ax.set_ylim(bottom=ymin, top=ymax)
     
-        handles = [
-           mpatches.Patch(color=color, label=ingest)
-           for ingest, color in cmap.items()
-        ]
         lgd = ax.legend(loc='center left', bbox_to_anchor=(1.05, 0.5))
-        # lgd = ax.legend(loc='best')
 
         # Shrink by 20%
         box = ax.get_position()
@@ -185,7 +197,7 @@ class ProcessIngestUnits(object):
     
         plt.show()
 
-    def frobnosticate_ingest(self, path):
+    def extract_ingest_name_from_path(self, path):
         """
         Determine the identifier for the ingest from the log.
         """
@@ -213,7 +225,8 @@ class ProcessIngestUnits(object):
         start = None
         command_succeeded = False
         for line in path.open(mode='rt'):
-            if line.startswith('Command Succeeded.'):
+            # if line.startswith('Command Succeeded.'):
+            if line.startswith('Executing at'):
                 # It is only if there is a line starting with this string that
                 # we know that arcpy was fed something.
                 command_succeeded = True
@@ -226,17 +239,27 @@ class ProcessIngestUnits(object):
                 if start < self.time_range[0] or start > self.time_range[1]:
                     start = None
                     continue
-                print(start)
+                print(f"\tExtracted start at {start}")
             
             if 'end' in line and start is not None and command_succeeded:
                 s = ' '.join(line.split()[4:6])
                 end = dt.datetime.strptime(s, '%Y-%m-%d %H:%M:%S')
                 self.data.append(dict(ingest=ingest, start=start, end=end))
+                print(f'\tAccepted {ingest} at {start}:{end}')
 
                 start = None
                 command_succeeded = False
 
     def process_log(self, path):
+        """
+        Determine if a log file falls within our window of interest.  If so,
+        parse out the start and stop times of the ingest.
+
+        Parameters
+        ----------
+        path
+            Path to nowCOAST log file
+        """
         # Some paths should always be skipped.
         if '.snapshot' in str(path):
             return
@@ -244,7 +267,9 @@ class ProcessIngestUnits(object):
             return
 
         print(path)
-        ingest = self.frobnosticate_ingest(path)
+        if 'creofs' in str(path):
+            pass
+        ingest = self.extract_ingest_name_from_path(path)
 
         if ingest in self.exclude:
             return
