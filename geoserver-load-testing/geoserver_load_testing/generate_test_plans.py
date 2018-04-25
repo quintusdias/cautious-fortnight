@@ -135,7 +135,7 @@ class GenerateTestPlans(object):
 
         # Set the variable names.
         elt = ht.xpath('CSVDataSet/stringProp[@name="variableNames"]')[0]
-        elt.text = 'width,height,layer,bbox'
+        elt.text = 'width,height,layer,srs,bbox'
 
     def setup_http_request_name(self, ht):
         """
@@ -169,6 +169,7 @@ class GenerateTestPlans(object):
         self.set_parameter(elt, 'width', '${width}')
         self.set_parameter(elt, 'height', '${height}')
         self.set_parameter(elt, 'layers', '${layer}')
+        self.set_parameter(elt, 'srs', '${srs}')
         self.set_parameter(elt, 'bbox', '${bbox}')
 
     def setup_http_request_defaults_parameters(self, ht, testunit):
@@ -181,7 +182,6 @@ class GenerateTestPlans(object):
         self.set_parameter(elt, 'service', 'WMS')
         self.set_parameter(elt, 'version', '1.1.0')
         self.set_parameter(elt, 'request', 'GetMap')
-        self.set_parameter(elt, 'srs', 'EPSG:4326')
         self.set_parameter(elt, 'format', 'image/png')
         self.set_parameter(elt, 'tiled', 'true')
         self.set_parameter(elt, 'time', 'current')
