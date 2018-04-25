@@ -1,3 +1,6 @@
+2018-04-25 - v0.1.2
+    Reinstate etc/plan.jmx
+
 2018-04-23 - v0.1.1
     SRS must be a column in the CSV input files
 
