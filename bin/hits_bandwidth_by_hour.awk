@@ -11,8 +11,11 @@ BEGIN {
         month[monthstrs[i]] = i
     }
 
+    header_pspec = "%11s%15s%15s%10s%12s%10s\n"
+    body_pspec = "%11s%15s%15s%10.1f%12s%10.1f\n"
+
     # Header line
-    printf("%11s%15s%15s%10s%12s%10s\n", "Day", "TS", "Bytes", "GB/day", "Hits", "Hits/sec")
+    printf(header_pspec, "Day", "TS", "Bytes", "GB/hr", "Hits", "Hits/sec")
 }
 
 {
@@ -20,22 +23,23 @@ BEGIN {
     # split on the space character.  Cut off the leading bracket and trailing
     # hour:min:sec part.
     time_field = $4
-    day = substr(time_field, 2, 11)
+    hour = substr(time_field, 2, 14)
 
-    bytes[day] += $10
-    hits[day] += 1
+    bytes[hour] += $10
+    hits[hour] += 1
 } 
 
 END {
-    for (day in hits) {
+    for (hour in hits) {
         
-        # Convert the day string (something like "01/Mar/2017") into a unix
+        # Convert the time string (something like "01/Mar/2017:18") into a unix
         # timestamp.
-        split(day, dmy, "/")
-        spec = dmy[3] " " month[dmy[2]] " " dmy[1] " 0 0 0"
+        split(hour, parts, /\/|:/)
+        spec = parts[3] " " month[parts[2]] " " parts[1] " " parts[4] " 0 0"
         ts = mktime(spec)
 
-        printf("%11s%15s%15s%10.1f%12s%10.1f\n", day, ts, bytes[day], bytes[day]/1024/1024/1024, hits[day], hits[day]/86400)
+	bandwidth_rate = bytes[hour]/1024/1024/1024
+        printf(body_pspec, hour, ts, bytes[hour], bandwidth_rate, hits[hour], hits[hour]/3600)
     }
 }
 
