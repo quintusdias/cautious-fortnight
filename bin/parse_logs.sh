@@ -57,10 +57,10 @@ function filter_not_ok_status() {
 
 function filter_wmts()
 {
-    # /arcgis/rest/services/folder/service/MapServer/WMTS/1.0.0/WMTSCapabilities.xml
+    # /arcgis/rest/services/NOS_Biogeo_Biomapper/StJ_Imagery/MapServer/WMTS/1.0.0/WMTSCapabilities.xml
     #
     # /arcgis/services/folder/service/MapServer/WFSServer?request=GetCapabilities&service=WMTS
-    grep -P "/arcgis/rest/services/\w+/\w+/mapserver/wmts"
+    egrep "/arcgis/rest/services/[[:alpha:]_]+/[[:alpha:]_]+/mapserver/wmts"
 }
 
 function pick_out_service()
