@@ -2,11 +2,25 @@
 
 function filter_clean()
 {
-  # Get rid of the Akamai hostname
+  # Get rid of any semblance of a hostname.
+  #
+  # Turn a line that contains something like
+  #
+  #     GET /origin.nowcoast.ncep.noaa.gov/arcgis/rest/services/nowcoast/radar_meteo_imagery_nexrad_time/MapServer/export
+  #     GET /nowcoast.ncep.noaa.gov.akadns.net/arcgis/rest/services/nowcoast/sat_meteo_emulated_imagery_lightningstrikedensity_goes_time/MapServer/export
+  #
+  # into
+  #
+  #     GET /arcgis/rest/services/nowcoast/radar_meteo_imagery_nexrad_time/MapServer/export
+  #     GET /arcgis/rest/services/nowcoast/sat_meteo_emulated_imagery_lightningstrikedensity_goes_time/MapServer/export
+  #
   sed -r 's#(http://|/origin.|/)?(idpgis|nowcoast).((bldr|cprk).)?ncep.noaa.gov(.akadns.net)?##g' | \
     # Restrict to a service request or layerinfo request.
     # 
-    # Don't let the folder name be either "admin", "rest", or "system".
+    # Don't let the folder name be either "admin", "rest", or "system", i.e.
+    # exclude lines like
+    #
+    #     GET /arcgis/rest/services/System/CachingTools/GPServer/ImportCache
     #
     # Don't let the service name start with "mapserver".  Sometimes we also just see "mapserve"
     # make it easy and just restrict that.
