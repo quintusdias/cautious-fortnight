@@ -136,7 +136,9 @@ class Summarize(object):
 
         # Add section for the user to later describe the load test
         etree.SubElement(body, 'hr')
-        etree.SubElement(body, 'div', id="description")
+        div = etree.SubElement(body, 'div', id="description")
+        h1 = etree.SubElement(div, 'h1')
+        h1.text = 'Synopsis'
 
         self._add_loadtest_configuration(body)
         self._generate_throughput_div(body)
@@ -193,44 +195,16 @@ class Summarize(object):
         """
         Create a plot for the bandwidth and write a nice table.
         """
-        plt.style.use('seaborn-darkgrid')
         df = self.df['bytes'].unstack()
         self._reset_index_to_num_threads(df)
 
-        # Create the plot
-        fig, ax = plt.subplots()
-        df.plot(ax=ax)
-        self._set_colors_and_linestyles(ax)
-
-        lgd = ax.legend(loc='center left', bbox_to_anchor=(1.05, 0.5))
-        ax.set_ylabel('Bytes')
-        output_file = str(self.output_dir / 'bytes.png')
-        fig.savefig(output_file,
-                    bbox_extra_artists=(lgd,),
-                    bbox_inches='tight')
-
-        # Create the HTML for the table.
-        table_df = df.T
-        self._simplify_labels(table_df)
-        table_html_str = (table_df.style
-                                  .format("{:.0f}")
-                                  .set_caption("Bytes")
-                                  .render())
-        table_doc = etree.HTML(table_html_str)
-        table = table_doc.xpath('body/table')[0]
-
-        # Link the plot and table into the document.
-        etree.SubElement(body, 'hr')
-        div = etree.SubElement(body, 'div', id='bytes', name='bytes')
-        h1 = etree.SubElement(div, 'h1')
-        h1.text = 'Average Number of Bytes Per Run Level'
-        etree.SubElement(div, 'img', src="bytes.png")
-        div.append(table)
-
-        # Add the throughput section to the table of contents.
-        li = etree.SubElement(self.toc, 'li')
-        a = etree.SubElement(li, 'a', href='#bytes')
-        a.text = 'Bytes'
+        self._simplify_labels(df)
+        kwargs = {
+            'shortname': 'bytes',
+            'ylabel': 'Bytes',
+            'title': 'Average Number of Bytes Per Transaction',
+        }
+        self._generate_common_div(body, df, **kwargs)
 
     def _generate_elapsed_div(self, body):
         """
@@ -238,41 +212,14 @@ class Summarize(object):
         """
         df = self.df['elapsed'].unstack() / 1000
         self._reset_index_to_num_threads(df)
+        self._simplify_labels(df)
 
-        # Create the plot
-        fig, ax = plt.subplots()
-        df.plot(ax=ax)
-        self._set_colors_and_linestyles(ax)
-
-        lgd = ax.legend(loc='center left', bbox_to_anchor=(1.05, 0.5))
-        ax.set_ylabel('seconds')
-        output_file = str(self.output_dir / 'elapsed.png')
-        fig.savefig(output_file,
-                    bbox_extra_artists=(lgd,),
-                    bbox_inches='tight')
-
-        # Create the HTML for the table.
-        table_df = df.T
-        self._simplify_labels(table_df)
-        table_html_str = (table_df.style
-                                  .format("{:.1f}")
-                                  .set_caption("Elapsed")
-                                  .render())
-        table_doc = etree.HTML(table_html_str)
-        table = table_doc.xpath('body/table')[0]
-
-        # Link the plot and table into the document.
-        etree.SubElement(body, 'hr')
-        div = etree.SubElement(body, 'div', id='elapsed', name='elapsed')
-        h1 = etree.SubElement(div, 'h1')
-        h1.text = 'Elapsed Time Per Transaction'
-        etree.SubElement(div, 'img', src="elapsed.png")
-        div.append(table)
-
-        # Add the throughput section to the table of contents.
-        li = etree.SubElement(self.toc, 'li')
-        a = etree.SubElement(li, 'a', href='#elapsed')
-        a.text = 'Elapsed time per transaction'
+        kwargs = {
+            'shortname': 'elapsed',
+            'ylabel': 'seconds',
+            'title': 'Elapsed Time Per Transaction',
+        }
+        self._generate_common_div(body, df, **kwargs)
 
     def _generate_error_rate_div(self, body):
         """
@@ -280,43 +227,16 @@ class Summarize(object):
         """
         df = self.df['error_rate'].unstack()
         self._reset_index_to_num_threads(df)
+        self._simplify_labels(df)
 
-        # Create the plot
-        fig, ax = plt.subplots()
-        df.plot(ax=ax)
-        self._set_colors_and_linestyles(ax)
+        kwargs = {
+            'shortname': 'error_rate',
+            'ylabel': 'Error Rate (%)',
+            'title': 'Error Rate',
+        }
+        self._generate_common_div(body, df, **kwargs)
 
-        lgd = ax.legend(loc='center left', bbox_to_anchor=(1.05, 0.5))
-        ax.set_ylabel('%')
-        output_file = str(self.output_dir / 'error_rate.png')
-        fig.savefig(output_file,
-                    bbox_extra_artists=(lgd,),
-                    bbox_inches='tight')
-
-        # Create the HTML for the table.
-        table_df = df.T
-        self._simplify_labels(table_df)
-        table_html_str = (table_df.style
-                                  .format("{:.1f}")
-                                  .set_caption("Error Rate")
-                                  .render())
-        table_doc = etree.HTML(table_html_str)
-        table = table_doc.xpath('body/table')[0]
-
-        # Link the plot and table into the document.
-        etree.SubElement(body, 'hr')
-        div = etree.SubElement(body, 'div', id='error_rate', name='error_rate')
-        h1 = etree.SubElement(div, 'h1')
-        h1.text = 'Error Rate'
-        etree.SubElement(div, 'img', src="error_rate.png")
-        div.append(table)
-
-        # Add the throughput section to the table of contents.
-        li = etree.SubElement(self.toc, 'li')
-        a = etree.SubElement(li, 'a', href='#error_rate')
-        a.text = 'Error rate'
-
-    def _simplify_labels(self, table_df):
+    def _simplify_labels(self, df):
         """
         The dataframe row labels come in looking something like
 
@@ -326,14 +246,14 @@ class Summarize(object):
         if present, because most of the services are MapServers.
         """
         lst = []
-        for label in table_df.index:
+        for label in df.columns:
             # Don't bother saying it's a MapServer
             label = label.replace('/MapServer', '')
 
             # Don't bother with the folder.
             label = '/'.join(label.split('/')[1:])
             lst.append(label)
-        table_df.index = lst
+        df.columns = lst
 
     def _generate_throughput_div(self, body):
         """
@@ -342,52 +262,110 @@ class Summarize(object):
         df = self.df['throughput'].unstack()
         self._reset_index_to_num_threads(df)
 
-        # Create the service-by-service plot
+        max_rate = df.sum(axis=1).max()
+        kwargs = {
+            'shortname': 'overall_throughput',
+            'ylabel': 'Overall Throughput (tr/sec)',
+            'title': f'Overall Throughput: {max_rate:.0f} tr/sec',
+        }
+        self._generate_common_div(body, df.sum(axis=1).to_frame(), **kwargs)
+
+        self._simplify_labels(df)
+        kwargs = {
+            'shortname': 'by_service_throughput',
+            'ylabel': 'By-Service Throughput (tr/sec)',
+            'title': 'By-Service Throughput',
+        }
+        self._generate_common_div(body, df, **kwargs)
+
+    def create_table_file(self, filename, df, caption):
+        """
+        Write an HTML file to summarize just a single metric.
+
+        Parameters
+        -----------
+        filename : path or str
+            HTML file presenting a single table.
+        df : dataframe
+            pandas dataframe describing a single metric, for all services, for
+            all run levels
+        caption : string
+            Descriptive text
+        """
+        html = etree.Element('html')
+        body = etree.SubElement(html, 'body')
+        p = etree.SubElement(body, 'p')
+
+        table_html_str = (df.T.style
+                              .format("{:.1f}")
+                              .set_caption(caption)
+                              .render())
+        table_doc = etree.HTML(table_html_str)
+        table = table_doc.xpath('body/table')[0]
+        p.append(table)
+
+        path = self.output_dir / filename
+        with pathlib.Path(path).open(mode='wb') as fp:
+            html.getroottree().write(fp, encoding='utf-8', pretty_print=True)
+
+    def _generate_common_div(self, body, df, shortname=None, ylabel=None,
+                             title=None, text=None):
+        """
+        Create a plot and associated HTML elements.
+
+        Parameters
+        ----------
+        body : lxml Element
+            Corresponds to <BODY>
+        df : pandas dataframe
+            2D table with just a single metric of interest, spread out across
+            all services.
+        shortname : str
+            Easy-to-remember name for the metric.
+        ylabel, title : str
+            Y-label on the plot and a title string.
+        """
+        # Create the plot
         fig, ax = plt.subplots()
         df.plot(ax=ax)
         self._set_colors_and_linestyles(ax)
 
+        # Create a plot with the legend outside the box on the right (yes, the
+        # right).  Make the extra items crowd the box as much as possible (i.e.
+        # they are "tight").
         lgd = ax.legend(loc='center left', bbox_to_anchor=(1.05, 0.5))
-        ax.set_ylabel('tr/sec')
-        output_file = str(self.output_dir / 'throughput.png')
-        fig.savefig(output_file,
-                    bbox_extra_artists=(lgd,),
-                    bbox_inches='tight')
+        ax.set_ylabel(ylabel)
+        path = self.output_dir / f"{shortname}.png"
+        with path.open(mode='wb') as fp:
+            fig.savefig(fp, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
-        # Create the overall throughput plot.
-        fig, ax = plt.subplots()
-        overall_df = df.sum(axis=1)
-        overall_df.plot(ax=ax)
-        self._set_colors_and_linestyles(ax)
-
-        ax.set_title(f'Overall Throughput: Max = {overall_df.max():.0f}')
-        ax.set_ylabel('tr/sec')
-        output_file = str(self.output_dir / 'throughput_overall.png')
-        fig.savefig(output_file)
-
-        # Create the HTML for the table.
-        table_df = df.T
-        self._simplify_labels(table_df)
-        table_html_str = (table_df.style
-                                  .format("{:.1f}")
-                                  .set_caption("Throughput")
-                                  .render())
-        table_doc = etree.HTML(table_html_str)
-        table = table_doc.xpath('body/table')[0]
-
-        # Link the plot and table into the document.
+        # Link the plot into the document.  Put into it's own DIV with a title.
         etree.SubElement(body, 'hr')
-        div = etree.SubElement(body, 'div', id='throughput', name='throughput')
+        div = etree.SubElement(body, 'div', id=shortname, name=shortname)
         h1 = etree.SubElement(div, 'h1')
-        h1.text = 'Throughput'
-        etree.SubElement(div, 'img', src="throughput.png")
-        etree.SubElement(div, 'img', src="throughput_overall.png")
-        div.append(table)
+        h1.text = title
+        etree.SubElement(div, 'img', src=f"{shortname}.png")
 
-        # Add the throughput section to the table of contents.
+        # Text is truly optional.
+        if text is not None:
+            p = etree.SubElement(div, 'p')
+            p.text = text
+
+        # Create an HTML table for the dataframe in question.  Don't print it
+        # here, but use an external HTML file.
+        table_filename = f"{shortname}.html"
+        self.create_table_file(table_filename, df, title)
+
+        # Create a link to the throughput table.
+        p = etree.SubElement(div, 'p')
+        a = etree.SubElement(p, 'a', href=table_filename)
+        a.text = "table data"
+        div.append(p)
+
+        # Add this <DIV> into the table of contents at the top of the page.
         li = etree.SubElement(self.toc, 'li')
-        a = etree.SubElement(li, 'a', href='#throughput')
-        a.text = 'Throughput'
+        a = etree.SubElement(li, 'a', href=f"#{shortname}")
+        a.text = title
 
     def process_service(self, run_level, testunit):
 

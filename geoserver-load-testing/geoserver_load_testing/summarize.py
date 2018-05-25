@@ -137,6 +137,12 @@ class Summarize(object):
         body = etree.SubElement(self.doc, 'body')
         self.toc = etree.SubElement(body, 'ul', id='toc')
 
+        # Add section for the user to later describe the load test
+        etree.SubElement(body, 'hr')
+        div = etree.SubElement(body, 'div', id="description")
+        h1 = etree.SubElement(div, 'h1')
+        h1.text = 'Synopsis'
+
         self.add_link_to_raw_data(body)
         self._add_loadtest_configuration(body)
         self._generate_throughput_div(body)
@@ -144,6 +150,12 @@ class Summarize(object):
         self._generate_error_rate_div(body)
         self._generate_elapsed_div(body)
         self._generate_gwc_percentages(body)
+
+        # Add a final TOC entry for CheckMK.  It is assumed that the target of
+        # this link will be populated later.
+        li = etree.SubElement(self.toc, 'li')
+        a = etree.SubElement(li, 'a', href='checkmk')
+        a.text = 'CheckMK'
 
         self.doc.getroottree().write(str(self.output_dir / 'index.html'),
                                      encoding='utf-8', pretty_print=True)

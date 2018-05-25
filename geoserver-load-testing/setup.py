@@ -20,7 +20,7 @@ kwargs = {
     'author_email': 'john.g.evans@noaa.gov',
     'packages': ['geoserver_load_testing'],
     'package_data': {'geoserver_load_testing': ['etc/plan.jmx']},
-    'version': '0.1.3',
+    'version': '0.1.4',
     'install_requires': [
         'apache_log_parser>=1.7.0',
         'PyYAML>=3.12',
