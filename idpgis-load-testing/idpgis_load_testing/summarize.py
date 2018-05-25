@@ -8,6 +8,8 @@ import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
+sns.set_style('darkgrid')
 import yaml
 
 # Local imports
@@ -49,7 +51,8 @@ class Summarize(object):
 
         # As soon as we have the configuration file, we can determine what
         # the line colors and styles will be.
-        colors = mpl.rcParams['axes.prop_cycle'].by_key()['color']
+        # colors = mpl.rcParams['axes.prop_cycle'].by_key()['color']
+        colors = sns.color_palette(n_colors=7)
 
         linestyles = ['-', '--', ':', '-.']
         tuples = list(itertools.product(linestyles, colors))
@@ -92,6 +95,7 @@ class Summarize(object):
             "    border-right: 3px solid #99CCCC;\n"
             "    border-bottom:  1px solid #99CCCC;\n"
             "    padding-right:  .3em;\n"
+            "    text-align:  left;\n"
             "}\n"
             "table th[scope=\"col\"] {\n"
             "    border-right: 1px solid #99CCCC;\n"
@@ -130,11 +134,21 @@ class Summarize(object):
         body = etree.SubElement(self.doc, 'body')
         self.toc = etree.SubElement(body, 'ul', id='toc')
 
+        # Add section for the user to later describe the load test
+        etree.SubElement(body, 'hr')
+        etree.SubElement(body, 'div', id="description")
+
         self._add_loadtest_configuration(body)
         self._generate_throughput_div(body)
         self._generate_bandwidth_div(body)
         self._generate_error_rate_div(body)
         self._generate_elapsed_div(body)
+
+        # Add a final TOC entry for CheckMK.  We assume that this is
+        # populated later.
+        li = etree.SubElement(self.toc, 'li')
+        a = etree.SubElement(li, 'a', href='checkmk')
+        a.text = 'CheckMK'
 
         output_file = str(self.output_dir / 'index.html')
         self.doc.getroottree().write(output_file,
@@ -196,10 +210,12 @@ class Summarize(object):
                     bbox_inches='tight')
 
         # Create the HTML for the table.
-        table_html_str = (df.T.style
-                              .format("{:.0f}")
-                              .set_caption("Bytes")
-                              .render())
+        table_df = df.T
+        self._simplify_labels(table_df)
+        table_html_str = (table_df.style
+                                  .format("{:.0f}")
+                                  .set_caption("Bytes")
+                                  .render())
         table_doc = etree.HTML(table_html_str)
         table = table_doc.xpath('body/table')[0]
 
@@ -236,10 +252,12 @@ class Summarize(object):
                     bbox_inches='tight')
 
         # Create the HTML for the table.
-        table_html_str = (df.T.style
-                              .format("{:.1f}")
-                              .set_caption("Elapsed")
-                              .render())
+        table_df = df.T
+        self._simplify_labels(table_df)
+        table_html_str = (table_df.style
+                                  .format("{:.1f}")
+                                  .set_caption("Elapsed")
+                                  .render())
         table_doc = etree.HTML(table_html_str)
         table = table_doc.xpath('body/table')[0]
 
@@ -276,10 +294,12 @@ class Summarize(object):
                     bbox_inches='tight')
 
         # Create the HTML for the table.
-        table_html_str = (df.T.style
-                              .format("{:.1f}")
-                              .set_caption("Error Rate")
-                              .render())
+        table_df = df.T
+        self._simplify_labels(table_df)
+        table_html_str = (table_df.style
+                                  .format("{:.1f}")
+                                  .set_caption("Error Rate")
+                                  .render())
         table_doc = etree.HTML(table_html_str)
         table = table_doc.xpath('body/table')[0]
 
@@ -295,6 +315,25 @@ class Summarize(object):
         li = etree.SubElement(self.toc, 'li')
         a = etree.SubElement(li, 'a', href='#error_rate')
         a.text = 'Error rate'
+
+    def _simplify_labels(self, table_df):
+        """
+        The dataframe row labels come in looking something like
+
+        "folder/services/{MapServer,ImageServer,FeatureServer}"
+
+        Discard the folder name and discard the string "MapServer"
+        if present, because most of the services are MapServers.
+        """
+        lst = []
+        for label in table_df.index:
+            # Don't bother saying it's a MapServer
+            label = label.replace('/MapServer', '')
+
+            # Don't bother with the folder.
+            label = '/'.join(label.split('/')[1:])
+            lst.append(label)
+        table_df.index = lst
 
     def _generate_throughput_div(self, body):
         """
@@ -327,10 +366,12 @@ class Summarize(object):
         fig.savefig(output_file)
 
         # Create the HTML for the table.
-        table_html_str = (df.T.style
-                              .format("{:.1f}")
-                              .set_caption("Throughput")
-                              .render())
+        table_df = df.T
+        self._simplify_labels(table_df)
+        table_html_str = (table_df.style
+                                  .format("{:.1f}")
+                                  .set_caption("Throughput")
+                                  .render())
         table_doc = etree.HTML(table_html_str)
         table = table_doc.xpath('body/table')[0]
 
