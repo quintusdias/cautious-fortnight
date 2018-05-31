@@ -237,7 +237,7 @@ class SummarizeAgsLogs(AgsRestAdminBase):
 
         try:
             self.token = self.get_token(server)
-        except TokenRetrievalError as e:
+        except (TokenRetrievalError, ConnectionRefusedError) as e:
             print(f"Could not retrieve token for {server}.")
             print(repr(e))
             return
