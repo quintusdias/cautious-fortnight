@@ -3,7 +3,7 @@
 function filter_clean()
 {
   # Get rid of the Akamai hostname
-  sed -r 's#(http://|/origin.|/)?(idpgis|nowcoast).((bldr|cprk).)?ncep.noaa.gov##g' | \
+  sed -r 's#(http://|/origin.|/)?(idpgis|nowcoast).((bldr|cprk).)?ncep.noaa.gov(.akadns.net)?##g' | \
     # Restrict to a service request or layerinfo request.
     # 
     # Don't let the folder name be either "admin", "rest", or "system".
@@ -12,7 +12,7 @@ function filter_clean()
     # make it easy and just restrict that.
     #
     # Don't let the service name be featureserver or gpserver or layers either.
-    grep -P "GET (?i)((/arcgis(/rest)?/services/(?!(admin|rest|system))\w+/((?!(mapserve|featureserver|gpserver|layers))\w+))|(/layerinfo))(?-i)" | \
+    grep -P "(GET|POST) (?i)((/arcgis(/rest)?/services/(?!(admin|rest|system))\w+/((?!(mapserve|featureserver|gpserver|layers))\w+))|(/layerinfo))(?-i)" | \
       # Make it lowercase to make it easy.
       tr '[:upper:]' '[:lower:]' | \
         # Turn any sequences of '//' into just '/'
@@ -219,4 +219,4 @@ zcat ${1} | filter_clean | tee \
         >(filter_wmts_getmap    | aggregate > p_wmts.dat) > /dev/null) \
     >(aggregate_codes                       > p_errors.dat) > /dev/null
 
-python3 join2html.py
+join2html.py

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Standard library imports
 import datetime as dt
 import pathlib
@@ -35,6 +37,15 @@ class Summary(object):
         self.project = project
         self.data_root = pathlib.Path.home() / 'data' / 'webstats' / project
         
+        self.start_document()
+
+        # Create a scratch directory for artifacts that will need to be moved
+        # after this routine runs to completion.
+        tdir = pathlib.Path('.') / f"{self.project}"
+        if not tdir.exists():
+            tdir.mkdir()
+
+    def start_document(self):
         # We will write an HTML document for all this.  There will be two
         # pieces, a table of contents and the <DIV> containing all the images.
         # The TOC will link to all the images.
