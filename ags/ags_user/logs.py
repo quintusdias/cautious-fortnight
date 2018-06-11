@@ -165,7 +165,16 @@ class SummarizeAgsLogs(AgsRestAdminBase):
         """
         # Upon counting, all the columns count the same things, so just take
         # any column.  Choose elapsed for no particular reason.
-        df = df.groupby([df.index.day, df.index.hour]).count()
+        #
+        # This used to work prior to v0.23.0
+        # df = df.groupby([df.index.day, df.index.hour]).count()
+        #
+        # Now we have to be a bit more deliberate.
+        idx = pd.MultiIndex.from_arrays([df.index.day, df.index.hour],
+                                        names=['day', 'hour'])
+        df.index = idx
+        df = df.groupby(df.index).count()
+
 
         # Reset the index to be a normal by-the-hour index instead of a
         # multi-index.  That way the datetime information comes out on the
