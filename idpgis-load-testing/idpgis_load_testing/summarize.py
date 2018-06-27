@@ -399,13 +399,17 @@ class Summarize(object):
 
         print(f'Processing {path} ... ')
         df = pd.read_csv(path, **kwargs)
-
         s = df.sum(numeric_only=True)
 
-        s['throughput'] = s['dataType']
-        s['throughput'] /= (self.config['intervals'][run_level] * 60)
+        if df.shape[0] == 0:
+            # No data for this run level.  It has happened...
+            s['throughput'] = 0
+            s['ntrans'] = 0
+        else:
+            s['throughput'] = s['dataType']
+            s['throughput'] /= (self.config['intervals'][run_level] * 60)
+            s['ntrans'] = df.shape[0]
 
-        s['ntrans'] = df.shape[0]
         self.data.append(s.values)
         self.index_tuples.append((run_level, f"{testunit['service']}"))
 
