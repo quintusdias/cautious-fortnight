@@ -91,11 +91,14 @@ class Summary(object):
         self.df = pd.concat(dfs, keys=keys)
     
     def plot_mapdraws(self):
+        """
+        Sum the WMS, WMTS, and export image counts
+        """
         
-        mapdraws = self.df['wms mapdraws'] + self.df['export mapdraws'] \
-                 + self.df['wmts mapdraws']
-        mapdraws = mapdraws.unstack()
-        self.plot(mapdraws,
+        df = self.df['wms mapdraws'] + self.df['export mapdraws'] \
+             + self.df['wmts mapdraws']
+        df = df.unstack()
+        self.plot(df,
                   title='Map Draws',
                   ylabel='Map Draws',
                   output_file=f'{self.project}/mapdraws.png')
@@ -112,6 +115,14 @@ class Summary(object):
         img = etree.SubElement(div, 'img')
         img.attrib['src'] = 'mapdraws.png'
         etree.SubElement(self.div, 'hr')
+
+        # Create the table for the raw data and append a link to it.
+        column_name = 'mapdraws'
+        table = self.create_doc_for_latest_month_of_data(column_name, df)
+        a = etree.SubElement(div, 'a')
+        a.attrib['href'] = table
+        a.text = column_name
+            
 
     def adjust_ylabel(self, df, ylabel):
         max_val = df.max().max()
