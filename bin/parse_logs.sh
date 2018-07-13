@@ -1,4 +1,6 @@
 #!/bin/bash
+#
+# Usage: parse_logs.sh logfile
 
 function filter_clean()
 {
@@ -223,7 +225,9 @@ function aggregate_codes()
     pick_out_service_and_codes | sum_hits_codes | sort -nrk3,3
 }
 
-zcat ${1} | filter_clean | tee \
+logfile=${1}
+project=$(basename $logfile | awk -F"." '{print $1}')
+zcat $logfile | filter_clean | tee \
     >(filter_ok_status | tee \
         >(                        aggregate > p_all.dat) \
         >(filter_wms_getmap     | aggregate > p_wms.dat) \
@@ -233,4 +237,3 @@ zcat ${1} | filter_clean | tee \
         >(filter_wmts_getmap    | aggregate > p_wmts.dat) > /dev/null) \
     >(aggregate_codes                       > p_errors.dat) > /dev/null
 
-join2html.py
