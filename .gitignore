@@ -6,3 +6,6 @@ gis_utilities.egg-info
 *.swp
 akamai/nco_akamai.egg-info
 ags/ags_user.egg-info
+geoserver-load-testing/geoserver_load_testing.egg-info
+idpgis-load-testing/idpgis_load_testing.egg-info
+test_suite_documentation_generation/test_suite_documentation_generation.egg-info
