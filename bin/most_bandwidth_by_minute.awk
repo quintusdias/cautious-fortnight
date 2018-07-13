@@ -4,19 +4,45 @@
 #
 # Example usage:
 # 
-#   zcat apache_log.gz | awk -f most_most_bandwidth_by_minute.awk | sort -k1,1
+#   zcat apache_log.gz | awk -f most_bandwidth_by_minute.awk | sort -k1,1
+#
+# This may produce output that looks as follows:
+#
+#               Date           IP Address         GB    
+#  09/Jul/2018:00:00       66.223.179.138      13.66
+#  09/Jul/2018:00:01       66.223.179.138      14.13
+#  09/Jul/2018:00:02        216.38.80.221      15.29
+#
 #
 
+BEGIN {
+
+    header_pspec = "%20s%35s%10s\n"
+    body_pspec = "%20s%35s%10.2f\n"
+
+    # Header line
+    printf(header_pspec, "Date", "IP Address", "GB")
+}
+
 {
+    # We are interested in three fields here.  The 1st field has the
+    # IP address.  The 4th field has the timestamp information we need
+    # and the 10th field has the bytes information we need.
+
+    # Split the date into an array and reformulate into something that
+    # is precise to the minute.
+    split($4, parts, /[/:\[]/)
+    datetime = sprintf("%s/%s/%s:%s:%s", parts[2], parts[3], parts[4], parts[5], parts[6])
+
+    # Populate the IP buckets.
     ip = $1
     numbytes = $10
-    # Split the date into an array.
-    split($4, parts, /[/:\[]/)
-
-    # Reformulate something like 07/Mar/2018:20:00:00 into
-    datetime = sprintf("%s/%s/%s:%s:%s", parts[2], parts[3], parts[4], parts[5], parts[6])
     count[datetime][ip] += numbytes
+
 } END {
+
+    # Print the IP address with with largest bandwidth in each minute bucket.
+
     for (minute in count) {
         max = 0
         max_ip = ""
@@ -26,7 +52,7 @@
                 max_ip = ip
             }
         }
-        printf "%20s %20s %10.2f\n", minute, max_ip, max / (1024 * 1024)
+        printf(body_pspec, minute, max_ip, max / (1024 * 1024))
     }
 }
 
