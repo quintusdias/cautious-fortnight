@@ -14,4 +14,4 @@ root=$HOME/etc/webalizer/monthly
 sed "s/LATEST_LOG_ID/$logid/g" < $root/idpgis.conf.template > $root/idpgis.conf
 webalizer -c $HOME/etc/webalizer/monthly/idpgis.conf
 
-
+xfer_webalizer.sh
