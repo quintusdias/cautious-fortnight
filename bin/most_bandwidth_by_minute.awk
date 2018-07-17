@@ -17,8 +17,8 @@
 
 BEGIN {
 
-    header_pspec = "%20s%35s%10s\n"
-    body_pspec = "%20s%35s%10.2f\n"
+    header_pspec = "%20s%45s%10s\n"
+    body_pspec = "%20s%45s%10.2f\n"
 
     # Header line
     printf(header_pspec, "Date", "IP Address", "GB")
