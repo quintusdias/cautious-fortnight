@@ -266,12 +266,10 @@ class ProcessIngestUnits(object):
         if 'wine' in str(path):
             return
 
-        print(path)
-        if 'creofs' in str(path):
-            pass
         ingest = self.extract_ingest_name_from_path(path)
 
         if ingest in self.exclude:
+            print(f'excluded {ingest}')
             return
 
         self.process_ingest_times(path, ingest)
