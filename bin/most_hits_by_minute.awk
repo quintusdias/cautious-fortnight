@@ -6,7 +6,7 @@
 #
 # Example usage:
 # 
-#   zcat apache_log.gz | awk -f most_hits_per_minute.awk | sort -k1,1
+#   zcat apache_log.gz | awk -f most_hits_by_minute.awk | sort -k1,1
 
 {
     ip = $1
