@@ -47,4 +47,17 @@ def read_csv(csvfile):
     kwargs['nrows'] = nrows
 
     df = pd.read_csv(csvfile, **kwargs)
+
+    # Transform all to GB.
+    vols = []
+    for idx, row in df.iterrows():
+        volume, units = row['Volume'].split()
+        volume = float(volume)
+        if units == 'MB':
+            volume /= 1024
+        elif units == 'KB':
+            volume /= (1024 * 1024)
+        vols.append(volume)
+
+    df['Volume'] = vols
     return df
