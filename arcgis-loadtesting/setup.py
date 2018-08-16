@@ -3,24 +3,24 @@ from setuptools import setup
 
 # Define the bin scripts.
 units = [
-    'generate-idpgis-test-plans',
-    'generate-idpgis-rest-input',
-    'generate-idpgis-wms-input',
-    'run-idpgis-loadtest',
-    'summarize-idpgis-loadtest',
+    'generate-arcgis-test-plans',
+    'generate-arcgis-rest-input',
+    'generate-arcgis-wms-input',
+    'run-arcgis-loadtest',
+    'summarize-arcgis-loadtest',
 ]
 console_scripts = [
-    f"{item}=idpgis_load_testing.commandline:{item.replace('-', '_')}"
+    f"{item}=arcgis_loadtesting.commandline:{item.replace('-', '_')}"
     for item in units
 ]
 
 kwargs = {
-    'name': 'idpgis-load-testing',
-    'description': 'Tools for running load tests against IDP-GIS',
+    'name': 'arcgis-loadtesting',
+    'description': 'Tools for running load tests against nowCOAST/IDP-GIS',
     'author': 'John Evans',
     'author_email': 'john.g.evans@noaa.gov',
-    'packages': ['idpgis_load_testing'],
-    'package_data': {'idpgis_load_testing': ['etc/plan.jmx']},
+    'packages': ['arcgis_loadtesting'],
+    'package_data': {'arcgis_loadtesting': ['etc/plan.jmx']},
     'version': '0.1.3',
     'install_requires': [
         'apache_log_parser>=1.7.0',

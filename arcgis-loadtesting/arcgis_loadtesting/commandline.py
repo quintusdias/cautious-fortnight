@@ -6,7 +6,7 @@ from . import GenerateTestPlans, GenerateWMSinput, GenerateRESTinput
 from . import RunLoadTest, Summarize
 
 
-def summarize_idpgis_loadtest():
+def summarize_arcgis_loadtest():
     """
     Entry point for bin script that summarizes CSV output files from a load
     test into a single Pandas dataframe.
@@ -30,7 +30,7 @@ def summarize_idpgis_loadtest():
     obj.run()
 
 
-def generate_idpgis_rest_input():
+def generate_arcgis_rest_input():
     """
     Entry point for bin script that generates CSV files of input to feed into
     the REST endpoints for JMeter.
@@ -54,7 +54,7 @@ def generate_idpgis_rest_input():
     obj.run()
 
 
-def generate_idpgis_wms_input():
+def generate_arcgis_wms_input():
     """
     Entry point for bin script that generates CSV files of WMS input for
     JMeter.
@@ -78,7 +78,7 @@ def generate_idpgis_wms_input():
     obj.run()
 
 
-def run_idpgis_loadtest():
+def run_arcgis_loadtest():
     """
     Entry point for bin script that runs a load test.
     """
@@ -93,7 +93,7 @@ def run_idpgis_loadtest():
     obj.run()
 
 
-def generate_idpgis_test_plans():
+def generate_arcgis_test_plans():
     """
     Entry point for bin script that generates JMeter test plans.
     """
