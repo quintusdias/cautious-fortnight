@@ -128,7 +128,7 @@ def ccmk():
     help = "Query this Check_MK metric."
     choices = [
         'CPU_load', 'CPU_utilization', 'Memory_used', 'fs__opt',
-        'PostgreSQL_DB_postgres_Statistics:2'
+        'PostgreSQL_DB_postgres_Statistics:2', 'Uptime'
     ]
     parser.add_argument('metric', help=help, choices=choices)
 
