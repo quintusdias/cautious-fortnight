@@ -48,6 +48,15 @@ def read_csv(csvfile):
 
     df = pd.read_csv(csvfile, **kwargs)
 
+    df = transform_volume(df)
+
+    return df
+    
+
+def transform_volume(df):
+    if 'Volume' not in df.columns:
+        return df
+
     # Transform all to GB.
     vols = []
     for idx, row in df.iterrows():
