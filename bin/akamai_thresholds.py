@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 """
-Find which IP address is responsible for the most hits during a specific time
-frame.
+Aggregate all users to two-minute averages and 5-minute bursts.  Save the
+output to pandas HDFStore.
 """
 
 # Standard library imports
@@ -62,10 +62,10 @@ class MostBandwidth(object):
 
     def aggregate_to_bursts(self):
         """
-        Aggregate the bins to 15 second bursts.
+        Aggregate the bins to 5 second bursts.
         """
         # Calculate the bins for the burst series.
-        burst_seconds = [ts.second // 15 * 15 for ts in self.time_index]
+        burst_seconds = [ts.second // 5 * 5 for ts in self.time_index]
         burst_time = [
             pd.Timestamp(*(ts.timetuple()[:5]), second)
             for ts, second in zip(self.time_index, burst_seconds)
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     help = 'Write output to this HDF5 file.'
     parser.add_argument('outfile', type=str, help=help)
 
-    help = 'Take input from this file.'
+    help = 'Take input from this file.  Usually this should be stdin.'
     parser.add_argument('--infile', nargs='?', type=argparse.FileType('r'),
                         default=io.TextIOWrapper(sys.stdin.buffer,
                                                  errors='replace'),
