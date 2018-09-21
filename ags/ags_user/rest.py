@@ -25,7 +25,7 @@ class AgsRestAdminBase(ToolsBase):
         }
 
         self.config = {
-            'CPRK': {
+            'cprk': {
                 'idpgis': {
                     'op': [
                         'vm-lnx-gisapp-op1a',
@@ -103,7 +103,7 @@ class AgsRestAdminBase(ToolsBase):
                     ],
                 },
             },
-            'BLDR': {
+            'bldr': {
                 'idpgis': {
                     'op': [
                         'vm-bldr-gisapp-op1a',

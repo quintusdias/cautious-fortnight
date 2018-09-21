@@ -32,7 +32,7 @@ class SummarizeAgsLogs(AgsRestAdminBase):
     """
     def __init__(self, project, site, tier, outfile, time, level):
         super().__init__()
-        self.site = site.upper()
+        self.site = site
         self.project = project
         self.tier = tier
         self.level = level
