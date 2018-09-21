@@ -1,4 +1,5 @@
 # Standard library imports
+from dataclasses import dataclass
 import datetime as dt
 import http.client as httplib
 import json
@@ -14,6 +15,7 @@ import matplotlib.pyplot as plt
 from .rest import AgsRestAdminBase
 
 
+@dataclass
 class SummarizeAgsLogs(AgsRestAdminBase):
     """
     Attributes
@@ -29,15 +31,16 @@ class SummarizeAgsLogs(AgsRestAdminBase):
     df : pandas dataframe
         Dataframe of the AGS logs
     """
-    def __init__(self, project, site, tier, outfile, time, level):
-        super().__init__()
-        self.site = site
-        self.project = project
-        self.tier = tier
-        self.level = level
+    tier: str
+    outfile: str
+    time: list
+    level: str
 
-        self.startTime, self.endTime = time
-        self.outfile = pathlib.Path(outfile)
+    def __post_init__(self):
+        super().__post_init__()
+
+        self.startTime, self.endTime = self.time
+        self.outfile = pathlib.Path(self.outfile)
         self.root = self.outfile.parents[0]
 
         self.servers = [

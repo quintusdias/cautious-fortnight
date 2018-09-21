@@ -1,5 +1,6 @@
 # Standard library imports ...
 import collections
+from dataclasses import dataclass
 import datetime as dt
 import http.client as httplib
 import json
@@ -20,6 +21,7 @@ import requests
 import yaml
 
 
+@dataclass
 class ToolsBase(object):
     """
     Base class for many tools.
@@ -38,14 +40,10 @@ class ToolsBase(object):
     conn, cursor : sqlite3 connection objects
         Use these for database connectivity.
     """
-    def __init__(self, site, project):
-        """
-        The assumption is that we need access to a database to store the
-        statistics.
-        """
-        self.site = site
-        self.project = project
+    project: str
+    site: str
 
+    def __post_init__(self):
         self.ags_port = 6080
 
         self.db_path = pathlib.Path.home() / 'data' / 'sqlite' / 'gis.db'
@@ -151,19 +149,25 @@ class ToolsBase(object):
             raise RuntimeError(msg)
 
 
+@dataclass
 class CollectAgsUsageRequests(ToolsBase):
     """
     Collect requests for services over a specific time frame.
+
+    Example:
+        obj = CollectAgsUsageRequests('nowcoast', 'bldr', 'op',
+                                      '2018-09-20 00:00:00', 24, 'output.pkl')
+         
     """
-    def __init__(self, project, site, tier, start_time, num_hours, output):
+    tier : str
+    start_time: dt.datetime
+    num_hours: int
+    output: str
+
+    def __post_init__(self):
         """
         """
-        super().__init__(site, project)
-        self.tier = tier
-        self.start_time = start_time
-        self.num_hours = num_hours
-        self.output = output
-        self.server_port = 6080
+        super().__post_init__()
 
     def run(self):
 
