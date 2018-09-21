@@ -179,7 +179,7 @@ def set_ags():
     """
     parser = argparse.ArgumentParser()
 
-    choices = ["BLDR", "CPRK"]
+    choices = ["bldr", "cprk"]
     parser.add_argument('site', choices=choices)
 
     choices = ["idpgis", "nowcoast", "nowcoastqa"]
