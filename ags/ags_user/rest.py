@@ -13,9 +13,8 @@ class AgsRestAdminBase(ToolsBase):
     """
     Access and manipulate ArcGIS server via REST.
     """
-    def __init__(self):
-        self.username = 'agsadmin'
-        self.password = 'ags.8min2'
+    def __init__(self, site, project):
+        super().__init__(site, project)
         self.ags_port = 6080
 
         # It would seem all request need to send this.
@@ -214,10 +213,8 @@ class AgsRestAdmin(AgsRestAdminBase):
     """
     def __init__(self, site, project, tier, parameter, value=None, server=None,
                  service=None):
-        super().__init__()
+        super().__init__(site, project)
 
-        self.site = site
-        self.project = project
         self.tier = tier
         self.parameter = parameter
         self.value = value
