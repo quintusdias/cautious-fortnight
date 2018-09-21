@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 
 # Local imports
 from .rest import AgsRestAdminBase
-from .stats import TokenRetrievalError
 
 
 class SummarizeAgsLogs(AgsRestAdminBase):
@@ -242,7 +241,7 @@ class SummarizeAgsLogs(AgsRestAdminBase):
 
         try:
             self.token = self.get_token(server)
-        except (TokenRetrievalError, ConnectionRefusedError) as e:
+        except (RuntimeError, ConnectionRefusedError) as e:
             print(f"Could not retrieve token for {server}.")
             print(repr(e))
             return

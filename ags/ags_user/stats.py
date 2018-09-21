@@ -20,10 +20,6 @@ import requests
 import yaml
 
 
-class TokenRetrievalError(Exception):
-    pass
-
-
 class ToolsBase(object):
     """
     Base class for many tools.
@@ -152,7 +148,7 @@ class ToolsBase(object):
         obj = json.loads(data)
         if 'status' in obj and obj['status'] == "error":
             msg = "Error: JSON object returns an error. " + str(obj)
-            raise TokenRetrievalError(msg)
+            raise RuntimeError(msg)
 
 
 class CollectAgsUsageRequests(ToolsBase):
