@@ -1,7 +1,6 @@
 # Standard library imports
 import argparse
-import datetime
-import pathlib
+import datetime as dt
 
 from .logs import SummarizeAgsLogs
 from .plot_stats import AGSServiceStatisticsPlotsViaMPL
@@ -10,13 +9,45 @@ from .rest import AgsRestAdmin
 from .heatmap import HeatMap
 
 
+class CustomTimeAction(argparse.Action):
+    """
+    Helper class for parsing sequence of ISO-formatted dates via command line.
+    """
+    def __init__(self,
+                 option_strings,
+                 dest,
+                 nargs=None,
+                 default=None,
+                 type=None,
+                 help=None):
+        argparse.Action.__init__(self,
+                                 option_strings=option_strings,
+                                 dest=dest,
+                                 nargs=nargs,
+                                 default=default,
+                                 type=type,
+                                 help=help,
+                                 )
+
+    def __call__(self, parser, namespace, values, option_string=None):
+
+        # Do some arbitrary processing of the input values
+        values = [
+            dt.datetime.strptime(item, '%Y-%m-%dT%H:%M:%S')
+            for item in values
+        ]
+        # Save the results in the namespace using the destination
+        # variable given to our constructor.
+        setattr(namespace, self.dest, values)
+
+
 def valid_date_time(s):
     """
     Performs type-checking for entry point.
     """
     format = '%Y-%m-%dT%H'
     try:
-        return datetime.datetime.strptime(s, format)
+        return dt.datetime.strptime(s, format)
     except ValueError:
         msg = f"Not a valid date: '{s}.  Expecting '{format}'"
         raise argparse.ArgumentTypeError(msg)
@@ -27,7 +58,7 @@ def valid_date(s):
     Performs type-checking for collect_ags_stats entry point.
     """
     try:
-        return datetime.datetime.strptime(s, '%Y-%m-%d')
+        return dt.datetime.strptime(s, '%Y-%m-%d')
     except ValueError:
         msg = "Not a valid date: '{0}.".format(s)
         raise argparse.ArgumentTypeError(msg)
@@ -171,9 +202,9 @@ def set_ags():
 
     args = parser.parse_args()
 
-    if (((args.parameter == "status") and
-         (args.value is not None) and
-         (args.service is None))):
+    if (((args.parameter == "status")
+         and (args.value is not None)
+         and (args.service is None))):
         msg = 'status requires service to be supplied'
         raise RuntimeError(msg)
 
@@ -184,43 +215,51 @@ def set_ags():
 
 def summarize_ags_logs():
     """
-    Console script interface for summarizing the ags logs for a day.
+    Console script interface for summarizing the ags logs.
     """
     formatter_class = argparse.RawTextHelpFormatter
     parser = argparse.ArgumentParser(formatter_class=formatter_class)
-    help = 'Project (need this to determine the services)'
+
+    help = 'Query this project.'
     choices = ['idpgis', 'nowcoast']
+    parser.add_argument('project', choices=choices, help=help)
 
-    parser.add_argument('project', choices=choices, default='nowcoast',
-                        help=help)
+    help = 'Query this site.'
+    parser.add_argument('site', choices=['cprk', 'bldr'], help=help)
 
-    parser.add_argument('site', choices=['cprk', 'bldr'], help='Site')
-
+    help = 'Query this tier.'
     choices = ["dev", "qa", "op"]
     parser.add_argument('tier', choices=choices, help='Tier')
 
-    parser.add_argument('startdate',
-                        help='The start date and hour - format YYYY-MM-DDTHH',
-                        type=valid_date_time)
+    help = (
+        "Save the output in this HDF5 file.  If no argument is provided, the "
+        "output is written to "
+        "/mnt/intra_wwwdev/ncep/ncepintradev/htdocs/ncep_common"
+        "/nowcoast/ags_logs/$project/logs.h5"
+    )
+    parser.add_argument('--outfile', type=str, help=help)
 
-    parser.add_argument('--nhours',
-                        help='Collect logs for this many hours',
-                        type=int, default=24)
+    help = 'Time frame (default is prior 24 hours).'
+    default_time = [
+        dt.datetime.now() - dt.timedelta(hours=24), dt.datetime.now()
+    ]
+    parser.add_argument('--time', nargs=2, default=default_time, help=help,
+                        action=CustomTimeAction)
 
-    help = ("Save summary results to a directory.  If no argument is "
-            "supplied, the output is written to "
-            "/mnt/intra_wwwdev/ncep/ncepintradev/htdocs/ncep_common"
-            "/nowcoast/$project")
-    parser.add_argument('output', help=help)
-
+    help = "Log items retrieved must have a log level at least this high."
     choices = ["SEVERE", "WARNING", "INFO", "FINE", "VERBOSE", "DEBUG", "OFF"]
-    parser.add_argument('--level', choices=choices, default='SEVERE')
+    parser.add_argument('--level', choices=choices, default='WARNING')
 
     args = parser.parse_args()
 
-    stopdate = args.startdate + datetime.timedelta(hours=args.nhours)
+    if args.outfile is None:
+        outfile = (
+            f"/mnt/intra_wwwdev/ncep/ncepintradev/htdocs/ncep_common"
+            f"/nowcoast/ags_logs/{args.project}/logs.h5"
+        )
+    else:
+        outfile = args.outfile
 
-    obj = SummarizeAgsLogs(args.project, args.site.upper(), args.tier,
-                           args.startdate, stopdate, args.level,
-                           output=pathlib.Path(args.output))
+    obj = SummarizeAgsLogs(args.project, args.site, args.tier,
+                           outfile, args.time, args.level)
     obj.run()
