@@ -50,7 +50,8 @@ class MostBandwidth(object):
         """
         Aggregate the bins to two minutes.
         """
-        # Calculate the bins for the burst series.
+        # Calculate the bins for the burst series.  These should be every two
+        # minutes.
         avg_minutes = [ts.minute // 2 * 2 for ts in self.time_index]
         avg_time = [
             pd.Timestamp(*(ts.timetuple()[:4]), minute, 0)
@@ -58,13 +59,16 @@ class MostBandwidth(object):
         ]
 
         df = pd.DataFrame({'time': avg_time, 'IP': self.ip, 'hits': self.hits})
+
+        # Sum the hit counts, but get an average rate of hits per second
         self.average = df.groupby(['time', 'IP']).sum()  / 120
 
     def aggregate_to_bursts(self):
         """
         Aggregate the bins to 5 second bursts.
         """
-        # Calculate the bins for the burst series.
+        # Calculate the bins for the burst series.  These should be every 5
+        # seconds.
         burst_seconds = [ts.second // 5 * 5 for ts in self.time_index]
         burst_time = [
             pd.Timestamp(*(ts.timetuple()[:5]), second)
@@ -72,18 +76,28 @@ class MostBandwidth(object):
         ]
 
         df = pd.DataFrame({'time': burst_time, 'IP': self.ip, 'hits': self.hits})
-        self.burst = df.groupby(['time', 'IP']).sum() / 15
+
+        # Sum the hit counts, but get a burst rate of hits per second
+        self.burst = df.groupby(['time', 'IP']).sum() / 5
 
     def bin_to_seconds(self):
+        """
+        For each log item, take note of the timestamp and the IP address.  Add
+        to the counter at each timestamp for that IP address.
 
+        At the end of this method, we have constructed lists of the hit count
+        corresponding to a datestring (timestamp to the second) and IP address.
+        """
+
+        # rates is a two-level dictionary.  The first level is the date, the
+        # second level is the IP address.
         rates = {}
-
-        t0 = time.time()
 
         for line in self.infile:
 
             parts = line.split()
 
+            # Parse out the date string and IP address.
             ip_address = parts[0]
             datestr = parts[3][1:]
 
@@ -91,16 +105,13 @@ class MostBandwidth(object):
                 rates[datestr] = collections.Counter()
             rates[datestr][ip_address] += 1
 
-        t1 = time.time()
-        print(t1-t0)
+        # Now flatten out the structure.
+        datestr_ip, self.hits = zip(*[((i, j), rates[i][j]) for i in rates for j in rates[i]])
 
-        # Separate into a multi-index and the data.
-        index, self.hits = zip(*[((i, j), rates[i][j]) for i in rates for j in rates[i]])
-
-        # Convert the index (datestr, IP) tuples into (datetime, IP) tuples
-        self.time_index = pd.to_datetime([t[0] for t in index],
+        # Convert the (datestr, IP) tuples into (datetime, IP) tuples
+        self.time_index = pd.to_datetime([t[0] for t in datestr_ip],
                                          format='%d/%b/%Y:%H:%M:%S')
-        self.ip = [t[1] for t in index]
+        self.ip = [t[1] for t in datestr_ip]
 
 
 if __name__ == "__main__":
