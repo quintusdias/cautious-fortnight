@@ -15,7 +15,7 @@ import sys
 import pandas as pd
 
 
-class MostHitsPerMinute(object):
+class MostHits(object):
     """
     Attributes
     ----------
@@ -64,7 +64,7 @@ class MostHitsPerMinute(object):
 
     def run(self):
 
-        self.compute_max_ip_by_minute()
+        self.compute_max_ip()
 
         if self.csv:
             self.df.to_csv(self.outfile)
@@ -73,7 +73,7 @@ class MostHitsPerMinute(object):
             # sys.stdout???)
             print(self.df, file=self.outfile)
 
-    def compute_max_ip_by_minute(self):
+    def compute_max_ip(self):
 
         items = {}
 
@@ -132,6 +132,5 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    o = MostHitsPerMinute(args.infile, args.outfile,
-                          csv=args.csv, period=args.period)
+    o = MostHits(args.infile, args.outfile, csv=args.csv, period=args.period)
     o.run()

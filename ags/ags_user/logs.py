@@ -1,7 +1,9 @@
 # Standard library imports
+from dataclasses import dataclass
 import datetime as dt
 import http.client as httplib
 import json
+import pathlib
 import urllib
 
 # 3rd party library imports
@@ -11,9 +13,9 @@ import matplotlib.pyplot as plt
 
 # Local imports
 from .rest import AgsRestAdminBase
-from .stats import TokenRetrievalError
 
 
+@dataclass
 class SummarizeAgsLogs(AgsRestAdminBase):
     """
     Attributes
@@ -29,30 +31,26 @@ class SummarizeAgsLogs(AgsRestAdminBase):
     df : pandas dataframe
         Dataframe of the AGS logs
     """
-    def __init__(self, project, site, tier, startTime, endTime, level,
-                 output=None):
-        super().__init__()
-        self.site = site.upper()
-        self.project = project
-        self.tier = tier
-        self.level = level
-        self.output = output
+    tier: str
+    outfile: str
+    time: list
+    level: str
 
-        self.startTime = startTime
-        self.endTime = endTime
+    def __post_init__(self):
+        super().__post_init__()
+
+        self.startTime, self.endTime = self.time
+        self.outfile = pathlib.Path(self.outfile)
+        self.root = self.outfile.parents[0]
 
         self.servers = [
             server + '.ncep.noaa.gov'
             for server in self.config[self.site][self.project][self.tier]
         ]
 
-        self.root = output
-
         self.setup_output()
 
     def setup_output(self):
-        if self.root is None:
-            return
 
         self.root.mkdir(exist_ok=True, parents=True)
 
@@ -117,12 +115,12 @@ class SummarizeAgsLogs(AgsRestAdminBase):
         for server in self.servers:
             print(server)
             dfs.append(self.retrieve_server_logs(server))
+
         df = pd.concat(dfs)
         df.sort_index(inplace=True)
         self.df = df
 
-        if self.output is not None:
-            self.write_output(df)
+        self.write_output(df)
 
     def write_hdf5(self, df):
         """
@@ -130,20 +128,21 @@ class SummarizeAgsLogs(AgsRestAdminBase):
         necessary.  Then link it into the output HTML.
         """
         # First just save the data so we can get it later.
-        with pd.HDFStore(self.root / 'latest.h5') as store:
+        with pd.HDFStore(self.outfile) as store:
             store['df'] = df
 
         # Link to the HDF5 file.
         div = etree.SubElement(self.body, 'div')
         p = etree.SubElement(div, 'p')
         p.text = 'The error messages are stored in a pandas dataframe ('
-        a = etree.SubElement(p, 'a', href='latest.h5')
+        a = etree.SubElement(p, 'a', href=f"self.outfile.stem")
         a.text = 'latest.h5'
         a.tail = ').  To read after downloading, try the following:'
         pre = etree.SubElement(div, 'pre')
         pre.text = (
-            ">>> import pandas as pd\n"
-            ">>> with pd.HDFStore('latest.h5') as store: df = store['df']"
+            f">>> import pandas as pd\n"
+            f">>> with pd.HDFStore('{self.outfile.stem}') as store: "
+            f"df = store['df']"
         )
 
     def write_output(self, df):
@@ -174,7 +173,6 @@ class SummarizeAgsLogs(AgsRestAdminBase):
                                         names=['day', 'hour'])
         df.index = idx
         df = df.groupby(df.index).count()
-
 
         # Reset the index to be a normal by-the-hour index instead of a
         # multi-index.  That way the datetime information comes out on the
@@ -246,7 +244,7 @@ class SummarizeAgsLogs(AgsRestAdminBase):
 
         try:
             self.token = self.get_token(server)
-        except (TokenRetrievalError, ConnectionRefusedError) as e:
+        except (RuntimeError, ConnectionRefusedError) as e:
             print(f"Could not retrieve token for {server}.")
             print(repr(e))
             return
@@ -265,10 +263,6 @@ class SummarizeAgsLogs(AgsRestAdminBase):
                 'machines': [server],
             },
         }
-
-        # msg = "Requesting [{} - {}]"
-        # print(msg.format(dt.datetime.fromtimestamp(params['startTime']/1000),
-        #                  dt.datetime.fromtimestamp(params['endTime']/1000)))
 
         lst = []
         count = 0

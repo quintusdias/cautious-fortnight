@@ -1,4 +1,5 @@
 # Standard library imports
+from dataclasses import dataclass
 import json
 
 # 3rd party library imports
@@ -9,14 +10,13 @@ import requests
 from .stats import ToolsBase
 
 
+@dataclass
 class AgsRestAdminBase(ToolsBase):
     """
     Access and manipulate ArcGIS server via REST.
     """
-    def __init__(self):
-        self.username = 'agsadmin'
-        self.password = 'ags.8min2'
-        self.ags_port = 6080
+    def __post_init__(self):
+        super().__post_init__()
 
         # It would seem all request need to send this.
         self.headers = {
@@ -25,7 +25,7 @@ class AgsRestAdminBase(ToolsBase):
         }
 
         self.config = {
-            'CPRK': {
+            'cprk': {
                 'idpgis': {
                     'op': [
                         'vm-lnx-gisapp-op1a',
@@ -103,7 +103,7 @@ class AgsRestAdminBase(ToolsBase):
                     ],
                 },
             },
-            'BLDR': {
+            'bldr': {
                 'idpgis': {
                     'op': [
                         'vm-bldr-gisapp-op1a',
@@ -214,10 +214,8 @@ class AgsRestAdmin(AgsRestAdminBase):
     """
     def __init__(self, site, project, tier, parameter, value=None, server=None,
                  service=None):
-        super().__init__()
+        super().__init__(site, project)
 
-        self.site = site
-        self.project = project
         self.tier = tier
         self.parameter = parameter
         self.value = value
@@ -281,7 +279,7 @@ class AgsRestAdmin(AgsRestAdminBase):
 
     def set_log_parameter(self, value):
 
-        for server in self.config[self.site][self.project][self.tier]:
+        for server in self.config[self.project][self.site][self.tier]:
 
             if self.server is not None and not self.server.startswith(server):
                 print(f'Skipping {server}...')

@@ -8,7 +8,7 @@
 #
 # This may produce output that looks as follows:
 #
-#               Date           IP Address         GB    
+#               Date           IP Address         MB    
 #  09/Jul/2018:00:00       66.223.179.138      13.66
 #  09/Jul/2018:00:01       66.223.179.138      14.13
 #  09/Jul/2018:00:02        216.38.80.221      15.29
@@ -21,7 +21,7 @@ BEGIN {
     body_pspec = "%20s%45s%10.2f\n"
 
     # Header line
-    printf(header_pspec, "Date", "IP Address", "GB")
+    printf(header_pspec, "Date", "IP Address", "MB")
 }
 
 {

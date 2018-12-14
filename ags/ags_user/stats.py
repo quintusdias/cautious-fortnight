@@ -1,5 +1,6 @@
 # Standard library imports ...
 import collections
+from dataclasses import dataclass
 import datetime as dt
 import http.client as httplib
 import json
@@ -17,12 +18,10 @@ import matplotlib as mpl
 mpl.use('Agg')
 import pandas as pd
 import requests
+import yaml
 
 
-class TokenRetrievalError(Exception):
-    pass
-
-
+@dataclass
 class ToolsBase(object):
     """
     Base class for many tools.
@@ -30,7 +29,7 @@ class ToolsBase(object):
     Attributes
     ----------
     site, project : str
-        site should be either 'BLDR' or 'CPRK.
+        site should be either 'bldr' or 'cprk.
         project should be one of
             nowcoast
             nowcoastqa
@@ -41,16 +40,10 @@ class ToolsBase(object):
     conn, cursor : sqlite3 connection objects
         Use these for database connectivity.
     """
-    def __init__(self, site, project):
-        """
-        The assumption is that we need access to a database to store the
-        statistics.
-        """
-        self.site = site
-        self.project = project
+    project: str
+    site: str
 
-        self.username = 'agsadmin'
-        self.password = 'ags.8min2'
+    def __post_init__(self):
         self.ags_port = 6080
 
         self.db_path = pathlib.Path.home() / 'data' / 'sqlite' / 'gis.db'
@@ -61,13 +54,30 @@ class ToolsBase(object):
 
         self.cursor = self.conn.cursor()
 
+        self._get_ags_credentials()
+
+    def _get_ags_credentials(self):
+        """
+        Read the arcgis admin credentials from a private file.
+        """
+        path = pathlib.Path.home() / '.config' / 'arcgis_admin' / 'config.yml'
+        if not path.exists():
+            msg = (
+                f"The configuration file storing AGS credentials "
+                f"- {path} - does not exist.  Please create it."
+            )
+            raise RuntimeError(msg)
+
+        with path.open(mode='rt') as f:
+            config = yaml.load(f)
+        
+        self.username = config['username']
+        self.password = config['password']
+
     def get_token_requests(self, servername):
         """
         Get an AGS token
         """
-        username = 'agsadmin'
-        password = 'ags.8min2'
-
         url = (f'http://{servername}:{self.server_port}'
                f'/arcgis/admin/generateToken')
 
@@ -77,8 +87,8 @@ class ToolsBase(object):
         }
 
         params = {
-            'username': username,
-            'password': password,
+            'username': self.username,
+            'password': self.password,
             'client': 'requestip',
             'f': 'json',
         }
@@ -136,22 +146,28 @@ class ToolsBase(object):
         obj = json.loads(data)
         if 'status' in obj and obj['status'] == "error":
             msg = "Error: JSON object returns an error. " + str(obj)
-            raise TokenRetrievalError(msg)
+            raise RuntimeError(msg)
 
 
+@dataclass
 class CollectAgsUsageRequests(ToolsBase):
     """
     Collect requests for services over a specific time frame.
+
+    Example:
+        obj = CollectAgsUsageRequests('nowcoast', 'bldr', 'op',
+                                      '2018-09-20 00:00:00', 24, 'output.pkl')
+         
     """
-    def __init__(self, project, site, tier, start_time, num_hours, output):
+    tier : str
+    start_time: dt.datetime
+    num_hours: int
+    output: str
+
+    def __post_init__(self):
         """
         """
-        super().__init__(site, project)
-        self.tier = tier
-        self.start_time = start_time
-        self.num_hours = num_hours
-        self.output = output
-        self.server_port = 6080
+        super().__post_init__()
 
     def run(self):
 
