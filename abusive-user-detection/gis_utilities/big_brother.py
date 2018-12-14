@@ -7,6 +7,7 @@ import requests
 from lxml import etree
 import pandas as pd
 
+_NOWCOAST_OPS_CPRK = 'http://bb.ncep.noaa.gov/IDP-Applications/IDP-NOWCOAST-NEW-Ops/IDP-NOWCOAST-NEW-Ops.html'
 
 class BBFlagHistory(object):
 
@@ -36,9 +37,18 @@ class BBFlagHistory(object):
 
         # Get the names of the columns.
         self.columns = self.table.xpath('//a/font[@color="teal"]/b/text()')
+        print(self.columns)
 
         # Get the names of the hosts.
-        self.hosts = self.table.xpath('tr/td[@nowrap]/a[2]/font/text()')
+        path = 'tr/td[@nowrap]/a[2]/font/text()'
+        hosts = self.table.xpath(path)
+        if len(hosts) == 0:
+            # new nowcoast cprk on op?
+            path = 'tr/td[@nowrap]/a[1]/font/text()'
+            hosts = self.table.xpath(path)
+        self.hosts = hosts
+
+        print(self.hosts)
 
         self.setup_output_document()
 
@@ -104,8 +114,13 @@ class BBFlagHistory(object):
                 # Look for a hyperlink specific to both the host and the BB
                 # column.  If we find one, then that combination needs to be
                 # interrogated.
-                resource = host + '.' + column
-                elts = self.table.xpath(f'//a[@href="/html/{resource}.html"]')
+                if self.url == _NOWCOAST_OPS_CPRK:
+                    # path = f'.//tr[3]/td/a[@href="/bb/html/{host}.{column}.html"]'
+                    path = f'//a[@href="/html/{host}.{column}.html"]'
+                else:
+                    path = f'//a[@href="/html/{host}.{column}.html"]'
+                elts = self.table.xpath(path)
+
                 if len(elts) > 0:
                     self.process_host_column(host, column)
 
@@ -117,6 +132,7 @@ class BBFlagHistory(object):
         """
         Interrogate the history screen for the host and the column.
         """
+        print(host, column)
         url = self.scheme + '://' + self.netloc + '/cgi-bin/bb-hist.sh'
         params = {
             'HISTFILE': host.replace('.', ',') + '.' + column,

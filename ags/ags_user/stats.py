@@ -372,17 +372,17 @@ class CollectAgsUsageRequests(ToolsBase):
         return services
 
 
+@dataclass
 class CollectAgsStats(ToolsBase):
     """
     Collect ArcGIS server statistics.
     """
-    def __init__(self, site, project, priority):
-        """
-        """
-        super().__init__(site, project)
+    priority: int
 
-        self.priority = priority
-        self.server_port = 6080
+    def __post_init__(self):
+        """
+        """
+        super().__post_init__()
 
     def acquire_stats(self, server, folder, service_name, service_type, token):
         """

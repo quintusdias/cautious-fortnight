@@ -1,7 +1,7 @@
 # Standard library imports
 from dataclasses import dataclass
 import datetime as dt
-import http.client as httplib
+import http.client
 import json
 import pathlib
 import urllib
@@ -10,6 +10,7 @@ import urllib
 import pandas as pd
 from lxml import etree
 import matplotlib.pyplot as plt
+import requests
 
 # Local imports
 from .rest import AgsRestAdminBase
@@ -26,18 +27,48 @@ class SummarizeAgsLogs(AgsRestAdminBase):
         Summarize the logs between these times.
     doc : elementtree
         Will constitute the HTML for the output.
-    output : path or str
-        If None, save no output.  Otherwise write the results to CSV file.
+    outfile : str
+        Write output to pandas HDF5 store file.
+    html : bool
+        If True, write an HTML summary into the root directory of the output
+        file.
     df : pandas dataframe
         Dataframe of the AGS logs
     """
     tier: str
-    outfile: str
-    time: list
-    level: str
+    html: bool
+    outfile: str = None
+    time: list = None
+    level: str = 'WARNING'
+    protocol: str = 'http'
+    port: int = 6080
+    server: str = None
+    general: bool = False
+    services: bool = False
 
     def __post_init__(self):
         super().__post_init__()
+
+        if not self.general and not self.services:
+            msg = (
+                "At least one of either general or services log acquisition "
+                "must be specified."
+            )
+            raise RuntimeError(msg)
+
+        if self.level is None:
+            self.level = 'WARNING'
+
+        if self.outfile is None:
+            self.outfile = (
+                f"/mnt/intra_wwwdev/ncep/ncepintradev/htdocs/ncep_common"
+                f"/nowcoast/ags_logs/{self.project}/logs.h5"
+            )
+
+        if self.time is None:
+            self.time = [
+                dt.datetime.now() - dt.timedelta(hours=24), dt.datetime.now()
+        ]
 
         self.startTime, self.endTime = self.time
         self.outfile = pathlib.Path(self.outfile)
@@ -48,9 +79,17 @@ class SummarizeAgsLogs(AgsRestAdminBase):
             for server in self.config[self.site][self.project][self.tier]
         ]
 
+        if self.server is not None:
+            # Ok, throw the server list out and just restrict to this one.
+            self.servers = [self.server + '.ncep.noaa.gov']
+
+
         self.setup_output()
 
     def setup_output(self):
+
+        if not self.html:
+            return
 
         self.root.mkdir(exist_ok=True, parents=True)
 
@@ -58,47 +97,41 @@ class SummarizeAgsLogs(AgsRestAdminBase):
         self.doc = etree.Element('html')
 
         # Add some CSS.
-        header = etree.SubElement(self.doc, 'head')
+        self.head = etree.SubElement(self.doc, 'head')
 
         # Make the document refresh every 60 seconds.
-        meta = etree.SubElement(header, 'meta')
+        meta = etree.SubElement(self.head, 'meta')
         meta.attrib['http-equiv'] = 'refresh'
         meta.attrib['content'] = '60'
 
-        style = etree.SubElement(header, 'style', type='text/css')
-
-        # Write the global table styles.  We do this here instead of using
-        # the dataframe option because we only need do it once.
-        style.text = (
-            "\n"
-            "table {\n"
-            "    border-collapse: collapse;\n"
-            "}\n"
-            "table td {\n"
-            "    border-right: 1px solid #99CCCC;\n"
-            "    border-bottom:  1px solid #99CCCC;\n"
-            "    text-align:  right;\n"
-            "}\n"
-            "table th {\n"
-            "    border-right: 3px solid #99CCCC;\n"
-            "    border-bottom:  1px solid #99CCCC;\n"
-            "    padding-right:  .3em;\n"
-            "}\n"
-            "table th[scope=\"col\"] {\n"
-            "    border-right: 1px solid #99CCCC;\n"
-            "    border-bottom:  3px solid #99CCCC;\n"
-            "    padding-right:  .3em;\n"
-            "}\n"
-            "table th[scope=\"col\"]:first-child {\n"
-            "    border-right: 3px solid #99CCCC;\n"
-            "}\n"
-            "table th[scope=\"col\"]:last-child {\n"
-            "    border-right: 0;\n"
-            "}\n"
-            "table tr:last-child th {\n"
-            "    border-bottom: 0;\n"
-            "}\n"
-        )
+        self.table_styles = [
+            # checkerboard pattern in the interior
+            dict(selector='td',
+                 props=[('border-right', '1px solid #99CCCC'),
+                        ('border-bottom', '1px solid #99CCCC'),
+                        ('text-align', 'right')]),
+            # the header elements should also have lower and right borders
+            dict(selector='th',
+                 props=[('border-right', '3px solid #99CCCC'),
+                        ('border-bottom', '1px solid #99CCCC'),
+                        ('text-align', 'center'),
+                        ('padding-right', '.3em')]),
+            dict(selector='th.col_heading',
+                 props=[('border-right', '1px solid #99CCCC'),
+                        ('border-bottom', '3px solid #99CCCC')]),
+            dict(selector='th.blank',
+                 props=[('border-right', '3px solid #99CCCC'),]),
+            # take the bottom and right border off the bottom and right cells
+            dict(selector='th.col_heading:last-child',
+                 props=[('border-right', '0')]),
+            dict(selector='tbody tr:last-child th',
+                 props=[('border-bottom', '0')]),
+            # remove the bottom borders of the last row
+            dict(selector='tbody tr:last-child td',
+                 props=[('border-bottom', '0')]),
+            dict(selector='td:last-child',
+                 props=[('border-right', '0')]),
+        ]
 
         self.body = etree.SubElement(self.doc, 'body')
 
@@ -106,10 +139,7 @@ class SummarizeAgsLogs(AgsRestAdminBase):
         div = etree.SubElement(self.body, 'div', id='toc')
         self.toc = etree.SubElement(div, 'ul', id='toc')
 
-    def run(self):
-        """
-        Collect a dataframe for each service, concatenate them, save to file.
-        """
+    def collect_general_logs(self):
 
         dfs = []
         for server in self.servers:
@@ -118,45 +148,186 @@ class SummarizeAgsLogs(AgsRestAdminBase):
 
         df = pd.concat(dfs)
         df.sort_index(inplace=True)
-        self.df = df
+        self.df_general = df
 
-        self.write_output(df)
+    def collect_service_logs(self):
 
-    def write_hdf5(self, df):
+        self._df_list = []
+
+        for server in self.servers:
+            print(server)
+            try:
+                self.services = self._get_services(server)
+            except requests.exceptions.ConnectionError:
+                # server is down? op5a?
+                continue
+            self.token = self.get_token(server)
+
+            self.query_services_logs(server)
+
+        self.df_services = pd.concat(self._df_list)
+
+    def query_services_logs(self, server):
+
+        for service in self.services:
+            print(service)
+            self.query_service_logs(server, service)
+
+    def query_service_logs(self, server, service):
+
+        path = '/arcgis/admin/logs/query'
+        url = f'{self.protocol}://{server}:{self.port}{path}'
+
+        params = {
+            'startTime': int(self.time[0].timestamp() * 1000),
+            'endTime': int(self.time[1].timestamp() * 1000),
+            'level': self.level,
+            'token': self.token,
+            'f': 'json',
+            'pageSize': 500,
+            'sinceLastStart': True,
+            'filter': {
+                'services': [service],
+                'machines': [server],
+            }
+        }
+
+        encoded_params = urllib.parse.urlencode(params)
+        conn = http.client.HTTPConnection(server, self.port)
+
+        while True:
+            conn.request('POST', path, encoded_params, self.headers)
+            response = conn.getresponse()
+            if response.status != 200:
+                msg = (
+                    "Error while fetching logs from the admin URL.  "
+                    "Please check the URL and try again."
+                )
+                raise RuntimeError(msg)
+
+            rawdata = response.read()
+            data = json.loads(rawdata)
+
+            df = pd.DataFrame(data['logMessages'])
+            if len(df) == 0:
+                # No data, so we're done.
+                return
+
+            df['time'] = pd.to_datetime(df['time'], unit='ms')
+
+            self._df_list.append(df)
+
+            if data['hasMore']:
+                # Must get the next set of records.
+                pass
+            else:
+                break
+
+    def _get_services(self, server):
+        """
+        Get list of all services.
+
+        Returns
+        -------
+        list
+            List of services.
+        """
+        service_list = []
+
+        params = {'f': 'json'}
+        url = f"{self.protocol}://{server}:{self.port}/arcgis/rest"
+        r = requests.get(url, params=params)
+        r.raise_for_status()
+        directory_json = r.json()
+
+        for folder in directory_json['folders']:
+            url = f"http://{server}:{self.port}/arcgis/rest/services/{folder}"
+            r = requests.get(url, params=params, verify=False)
+            r.raise_for_status()
+            service_json = r.json()
+
+            for item in service_json['services']:
+                service_list.append(f"{item['name']}.{item['type']}")
+
+        return service_list
+
+    def run(self):
+        """
+        Collect a dataframe for each service, concatenate them, save to file.
+        """
+        if self.general:
+            self.collect_general_logs()
+
+        if self.services:
+            self.collect_service_logs()
+
+        self.write_output()
+
+    def write_hdf5(self):
         """
         Store the dataframe as an HDF5 file that we can access later if
         necessary.  Then link it into the output HTML.
         """
         # First just save the data so we can get it later.
         with pd.HDFStore(self.outfile) as store:
-            store['df'] = df
+            if self.general:
+                store['general'] = self.df_general
+
+            if self.services:
+                store['services'] = self.df_services
 
         # Link to the HDF5 file.
-        div = etree.SubElement(self.body, 'div')
-        p = etree.SubElement(div, 'p')
-        p.text = 'The error messages are stored in a pandas dataframe ('
-        a = etree.SubElement(p, 'a', href=f"self.outfile.stem")
-        a.text = 'latest.h5'
-        a.tail = ').  To read after downloading, try the following:'
-        pre = etree.SubElement(div, 'pre')
-        pre.text = (
-            f">>> import pandas as pd\n"
-            f">>> with pd.HDFStore('{self.outfile.stem}') as store: "
-            f"df = store['df']"
-        )
+        if self.html:
+            div = etree.SubElement(self.body, 'div')
+            p = etree.SubElement(div, 'p')
+            p.text = 'The error messages are stored in a pandas dataframe ('
+            a = etree.SubElement(p, 'a', href=f"{self.outfile.stem}")
+            a.text = 'logs.h5'
+            a.tail = ').  To read after downloading, try the following:'
+            pre = etree.SubElement(div, 'pre')
+            pre.text = (
+                f">>> import pandas as pd\n"
+                f">>> store = pd.HDFStore('{self.outfile.stem}')"
+            )
 
-    def write_output(self, df):
+    def write_output(self):
         """
         Create the output document content.
         """
 
-        self.write_hdf5(df)
-        self.write_daily_summary_by_vm_and_code(df)
-        self.write_hourly_summary(df)
+        self.write_hdf5()
+        
+        if self.html:
+            self.write_daily_summary_by_vm_and_code(self.df_general)
+            self.write_hourly_summary(self.df_general)
+            self.write_service_summary()
 
-        # Last thing is to just write the HTML to file.
-        self.doc.getroottree().write(str(self.root / 'index.html'),
-                                     encoding='utf-8', pretty_print=True)
+            # Last thing is to just write the HTML to file.
+            file = str(self.root / 'index.html')
+            roottree = self.doc.getroottree()
+            roottree.write(file, encoding='utf-8', pretty_print=True)
+
+    def write_service_summary(self):
+        """
+        Summarize by service.
+        """
+        if self.project == 'nowcoast':
+            return
+
+        s = self.df_services.groupby('source')['code'].count().sort_values(ascending=False).head(n=10)
+        s.name = 'Errors'
+
+        html = s.to_frame().style.set_table_styles(self.table_styles).render()
+        table = etree.HTML(html)
+
+        etree.SubElement(self.body, 'hr')
+
+        a = etree.SubElement(self.body, 'a', name='summary_by_service')
+        div = etree.SubElement(self.body, 'div', id='by_service', name='by_service')
+        h1 = etree.SubElement(div, 'h1')
+        h1.text = 'Summary by Service'
+
+        self.body.append(table)
 
     def write_hourly_summary(self, df):
         """
@@ -215,8 +386,17 @@ class SummarizeAgsLogs(AgsRestAdminBase):
         df['total errors'] = df.sum(axis=1)
 
         # All of the columns count the same thing, so just take any column.
-        txt = df.style.set_caption('Errors By VM').render()
+        txt = (df.style
+                 .set_table_styles(self.table_styles)
+                 .set_caption('Errors By VM')
+                 .render())
         doc = etree.HTML(txt)
+
+        # Get the <STYLE> element and stick it in the correct place.
+        style = doc.xpath('head/style')[0]
+        self.head.append(style)
+
+        # And now get the table.
         table = doc.xpath('body/table')[0]
 
         etree.SubElement(self.body, 'hr')
@@ -270,12 +450,12 @@ class SummarizeAgsLogs(AgsRestAdminBase):
             # Loop until arcgis server says it's done.
             encoded_params = urllib.parse.urlencode(params)
 
-            httpConn = httplib.HTTPConnection(server, self.ags_port)
-            httpConn.request('POST', log_query_url, encoded_params,
-                             self.headers)
-            response = httpConn.getresponse()
+            conn = http.client.HTTPConnection(server, self.ags_port)
+            conn.request('POST', log_query_url, encoded_params,
+                         self.headers)
+            response = conn.getresponse()
             if (response.status != 200):
-                httpConn.close()
+                conn.close()
                 msg = ("Error while fetching log info from the "
                        "admin URL.  Please check the URL and try again.")
                 raise RuntimeError(msg)

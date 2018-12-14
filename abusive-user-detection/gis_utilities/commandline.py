@@ -17,9 +17,12 @@ BB_SITE_MAP = {
                    '/IDP-Applications/IDP-GIS-ESRI/IDP-GIS-ESRI.html'),
     },
     'cprk': {
+        # 'nowcoast': ('http://bb.ncep.noaa.gov'
+        #              '/IDP-Applications/IDP-NOWCOAST-OPS'
+        #              '/IDP-NOWCOAST-OPS.html'),
         'nowcoast': ('http://bb.ncep.noaa.gov'
-                     '/IDP-Applications/IDP-NOWCOAST-OPS'
-                     '/IDP-NOWCOAST-OPS.html'),
+                     '/IDP-Applications/IDP-NOWCOAST-NEW-Ops'
+                     '/IDP-NOWCOAST-NEW-Ops.html'),
         'idpgis': ('http://bb.ncep.noaa.gov'
                    '/IDP-Applications/IDP-GIS-ESRI/IDP-GIS-ESRI.html'),
     },
@@ -60,11 +63,10 @@ def bb_flag_history():
 
     args = parser.parse_args()
 
-    s = '/mnt/intra_wwwdev/ncep/ncepintradev/htdocs/ncep_common/nowcoast'
-    root = pathlib.Path(s)
-    dir = root / 'bigbrother' / 'summary' / args.site / args.project
-    dir.mkdir(parents=True, exist_ok=True)
-    path = dir / 'index.html'
+    root = pathlib.Path.home()
+    root = root / 'www' / 'bigbrother' / 'summary' / args.site / args.project
+    root.mkdir(parents=True, exist_ok=True)
+    path = root / 'index.html'
 
     url = BB_SITE_MAP[args.site][args.project]
     obj = BBFlagHistory(url, output_file=str(path))

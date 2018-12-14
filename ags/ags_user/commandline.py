@@ -166,10 +166,15 @@ def plot_mpl_ags_stats():
 
     parser.add_argument('num_hours', type=int)
 
+    help = 'Verbosity'
+    choices = ['debug', 'info', 'warning', 'error', 'critical']
+    parser.add_argument('--verbose', choices=choices, default='warning',
+                        help=help)
+
     args = parser.parse_args()
 
     obj = AGSServiceStatisticsPlotsViaMPL(args.site, args.project,
-                                          args.num_hours)
+                                          args.num_hours, args.verbose.upper())
     obj.run()
 
 
@@ -232,34 +237,38 @@ def summarize_ags_logs():
     parser.add_argument('tier', choices=choices, help='Tier')
 
     help = (
-        "Save the output in this HDF5 file.  If no argument is provided, the "
-        "output is written to "
-        "/mnt/intra_wwwdev/ncep/ncepintradev/htdocs/ncep_common"
-        "/nowcoast/ags_logs/$project/logs.h5"
+        'Create an HTML document in the same root directory as the output '
+        'document.  The only reason for not supplying this argument is for '
+        'debugging purposes.'
     )
+    parser.add_argument('--html', action='store_true', help=help)
+
+    help = "Save the output in this HDF5 file."
     parser.add_argument('--outfile', type=str, help=help)
 
     help = 'Time frame (default is prior 24 hours).'
-    default_time = [
-        dt.datetime.now() - dt.timedelta(hours=24), dt.datetime.now()
-    ]
-    parser.add_argument('--time', nargs=2, default=default_time, help=help,
-                        action=CustomTimeAction)
+    parser.add_argument('--time', nargs=2, action=CustomTimeAction)
 
     help = "Log items retrieved must have a log level at least this high."
     choices = ["SEVERE", "WARNING", "INFO", "FINE", "VERBOSE", "DEBUG", "OFF"]
-    parser.add_argument('--level', choices=choices, default='WARNING')
+    parser.add_argument('--level', choices=choices)
+
+    help = (
+        'Restrict to this single server.  Do not use this unless you are '
+        'debugging.'
+    )
+    parser.add_argument('--server', type=str, help=help)
+
+    help = 'Create dataframe for general logs.'
+    parser.add_argument('--general', action='store_true', help=help)
+
+    help = 'Create dataframe with a service source.'
+    parser.add_argument('--services', action='store_true', help=help)
 
     args = parser.parse_args()
 
-    if args.outfile is None:
-        outfile = (
-            f"/mnt/intra_wwwdev/ncep/ncepintradev/htdocs/ncep_common"
-            f"/nowcoast/ags_logs/{args.project}/logs.h5"
-        )
-    else:
-        outfile = args.outfile
-
     obj = SummarizeAgsLogs(args.project, args.site, args.tier,
-                           outfile, args.time, args.level)
+                           args.html, time=args.time, level=args.level,
+                           outfile=args.outfile, server=args.server,
+                           general=args.general, services=args.services)
     obj.run()

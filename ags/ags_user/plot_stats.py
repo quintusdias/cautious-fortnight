@@ -14,8 +14,16 @@ import pandas as pd
 # Local imports
 from .stats import ToolsBase
 
-_DEFAULT_WEB_ROOT = ('/mnt/intra_wwwdev/ncep/ncepintradev/htdocs'
-                     '/ncep_common/nowcoast')
+_DEFAULT_WEB_ROOT = pathlib.Path.home() / 'www'
+
+
+_VERBOSITY = {
+    'CRITICAL': logging.CRITICAL,
+    'ERROR': logging.ERROR,
+    'WARNING': logging.WARNING,
+    'INFO': logging.INFO,
+    'DEBUG': logging.DEBUG,
+}
 
 
 class AGSServiceStatisticsPlotsViaMPL(ToolsBase):
@@ -23,7 +31,8 @@ class AGSServiceStatisticsPlotsViaMPL(ToolsBase):
     Instance plots via MPL
     """
 
-    def __init__(self, site, project, num_hours, web_root=_DEFAULT_WEB_ROOT):
+    def __init__(self, site, project, num_hours, verbosity,
+                 web_root=_DEFAULT_WEB_ROOT):
         super().__init__(site, project)
 
         self.root = pathlib.Path(web_root) / 'ags_stats' / site \
@@ -34,6 +43,15 @@ class AGSServiceStatisticsPlotsViaMPL(ToolsBase):
             self.priority = 1
         else:
             self.priority = 2
+
+        self.level = _VERBOSITY[verbosity]
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(self.level)
+
+        # Add a console handler
+        ch = logging.StreamHandler()
+        ch.setLevel(self.level)
+        self.logger.addHandler(ch)
 
         # Create the root directory if it does not already exist.
         self.root.mkdir(parents=True, exist_ok=True)
@@ -97,6 +115,7 @@ class AGSServiceStatisticsPlotsViaMPL(ToolsBase):
                WHERE hostname like '%{pattern}%'
                    AND b.priority <= {self.priority}
                """
+        self.logger.log(self.level, sql)
         cursor.execute(sql)
 
         self.cursor.execute(sql)
@@ -216,7 +235,7 @@ class AGSServiceStatisticsPlotsViaMPL(ToolsBase):
                  AND stats.time > '{current_time}'
                ORDER BY servers.hostname, stats.time ASC
                """
-        logging.info(sql)
+        self.logger.log(self.level, sql)
 
         df = pd.io.sql.read_sql(sql, self.conn)
 
