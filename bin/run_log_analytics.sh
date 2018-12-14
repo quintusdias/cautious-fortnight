@@ -27,4 +27,8 @@ mv hits.csv $dest
 update_monthly_content.py $project
 
 # And transfer the content to the NCO intranet.
-xfer_output.sh $project
+# xfer_output.sh $project
+
+# And transfer the content to ~/www.  From there it can be synced to the
+# NCO intranet.
+rsync -avz $project $HOME/www/analytics
