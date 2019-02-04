@@ -80,18 +80,18 @@ class AgsRestAdminBase(ToolsBase):
                         'vm-lnx-ncgis7app-op6b',
                     ],
                     'qa': [
-                        'vm-lnx-ncgisapp-qa1a',
-                        'vm-lnx-ncgisapp-qa1b',
-                        'vm-lnx-ncgisapp-qa2a',
-                        'vm-lnx-ncgisapp-qa2b',
-                        'vm-lnx-ncgisapp-qa3a',
-                        'vm-lnx-ncgisapp-qa3b',
-                        'vm-lnx-ncgisapp-qa4a',
-                        'vm-lnx-ncgisapp-qa4b',
-                        'vm-lnx-ncgisapp-qa5a',
-                        'vm-lnx-ncgisapp-qa5b',
-                        'vm-lnx-ncgisapp-qa6a',
-                        'vm-lnx-ncgisapp-qa6b',
+                        'vm-lnx7-ncgisapp-qa1a',
+                        'vm-lnx7-ncgisapp-qa1b',
+                        'vm-lnx7-ncgisapp-qa2a',
+                        'vm-lnx7-ncgisapp-qa2b',
+                        'vm-lnx7-ncgisapp-qa3a',
+                        'vm-lnx7-ncgisapp-qa3b',
+                        'vm-lnx7-ncgisapp-qa4a',
+                        'vm-lnx7-ncgisapp-qa4b',
+                        'vm-lnx7-ncgisapp-qa5a',
+                        'vm-lnx7-ncgisapp-qa5b',
+                        'vm-lnx7-ncgisapp-qa6a',
+                        'vm-lnx7-ncgisapp-qa6b',
                     ],
                     'dev': [
                         'vm-lnx-ncgisapp-dev1',
@@ -277,6 +277,42 @@ class AgsRestAdmin(AgsRestAdminBase):
 
         return services
 
+    def clean_logs(self):
+        """
+        Delete all the logs on servers
+        """
+
+        for server in self.config[self.project][self.site][self.tier]:
+
+            if self.server is not None and not self.server.startswith(server):
+                print(f'Skipping {server}...')
+                continue
+
+            server = server + '.ncep.noaa.gov'
+            self.token = self.get_token(server)
+
+            url = f"http://{server}:{self.ags_port}/arcgis/admin/logs/clean"
+            print(url)
+
+            params = {'token': self.token, 'f': 'json'}
+
+            r = self.s.post(url, params=params, headers=self.headers)
+            r.raise_for_status()
+
+            settings = r.json()
+
+            if settings['status'] not in ['success', 'warning']:
+                msg = (
+                    "Error while updating from the admin URL.  "
+                    "Please check the URL and try again.\n\n"
+                    "{jason}"
+                )
+                msg = msg.format(jason=json.dumps(settings,
+                                                  sort_keys=True,
+                                                  indent=4,
+                                                  separators=(',', ': ')))
+                raise RuntimeError(msg)
+
     def set_log_parameter(self, value):
 
         for server in self.config[self.project][self.site][self.tier]:
@@ -379,6 +415,10 @@ class AgsRestAdmin(AgsRestAdminBase):
     def set_parameter(self, value):
         if self.parameter in ['logLevel', 'maxLogFileAge']:
             self.set_log_parameter(value)
+            return
+
+        if self.parameter == "clean":
+            self.clean_logs()
             return
 
         if self.parameter == "status":

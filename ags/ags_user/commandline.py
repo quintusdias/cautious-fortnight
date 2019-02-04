@@ -194,7 +194,7 @@ def set_ags():
     parser.add_argument('tier', choices=choices)
 
     help = "Reset this parameter"
-    choices = ["enableDynamicLayers",
+    choices = ["clean", "enableDynamicLayers",
                "maxInstancesPerNode", "minInstancesPerNode", "maxLogFileAge",
                "maxStartupTime", "recycleStartTime", "logLevel", "status"]
     parser.add_argument('parameter', choices=choices, help=help)
