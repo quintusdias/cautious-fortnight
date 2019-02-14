@@ -1,0 +1,87 @@
+950901 SQL Injection Attack
+Status = 200
+
+959071 SQL Injection Attack
+Status = 200
+
+959073 SQL Injection Attack
+Status = 200
+
+981173 Restricted SQL Character Anomaly Detection Alert - Total # of special characters exceeded
+Status = 200
+
+981318 SQL Injection Attack: Common Injection Testing Detected
+Status = 200
+
+981245 Basic SQL Authentication Bypass Attempts 2/3
+Status = 200
+
+981248 Chained SQL Injection Attempts 1/2
+Status = 200
+
+950001 SQL Injection attack
+Status = 200
+
+981243 Classic SQL Injection Probes 2/2
+Status = 200
+
+981242 Classic SQL Injection Probes 1/2
+Status = 400
+
+981319 SQL Injection Attack: SQL Operator Detected
+Status = 200
+
+981244 Basic SQL Authentication Bypass Attempts 1/3
+Status = 400
+
+959072 SQL Injection Attack
+Status = 400
+
+981255 MSSQL Code Execution and Information Gathering Attempts
+Status = 200
+
+973335 IE XSS Filters - Attack Detected
+Status = 200
+
+981249 Chained SQL Injection Attempts 2/2
+Status = 400
+
+959070 SQL Injection Attack
+Status = 404
+
+981247 Concatenated Basic SQL Injection and SQLLFI Attempts
+Status = 404
+
+981320 SQL Injection Attack: Common DB Names Detected
+Status = 404
+
+981272 Blind SQLi Tests Using sleep() or benchmark()
+Status = 400
+
+950007 Blind SQL Injection Attack
+Status = 404
+
+3000017 MySQL Keywords Anomaly Detection Alert
+Status = 400
+
+960901 Invalid character in request
+Status = 400
+
+950006 system command injection
+Status = 200
+
+973332 IE XSS Filters - Attack Detected
+Status = 200
+
+973306 Possible XSS Attack Detected - HTML Tag Handler
+Status = 200
+
+973300 Possible XSS Attack Detected - HTML Tag Handler
+Status = 200
+
+3000003 php code injection
+Status = 200
+
+950117 Remote File Inclusion Attack (Remote URL with IP address)
+Status = 503
+

