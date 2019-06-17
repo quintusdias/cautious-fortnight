@@ -8,6 +8,7 @@ import sys
 from lxml import etree
 import matplotlib as mpl
 mpl.use('agg')
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 import numpy as np
@@ -15,16 +16,14 @@ import pandas as pd
 import seaborn as sns
 
 
-def millions(x, pos):
+def millions_fcn(x, pos):
     """
     Parameters
     ----------
     x : value
     pos : position
     """
-    return f'{(x/1e6):.1f}M'
-
-formatter = FuncFormatter(millions)
+    return f'{(x/1e6):.2f}M'
 
 class ProcessReferer(object):
     """
@@ -52,8 +51,6 @@ class ProcessReferer(object):
         self.conn = sqlite3.connect(self.database_file)
         self.cursor = self.conn.cursor()
 
-        self.df = pd.read_sql('SELECT * FROM observations', self.conn)
-
         self.doc = etree.Element('html')
         self.body = etree.SubElement(self.doc, 'body')
 
@@ -72,7 +69,7 @@ class ProcessReferer(object):
         self.root = pathlib.Path.home() / 'www' / 'analytics' / 'referer' / 'nowcoast'
         self.root.mkdir(parents=True, exist_ok=True)
 
-    def process_hits(self):
+    def create_table(self):
         """
         Calculate
 
@@ -82,54 +79,55 @@ class ProcessReferer(object):
 
         Just for the latest day, though.
         """
-        df = self.df[self.df.date == self.df.date.max()]
+        df = self.df_today.copy().groupby('referer').sum()
 
-        hits = df['hits'].sum()
-        num_403s = df['hits_403s'].sum()
-        print('hits', hits)
-        print('403s', num_403s)
+        total_hits = df['hits'].sum()
+        total_bytes = df['bytes'].sum()
+        total_errors = df['errors'].sum()
 
-        df = df[['referer', 'hits', 'hits_403s']].copy()
-        df['hits %'] = df['hits'] / hits * 100
+        print('hits', total_hits)
+        print('errors', total_errors)
 
-        idx = df['hits_403s'].isnull()
-        df.loc[idx, ('hits_403s')] = 0
-        df['hits_403s'] = df['hits_403s'].astype(np.uint64)
+        df = df[['hits', 'bytes', 'errors']].copy()
+        df['hits %'] = df['hits'] / total_hits * 100
+        df['GBytes'] = df['bytes'] / (1024 ** 3)  # GBytes
+        df['GBytes %'] = df['bytes'] / total_bytes * 100
 
-        df['403s: % of all hits'] = df['hits_403s'] / hits * 100
-        df['403s: % of all 403s'] = df['hits_403s'] / num_403s * 100
+        idx = df['errors'].isnull()
+        df.loc[idx, ('errors')] = 0
+        df['errors'] = df['errors'].astype(np.uint64)
+
+        df['errors: % of all hits'] = df['errors'] / total_hits * 100
+        df['errors: % of all errors'] = df['errors'] / total_errors * 100
 
         # Reorder the columns
         reordered_cols = [
-            'referer',
+            'GBytes',
+            'GBytes %',
             'hits',
             'hits %',
-            'hits_403s',
-            '403s: % of all hits',
-            '403s: % of all 403s'
+            'errors',
+            'errors: % of all hits',
+            'errors: % of all errors'
         ]
         df = df[reordered_cols]
 
-        self.process_hits_output(df)
-
-    def process_hits_output(self, df):
-
-        df = df.drop_duplicates()
-        df.set_index('referer', inplace=True)
-
-        percentage_all_403s = df['hits_403s'].sum() / df['hits'].sum() * 100
-        print(f"Percentage of 403s:  {percentage_all_403s:.2f}")
+        percentage_all_errors = df['errors'].sum() / df['hits'].sum() * 100
+        print(f"Percentage of Errors:  {percentage_all_errors:.2f}")
 
         n = 15
-        tablestr = (df.sort_values(by='hits', ascending=False).head(n=n)
-                      .style
+        # take the top 15
+        df = df.sort_values(by='hits', ascending=False).head(n=n)
+        tablestr = (df.style 
                       .set_table_styles(self.table_styles)
                       .format({
                           'hits': '{:,.0f}',
                           'hits %': '{:.1f}',
-                          'hits_403s': '{:,.0f}',
-                          '403s: % of all hits': '{:,.1f}',
-                          '403s: % of all 403s': '{:,.1f}',
+                          'GBytes': '{:,.1f}',
+                          'GBytes %': '{:.1f}',
+                          'errors': '{:,.0f}',
+                          'errors: % of all hits': '{:,.1f}',
+                          'errors: % of all errors': '{:,.1f}',
                       })
                       .render())
 
@@ -138,23 +136,25 @@ class ProcessReferer(object):
         div = etree.SubElement(self.body, 'div')
         hr = etree.SubElement(div, 'hr')
         h1 = etree.SubElement(div, 'h1')
-        h1.text = f'Top {n} Referers by Hits'
+
+        yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
+        h1.text = f'Top {n} Referers by Hits: {yesterday}'
         div.append(table)
 
-        div = etree.SubElement(self.body, 'div')
-        img = etree.SubElement(div, 'img', src='referers_hits.png')
+    def process_bytes(self):
+        df = self.df_today.copy().groupby('referer').sum()
 
-    def process_bytes_output(self, df):
-        """
-        Calculate
+        total_bytes = df['bytes'].sum()
 
-            I) Bandwidth for each referer as GBs
-        """
-        df = df.drop_duplicates()
+        df['percentage'] = df['bytes'] / total_bytes * 100
 
-        df.set_index('referer', inplace=True)
+        df = df.sort_values(by='bytes', ascending=False).head(n=10)
 
-        df['GBytes'] /= (1024 ** 3)
+        # Calculate
+        #
+        #    I) Bandwidth for each referer as GBs
+        df['GBytes'] = df['bytes'] / (1024 ** 3)
+        df = df[['GBytes', 'percentage']]
 
         format = {
             'GBytes': '{:,.1f}',
@@ -169,8 +169,7 @@ class ProcessReferer(object):
                                        ('border-bottom', '1px solid #069'),
                                        ('padding', '5px 3px')]),
         ]
-        tablestr = (df.sort_values(by='GBytes', ascending=False).head(n=10)
-                      .style
+        tablestr = (df.style
                       .set_table_styles(self.table_styles)
                       .format(format)
                       .render())
@@ -183,77 +182,125 @@ class ProcessReferer(object):
         h1.text = 'Top 10 Referers by Bytes'
         div.append(table)
 
-    def process_bytes(self):
+    def get_timeseries(self):
 
-        df = self.df[self.df.date == self.df.date.max()]
+        df = pd.read_sql('SELECT * FROM observations', self.conn)
 
-        bytes = df['bytes'].sum()
+        # Right now the 'date' column is in timestamp form.  We need that
+        # in native datetime.
+        df['date'] = pd.to_datetime(df['date'], unit='s')
 
-        df = df[['referer', 'bytes']].copy()
-        df['percentage'] = df['bytes'] / bytes * 100
+        self.df = df
+        self.df_today = self.df[self.df.date.dt.day == self.df.date.max().day] 
 
-        df.columns = ['referer', 'GBytes', 'percentage']
+    def get_top_referers(self):
+        # who are the top referers for today?
+        df = self.df_today.copy()
 
-        self.process_bytes_output(df)
+        df['valid_hits'] = df['hits'] - df['errors']
+        top_referers = df \
+                .groupby('referer') \
+                .sum() \
+                .sort_values(by='valid_hits', ascending=False) \
+                .head(n=7) \
+                .index
 
-    def create_timeseries(self):
+        return top_referers
 
-        # Get the top 5 referers by hits for the latest date.  By "top 5
-        # referers", we mean no 403s.
-        df = self.df[self.df.date == self.df.date.max()]
-        df['valid_hits'] = df['hits'] - df['hits_403s']
-        df = df.sort_values(by='valid_hits', ascending=False).head(n=7)
-        referers = ', '.join([f"\"{x}\"" for x in df['referer'].values])
-        sql = f"""
-               SELECT referer, hits - hits_403s AS hits, date
-               FROM observations
-               WHERE referer IN ({referers})
-               ORDER by date, referer
-               """
-        print(sql)
+    def create_timeseries_hits_plot(self):
+        """
+        Create a PNG showing the top referers over the last few days.
+        """
+        top_referers = self.get_top_referers()
 
-        df = pd.read_sql(sql, self.conn)
-        df['date'] = df['date'].apply(lambda x: dt.datetime.fromordinal(x))
-        df = df.drop_duplicates()
+        # Now restrict the hourly data over the last few days to those
+        # referers.  Then restrict to valid hits.  And rename valid_hits to
+        # hits.
+        df = self.df[self.df.referer.isin(top_referers)].sort_values(by='date')
+        df['hits'] = df['hits'] - df['errors']
+        df = df[['date', 'referer', 'hits']]
+
         df = df.pivot(index='date', columns='referer', values='hits')
 
         fig, ax = plt.subplots(figsize=(15,5))
-        ax.yaxis.set_major_formatter(formatter)
+
         df.plot(ax=ax, legend=None)
-        ax.set_title('Non-403 Hits')
+
+        # ax.xaxis.set_major_locator(mdates.WeekdayLocator())
+
+        # formatter = mdates.DateFormatter('%b %d')
+        # ax.xaxis.set_major_formatter(formatter)
+        # plt.setp(ax.xaxis.get_majorticklabels(), rotation=20, ha="right")
+        # days_fmt = mdates.DateFormatter('%d\n%b\n%Y')
+        # hours = mdates.HourLocator()
+        # ax.xaxis.set_minor_locator(hours)
+
+        formatter = FuncFormatter(millions_fcn)
+        ax.yaxis.set_major_formatter(formatter)
+
+        ax.set_title('Hits per Hour (not including errors)')
 
         # Shrink the axis to put the legend outside.
         box = ax.get_position()
         ax.set_position([box.x0, box.y0, box.width * 0.65, box.height])
-        ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        handles, labels = ax.get_legend_handles_labels()
+        leg = ax.legend(handles[::-1], labels[::-1], loc='center left', bbox_to_anchor=(1, 0.5))
 
         path = self.root / 'referers_hits.png'
 
         plt.savefig(path)
 
+        div = etree.SubElement(self.body, 'div')
+        img = etree.SubElement(div, 'img', src='referers_hits.png')
 
-    def create_pie_chart(self):
+    def create_timeseries_bytes_plot(self):
+        """
+        Create a PNG showing the top referers (bytes) over the last few days.
+        """
+        top_referers = self.get_top_referers()
 
-        # Get the top 5 referers by hits for the latest date.
-        df = self.df[self.df.date == self.df.date.max()]
-        df = df.sort_values(by='hits', ascending=False)
-        df = df[['referer', 'hits']].set_index('referer')
+        # Now restrict the hourly data over the last few days to those
+        # referers.  Then restrict to valid hits.  And rename valid_hits to
+        # hits.
+        df = self.df[self.df.referer.isin(top_referers)].sort_values(by='date')
+        df = df[['date', 'referer', 'bytes']]
+        df['bytes'] /= (1024 ** 3)
 
-        n = 5
-        hits_others = df.hits.sum() - df.head(n=n).hits.sum()
+        df = df.pivot(index='date', columns='referer', values='bytes')
 
-        df = df[:n].copy()
-        df.loc['others'] = hits_others
+        fig, ax = plt.subplots(figsize=(15,5))
 
-        plot = df.plot.pie(y='hits', figsize=(5,15), labels=None)
-        plt.savefig('nowcoast/pie.png')
+        df.plot(ax=ax, legend=None)
 
+        # ax.xaxis.set_major_locator(mdates.WeekdayLocator())
+
+        # formatter = mdates.DateFormatter('%b %d')
+        # ax.xaxis.set_major_formatter(formatter)
+        # plt.setp(ax.xaxis.get_majorticklabels(), rotation=20, ha="right")
+        # days_fmt = mdates.DateFormatter('%d\n%b\n%Y')
+        # hours = mdates.HourLocator()
+        # ax.xaxis.set_minor_locator(hours)
+
+        ax.set_title('GBytes per Hour')
+
+        # Shrink the axis to put the legend outside.
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width * 0.65, box.height])
+        handles, labels = ax.get_legend_handles_labels()
+        leg = ax.legend(handles[::-1], labels[::-1], loc='center left', bbox_to_anchor=(1, 0.5))
+
+        path = self.root / 'referers_bytes.png'
+
+        plt.savefig(path)
+
+        div = etree.SubElement(self.body, 'div')
+        img = etree.SubElement(div, 'img', src='referers_bytes.png')
 
     def run(self):
-        # self.create_pie_chart()
-        self.create_timeseries()
-        self.process_hits()
-        self.process_bytes()
+        self.get_timeseries()
+        self.create_table()
+        self.create_timeseries_hits_plot()
+        self.create_timeseries_bytes_plot()
 
         path = self.root / 'index.html'
         with path.open(mode='wt') as f:

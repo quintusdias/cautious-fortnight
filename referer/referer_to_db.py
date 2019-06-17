@@ -1,4 +1,5 @@
 # Standard library imports
+import argparse
 import datetime as dt
 import pathlib
 import sqlite3
@@ -25,18 +26,14 @@ class ProcessCSV(object):
     date : datetime.date
         Date for the CSV file observations.
     """
-    def __init__(self, path, datestr):
+    def __init__(self, path):
         """
         Parameters
         ----------
         path : path or str
             Path to CSV file.
-        datestr : str
-            Eight character string for the date, YYYYMMDD.
         """
         self.path = path
-        self.df = pd.read_csv(path)
-        self.date = dt.datetime.strptime(datestr, '%Y%m%d')
 
         self.database_file = pathlib.Path('referer.db')
 
@@ -59,30 +56,52 @@ class ProcessCSV(object):
                   date integer,
                   referer text,
                   hits integer,
-                  hits_403s integer,
+                  errors integer,
                   bytes integer
               )
               """
         self.cursor.execute(sql)
 
-    def run(self):
+    def preprocess_database(self):
+
         # Delete anything older than 10 days.
         sql = """
               DELETE FROM observations WHERE date < ?
               """
-        date_10_days_ago = self.date - dt.timedelta(days=30)
-        self.cursor.execute(sql, (date_10_days_ago.toordinal(),))
+        too_old = dt.datetime.now() - dt.timedelta(days=30)
+        self.cursor.execute(sql, (too_old.timestamp(),))
 
-        # Need to create the date column in the dataframe.
-        # We will use the proleptic Gregorian ordinal of the date, where
-        # January 1 of year 1 has ordinal 1.
-        self.df['date'] = self.date.toordinal()
-        self.df.columns = ['referer', 'hits', 'hits_403s', 'bytes', 'date']
+        # Delete anything newer than the old observation in the dataframe.
+        sql = """
+              DELETE FROM observations WHERE date >= ?
+              """
+        too_new = self.df['date'].min()
+        self.cursor.execute(sql, (too_new,))
+
+    def load_referer_data(self):
+
+        self.df = pd.read_csv(self.path, parse_dates=[0])
+        self.df.columns = ['date', 'referer', 'hits', 'errors', 'bytes']
+
+        # The hits and error columns might have NaNs in them.
+        self.df['hits'] = self.df['hits'].fillna(value=0)
+        self.df['errors'] = self.df['errors'].fillna(value=0)
+
+        # Turn the date column into unix timestamps.
+        self.df['date'] = (self.df['date'] - pd.Timestamp('1970-01-01')) // pd.Timedelta('1s')
+
+    def run(self):
+
+        self.load_referer_data()
+        self.preprocess_database()
         self.df.to_sql('observations', self.conn, if_exists='append', index=False)
         self.conn.commit()
 
 if __name__ == '__main__':
-    path = pathlib.Path(sys.argv[1])
-    datestr = sys.argv[2]
-    o = ProcessCSV(path, datestr)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('csvfile', help="CSV file")
+    args = parser.parse_args()
+
+    o = ProcessCSV(args.csvfile)
     o.run()
