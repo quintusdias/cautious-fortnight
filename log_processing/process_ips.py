@@ -6,7 +6,6 @@ import pathlib
 import re
 import sqlite3
 import sys
-import urllib.parse
 
 # 3rd party library imports
 import numpy as np
@@ -32,7 +31,7 @@ class LogProcessor(object):
         self.project = project
         self.infile = infile
 
-        self.database = pathlib.Path(f'{project}_referers.db')
+        self.database = pathlib.Path(f'{project}_ips.db')
         if not self.database.exists():
             self.create_database()
 
@@ -86,11 +85,11 @@ class LogProcessor(object):
         )
 
         self.MAX_RAW_RECORDS = 1000000
-        self._referer_records = []
+        self._ip_records = []
 
     def create_database(self):
         """
-        Create an SQLITE database for the referer records.
+        Create an SQLITE database for the IP address records.
         """
         conn = sqlite3.connect(self.database)
         cursor = conn.cursor()
@@ -98,7 +97,7 @@ class LogProcessor(object):
         sql = """
               CREATE TABLE observations (
                   date integer,
-                  referer text,
+                  ip_address text,
                   hits integer,
                   errors integer,
                   nbytes integer
@@ -108,7 +107,7 @@ class LogProcessor(object):
 
     def preprocess_database(self):
         """
-        We don't want items in the referer database getting too old, it will
+        We don't want items in the IP address database getting too old, it will
         take up too much space.
         """
         conn = sqlite3.connect(self.database)
@@ -125,7 +124,6 @@ class LogProcessor(object):
 
     def run(self):
         self.dbaccess_count = 0
-
         self.preprocess_database()
 
         for line in self.infile:
@@ -133,67 +131,52 @@ class LogProcessor(object):
             if m is None:
                 print(line)
 
-            self.process_referer(m)
+            self.process_ip_address(m)
 
         # Any intermediate processing left to do?
-        if len(self._referer_records) > 0:
-            self.process_raw_referer_records()
+        if len(self._ip_records) > 0:
+            self.process_raw_records()
 
-    def process_referer(self, apache_match):
+    def process_ip_address(self, apache_match):
         """
-        What referers were given?
+        What IP addresses were given?
         """
         timestamp = apache_match.group('timestamp')
-        referer = apache_match.group('referer')
+        ip_address = apache_match.group('ip_address')
         status_code = int(apache_match.group('status_code'))
         nbytes = int(apache_match.group('nbytes'))
 
         error = 1 if status_code < 200 or status_code >= 400 else 0
 
-        self._referer_records.append((timestamp, referer, 1, error, nbytes))
-        if len(self._referer_records) == self.MAX_RAW_RECORDS:
-            self.process_raw_referer_records()
+        self._ip_records.append((timestamp, ip_address, 1, error, nbytes))
+        if len(self._ip_records) == self.MAX_RAW_RECORDS:
+            self.process_raw_records()
 
-    def process_raw_referer_records(self):
+    def process_raw_records(self):
         """
         We have reached a limit on how many records we accumulate before
         processing.  Turn what we have into a dataframe and aggregate it
         to the appropriate granularity.
         """
         self.dbaccess_count += 1
-        print(f'processing batch of referer records: {self.dbaccess_count}')  # noqa: E501
+        print(f'processing batch of IP address records: {self.dbaccess_count}')  # noqa: E501
 
-        columns = ['timestamp', 'referer', 'hits', 'errors', 'nbytes']
-        df = pd.DataFrame(self._referer_records, columns=columns)
+        columns = ['timestamp', 'ip_address', 'hits', 'errors', 'nbytes']
+        df = pd.DataFrame(self._ip_records, columns=columns)
 
-        # Convert the apache timestamp into a python timestamp.  Make the
-        # number of bytes numeric.
         format = '%d/%b/%Y:%H:%M:%S %z'
         df['timestamp'] = pd.to_datetime(df['timestamp'], format=format)
         df['nbytes'] = df['nbytes'].astype(int)
 
-        # Throw away any the query string in the referer.
-        def fcn(referer):
-            p = urllib.parse.urlparse(referer)
-            if p.query == '':
-                # No query string, use the referer as-is.
-                pass
-            else:
-                referer = f"{p.scheme}://{p.netloc}{p.path}"
-            return referer
-
-        df['referer'] = df['referer'].apply(fcn)
-
-        # Aggregate by the hour.
         df = df.groupby([
             df['timestamp'].dt.year,
             df['timestamp'].dt.month,
             df['timestamp'].dt.day,
             df['timestamp'].dt.hour,
-            df['referer']
+            df['ip_address']
         ]).sum()
 
-        midx_names = ['year', 'month', 'day', 'hour', 'referer']
+        midx_names = ['year', 'month', 'day', 'hour', 'ip_address']
         df.index = df.index.set_names(midx_names)
 
         df = df.reset_index()
@@ -203,16 +186,13 @@ class LogProcessor(object):
         df['date'] = df['date'].astype(np.int64) // 1e9
         df = df.drop(['year', 'month', 'day', 'hour'], axis='columns')
 
-        # print(f'Number of hits: {df.hits.sum()}')
-        # print(f'Number of errors: {df.errors.sum()}')
-
         # Ok, suitable to send to the database now.
         conn = sqlite3.connect(self.database)
         df.to_sql('observations', conn, if_exists='append', index=False)
         conn.commit()
 
         # Reset
-        self._referer_records = []
+        self._ip_records = []
 
 
 if __name__ == '__main__':

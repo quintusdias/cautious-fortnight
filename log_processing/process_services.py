@@ -32,8 +32,8 @@ class LogProcessor(object):
         self.project = project
         self.infile = infile
 
-        self.services_database = pathlib.Path(f'{project}_services.db')
-        if not self.services_database.exists():
+        self.database = pathlib.Path(f'{project}_services.db')
+        if not self.database.exists():
             self.create_services_database()
 
         self.apache_regex = re.compile(r'''
@@ -92,7 +92,7 @@ class LogProcessor(object):
         """
         Create an SQLITE database for the service records.
         """
-        conn = sqlite3.connect(self.services_database)
+        conn = sqlite3.connect(self.database)
         cursor = conn.cursor()
 
         sql = """
@@ -107,7 +107,26 @@ class LogProcessor(object):
             """
         cursor.execute(sql)
 
+    def preprocess_database(self):
+        """
+        We don't want items in the referer database getting too old, it will
+        take up too much space.
+        """
+        conn = sqlite3.connect(self.database)
+        cursor = conn.cursor()
+
+        # Delete anything too old
+        sql = """
+              DELETE FROM observations WHERE date < ?
+              """
+        too_old = dt.datetime.now() - dt.timedelta(days=8)
+        cursor.execute(sql, (too_old.timestamp(),))
+
+        conn.commit()
+
     def run(self):
+
+        self.preprocess_database()
 
         self.dbaccess_count = 0
 
@@ -179,7 +198,7 @@ class LogProcessor(object):
         df['date'] = df['date'].astype(np.int64) // 1e9
         df = df.drop(['year', 'month', 'day', 'hour'], axis='columns')
 
-        conn = sqlite3.connect(self.services_database)
+        conn = sqlite3.connect(self.database)
         df.to_sql('observations', conn, if_exists='append', index=False)
         conn.commit()
 
