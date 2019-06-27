@@ -1,4 +1,4 @@
-# Standard library imports
+#o Standard library imports
 import argparse
 import datetime as dt
 import pathlib

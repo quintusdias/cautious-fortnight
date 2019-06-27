@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
+# Standard library imports
 import datetime as dt
-import pathlib
-import sqlite3
 import urllib.parse
 
 # 3rd party library imports
@@ -11,6 +10,12 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 import numpy as np
 import pandas as pd
+import seaborn as sns
+
+# Local imports
+from .common import CommonProcessor
+
+sns.set()
 
 
 def millions_fcn(x, pos):
@@ -23,48 +28,140 @@ def millions_fcn(x, pos):
     return f'{(x/1e6):.2f}M'
 
 
-class RefererProcessor(object):
+class RefererProcessor(CommonProcessor):
     """
     Attributes
     ----------
-    conn, cursor : obj
+    conn : obj
         database connectivity
     database : path or str
         Path to database
     project : str
         Either nowcoast or idpgis
     """
-    def __init__(self, project, database_dir=None):
+    def __init__(self, project, **kwargs):
         """
         Parameters
         ----------
-        database_dir : path or None
-            Path to directory that will contain the database.
+        known_referers : dataframe
+            All referers that have been previously encountered.
+        """
+        super().__init__(project, **kwargs)
+
+        sql = """
+              SELECT * from known_referers
+              """
+        self.known_referers = pd.read_sql(sql, self.conn)
+
+    def process_match(self, apache_match):
+        """
+        What referers were given?
+        """
+        timestamp = apache_match.group('timestamp')
+        referer = apache_match.group('referer')
+        status_code = int(apache_match.group('status_code'))
+        nbytes = int(apache_match.group('nbytes'))
+
+        error = 1 if status_code < 200 or status_code >= 400 else 0
+
+        self.records.append((timestamp, referer, 1, error, nbytes))
+        if len(self.records) == self.MAX_RAW_RECORDS:
+            self.process_records()
+
+    def flush(self):
+        self.process_records()
+
+    def process_records(self):
+        """
+        We have reached a limit on how many records we accumulate before
+        processing.  Turn what we have into a dataframe and aggregate it
+        to the appropriate granularity.
+        """
+        self.db_access_count += 1
+        msg = f'processing batch of referer records: {self.db_access_count}'
+        self.logger.info(msg)
+
+        columns = ['date', 'referer', 'hits', 'errors', 'nbytes']
+        df = pd.DataFrame(self.records, columns=columns)
+
+        # Convert the apache timestamp into a python timestamp.  Make the
+        # number of bytes numeric.
+        format = '%d/%b/%Y:%H:%M:%S %z'
+        df['date'] = pd.to_datetime(df['date'], format=format)
+        df['nbytes'] = df['nbytes'].astype(int)
+
+        # Throw away any the query string in the referer.
+        def fcn(referer):
+            p = urllib.parse.urlparse(referer)
+            if p.query == '':
+                # No query string, use the referer as-is.
+                pass
+            else:
+                referer = f"{p.scheme}://{p.netloc}{p.path}"
+            return referer
+
+        df['referer'] = df['referer'].apply(fcn)
+
+        # Aggregate by the set frequency and referer, taking sums.
+        groupers = [pd.Grouper(freq=self.frequency), 'referer']
+        df = df.set_index('date').groupby(groupers).sum().reset_index()
+
+        # Remake the date into a single column, a timestamp
+        df['date'] = df['date'].astype(np.int64) // 1e9
+
+        # Have to have the same column names as the database.
+        df = self.replace_referers_with_ids(df)
+
+        # Ok, suitable to send to the database now.
+        df.to_sql('referer_logs', self.conn, if_exists='append', index=False)
+        self.conn.commit()
+
+        # Reset
+        self.records = []
+
+    def replace_referers_with_ids(self, df_orig):
+        """
+        Don't log the actual referer names to the database, log the ID instead.
         """
 
-        self.project = project
+        sql = """
+              SELECT * from known_referers
+              """
+        known_referers = pd.read_sql(sql, self.conn)
 
-        if database_dir is None:
-            database_dir = (
-                pathlib.Path.home() / 'Documents' / 'arcgis_apache_logs'
-            )
+        # Get the referer IDs
+        df = pd.merge(df_orig, known_referers,
+                      how='left', left_on='referer', right_on='name')
 
-        if not database_dir.exists():
-            database_dir.mkdir(parents=True, exist_ok=True)
+        # How many referers have NaN for IDs?  This must populate the known
+        # referers table before going further.
+        unknown_referers = df['referer'][df['id'].isnull()].unique()
+        if len(unknown_referers) > 0:
+            new_df = pd.Series(unknown_referers, name='name').to_frame()
+            new_df.to_sql('known_referers', self.conn,
+                          if_exists='append', index=False)
 
-        self.database = database_dir / f'tmp_{project}_referers.db'
-        if not self.database.exists():
-            self.conn = self.create_database()
-        else:
-            self.conn = sqlite3.connect(self.database)
+            sql = """
+                  SELECT * from known_referers
+                  """
+            known_referers = pd.read_sql(sql, self.conn)
+            df = pd.merge(df_orig, known_referers,
+                          how='left', left_on='referer', right_on='name')
 
-        self.MAX_RAW_RECORDS = 1000000
-        self._referer_records = []
+        df.drop(['referer', 'name'], axis='columns', inplace=True)
 
-    def get_referer_timeseries(self):
+        return df
 
-        conn = sqlite3.connect(self.database)
-        df = pd.read_sql('SELECT * FROM observations', conn)
+    def get_timeseries(self):
+
+        sql = """
+              SELECT a.date, a.hits, a.errors, a.nbytes,
+                     b.name as referer
+              FROM referer_logs a
+              INNER JOIN known_referers b
+              ON a.id = b.id
+              """
+        df = pd.read_sql(sql, self.conn)
 
         df = df.groupby(['date', 'referer']).sum().reset_index()
 
@@ -75,13 +172,26 @@ class RefererProcessor(object):
         self.df = df
         self.df_today = self.df[self.df.date.dt.day == self.df.date.max().day]
 
-    def process_graphics(self):
-        self.get_referer_timeseries()
-        self.create_referer_table()
-        self.create_referer_hits_plot()
-        self.create_referer_bytes_plot()
+    def process_graphics(self, html_doc):
+        self.get_timeseries()
+        self.create_referer_table(html_doc)
+        self.create_referer_hits_plot(html_doc)
+        self.create_referer_bytes_plot(html_doc)
 
-    def create_referer_bytes_plot(self):
+    def get_top_referers(self):
+        # who are the top referers for today?
+        df = self.df_today.copy()
+
+        df['valid_hits'] = df['hits'] - df['errors']
+        top_referers = (df.groupby('referer')
+                          .sum()
+                          .sort_values(by='valid_hits', ascending=False)
+                          .head(n=7)
+                          .index)
+
+        return top_referers
+
+    def create_referer_bytes_plot(self, html_doc):
         """
         Create a PNG showing the top referers (bytes) over the last few days.
         """
@@ -122,19 +232,22 @@ class RefererProcessor(object):
 
         plt.savefig(path)
 
-        div = etree.SubElement(self.body, 'div')
+        body = html_doc.xpath('body')[0]
+        div = etree.SubElement(body, 'div')
         etree.SubElement(div, 'img', src='referers_bytes.png')
 
-    def create_referer_hits_plot(self):
+    def create_referer_hits_plot(self, html_doc):
         """
         Create a PNG showing the top referers over the last few days.
         """
         top_referers = self.get_top_referers()
 
+        df = self.df.copy()
+
         # Now restrict the hourly data over the last few days to those
         # referers.  Then restrict to valid hits.  And rename valid_hits to
         # hits.
-        df = self.df[self.df.referer.isin(top_referers)].sort_values(by='date')
+        df = df[df.referer.isin(top_referers)].sort_values(by='date').copy()
         df['hits'] = df['hits'] - df['errors']
         df = df[['date', 'referer', 'hits']]
 
@@ -169,10 +282,11 @@ class RefererProcessor(object):
 
         plt.savefig(path)
 
-        div = etree.SubElement(self.body, 'div')
+        body = html_doc.xpath('body')[0]
+        div = etree.SubElement(body, 'div')
         etree.SubElement(div, 'img', src='referers_hits.png')
 
-    def create_referer_table(self):
+    def create_referer_table(self, html_doc):
         """
         Calculate
 
@@ -187,9 +301,6 @@ class RefererProcessor(object):
         total_hits = df['hits'].sum()
         total_bytes = df['nbytes'].sum()
         total_errors = df['errors'].sum()
-
-        print('hits', total_hits)
-        print('errors', total_errors)
 
         df = df[['hits', 'nbytes', 'errors']].copy()
         df['hits %'] = df['hits'] / total_hits * 100
@@ -216,168 +327,24 @@ class RefererProcessor(object):
         df = df[reordered_cols]
         df = df.sort_values(by='hits', ascending=False).head(15)
 
-        # Construct the HTML <TABLE>
-        tablestr = (df.style
-                      .set_table_styles(self.table_styles)
-                      .format({
-                          'hits': '{:,.0f}',
-                          'hits %': '{:.1f}',
-                          'GBytes': '{:,.1f}',
-                          'GBytes %': '{:.1f}',
-                          'errors': '{:,.0f}',
-                          'errors: % of all hits': '{:,.1f}',
-                          'errors: % of all errors': '{:,.1f}',
-                      })
-                      .render()
-        )
-
-        table_doc = etree.HTML(tablestr)
-        table = table_doc.xpath('body/table')[0]
+        table, table_css = self.extract_html_table_from_dataframe(df)
 
         # extract the CSS and place into our own document.
-        css = table_doc.xpath('head/style')[0]
-        self.style.text = css.text
+        style = html_doc.xpath('head/style')[0]
+        style.text = style.text + '\n' + table_css
 
-        div = etree.SubElement(self.body, 'div')
+        body = html_doc.xpath('body')[0]
+        div = etree.SubElement(body, 'div')
         etree.SubElement(div, 'hr')
         a = etree.SubElement(div, 'a', name='referers')
         h1 = etree.SubElement(div, 'h1')
 
         # Add to the table of contents.
-        li = etree.SubElement(self.toc, 'li')
+        toc = html_doc.xpath('body/ul[@class="tableofcontents"]')[0]
+        li = etree.SubElement(toc, 'li')
         a = etree.SubElement(li, 'a', href='#referers')
         a.text = 'Top Referers'
 
         yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
         h1.text = f'Top Referers by Hits: {yesterday}'
         div.append(table)
-
-    def create_database(self):
-        """
-        Create an SQLITE database for the referer records.
-
-        Returns
-        -------
-        connection object
-        """
-        conn = sqlite3.connect(self.database)
-        cursor = conn.cursor()
-
-        # Create the known referers table.
-        sql = """
-              CREATE TABLE known_referers (
-                  id integer,
-                  name text
-              )
-              """
-        cursor.execute(sql)
-
-        # Create the logs table.
-        sql = """
-              CREATE TABLE logs (
-                  date integer,
-                  referer_id integer,
-                  hits integer,
-                  errors integer,
-                  nbytes integer,
-                  FOREIGN KEY (referer_id) REFERENCES known_referers(id)
-              )
-              """
-        cursor.execute(sql)
-
-        return conn
-
-    def preprocess_database(self):
-        """
-        We don't want items in the referer database getting too old, it will
-        take up too much space.
-        """
-        conn = sqlite3.connect(self.database)
-        cursor = conn.cursor()
-
-        # Delete anything too old
-        sql = """
-              DELETE FROM observations WHERE date < ?
-              """
-        too_old = dt.datetime.now() - dt.timedelta(days=30)
-        cursor.execute(sql, (too_old.timestamp(),))
-
-        conn.commit()
-
-    def process_match(self, apache_match):
-        """
-        What referers were given?
-        """
-        timestamp = apache_match.group('timestamp')
-        referer = apache_match.group('referer')
-        status_code = int(apache_match.group('status_code'))
-        nbytes = int(apache_match.group('nbytes'))
-
-        error = 1 if status_code < 200 or status_code >= 400 else 0
-
-        self._referer_records.append((timestamp, referer, 1, error, nbytes))
-        if len(self._referer_records) == self.MAX_RAW_RECORDS:
-            self.process_raw_referer_records()
-
-    def flush(self):
-        self.process_raw_referer_records()
-
-    def process_raw_referer_records(self):
-        """
-        We have reached a limit on how many records we accumulate before
-        processing.  Turn what we have into a dataframe and aggregate it
-        to the appropriate granularity.
-        """
-        self.dbaccess_count += 1
-        print(f'processing batch of referer records: {self.dbaccess_count}')  # noqa: E501
-
-        columns = ['timestamp', 'referer', 'hits', 'errors', 'nbytes']
-        df = pd.DataFrame(self._referer_records, columns=columns)
-
-        # Convert the apache timestamp into a python timestamp.  Make the
-        # number of bytes numeric.
-        format = '%d/%b/%Y:%H:%M:%S %z'
-        df['timestamp'] = pd.to_datetime(df['timestamp'], format=format)
-        df['nbytes'] = df['nbytes'].astype(int)
-
-        # Throw away any the query string in the referer.
-        def fcn(referer):
-            p = urllib.parse.urlparse(referer)
-            if p.query == '':
-                # No query string, use the referer as-is.
-                pass
-            else:
-                referer = f"{p.scheme}://{p.netloc}{p.path}"
-            return referer
-
-        df['referer'] = df['referer'].apply(fcn)
-
-        # Aggregate by the hour.
-        df = df.groupby([
-            df['timestamp'].dt.year,
-            df['timestamp'].dt.month,
-            df['timestamp'].dt.day,
-            df['timestamp'].dt.hour,
-            df['referer']
-        ]).sum()
-
-        midx_names = ['year', 'month', 'day', 'hour', 'referer']
-        df.index = df.index.set_names(midx_names)
-
-        df = df.reset_index()
-
-        # Remake the date into a single column, a timestamp
-        df['date'] = pd.to_datetime(df[['year', 'month', 'day', 'hour']])
-        df['date'] = df['date'].astype(np.int64) // 1e9
-        df = df.drop(['year', 'month', 'day', 'hour'], axis='columns')
-
-        # print(f'Number of hits: {df.hits.sum()}')
-        # print(f'Number of errors: {df.errors.sum()}')
-
-        # Ok, suitable to send to the database now.
-        conn = sqlite3.connect(self.database)
-        df.to_sql('observations', conn, if_exists='append', index=False)
-        conn.commit()
-
-        # Reset
-        self._referer_records = []

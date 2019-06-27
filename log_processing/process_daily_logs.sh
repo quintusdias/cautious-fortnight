@@ -16,10 +16,6 @@ do
     # Process files just recently downloaded
     files_to_process=$(find "$root" -mmin -60 -name "*.gz")
     
-    # Delete any files that are too old
-    datestr=$(date +%Y%m%d --date="-7 days")
-    rm $HOME/data/logs/akamai/$project/incoming/*.*.*-*-"$datestr"*.gz
-    
     # for filename in $files_to_process
     # do
     #     echo processing $filename
@@ -37,4 +33,8 @@ do
             >(python process_services.py $project -) \
     	1> /dev/null
 
+    # Delete any files that are too old
+    datestr=$(date +%Y%m%d --date="-10 days")
+    rm $HOME/data/logs/akamai/$project/incoming/*.*.*-*-"$datestr"*.gz
+    
 done

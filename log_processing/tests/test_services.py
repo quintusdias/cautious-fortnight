@@ -9,7 +9,7 @@ from unittest.mock import patch
 import pandas as pd
 
 # Local imports
-from arcgis_apache_logs import RefererProcessor
+from arcgis_apache_logs import ServicesProcessor
 
 
 class TestSuite(unittest.TestCase):
@@ -48,9 +48,9 @@ class TestSuite(unittest.TestCase):
         SCENARIO:  The referer database does not exist.
 
         EXPECTED RESULT:  The referer database is initialized.  There should be
-        two tables, "logs" and "known_referers".
+        six tables.
         """
-        r = RefererProcessor('idpgis')
+        r = ServicesProcessor('idpgis')
 
         sql = """
               SELECT name

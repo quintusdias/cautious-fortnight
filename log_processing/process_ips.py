@@ -49,7 +49,7 @@ class LogProcessor(object):
             \[(?P<timestamp>\d{2}/\w{3}/\d{4}:\d{2}:\d{2}:\d{2}\s(\+|-)\d{4})\]
             \s
             # The request
-            "(?P<request_op>(GET|HEAD|OPTIONS|POST))
+            "(?P<request_op>(GET|HEAD|OPTIONS|POST|PROPFIND))
             \s
             (?P<path>.*?)
             \s

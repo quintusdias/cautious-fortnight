@@ -9,7 +9,7 @@ from unittest.mock import patch
 import pandas as pd
 
 # Local imports
-from arcgis_apache_logs import RefererProcessor
+from arcgis_apache_logs import IPAddressProcessor
 
 
 class TestSuite(unittest.TestCase):
@@ -47,10 +47,10 @@ class TestSuite(unittest.TestCase):
         """
         SCENARIO:  The referer database does not exist.
 
-        EXPECTED RESULT:  The referer database is initialized.  There should be
-        two tables, "logs" and "known_referers".
+        EXPECTED RESULT:  The IP address database is initialized.
+        There should be two tables, "logs" and "known_ip_addresses".
         """
-        r = RefererProcessor('idpgis')
+        r = IPAddressProcessor('idpgis')
 
         sql = """
               SELECT name
