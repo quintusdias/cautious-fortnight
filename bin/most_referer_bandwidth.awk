@@ -4,15 +4,7 @@
 #
 # Example usage:
 # 
-#   zcat apache_log.gz | awk -f most_referer_bandwidth_by_day.awk | sort -k1,1
-#
-# This may produce output that looks as follows:
-#
-#               Date           IP Address         MB    
-#  09/Jul/2018:00:00       66.223.179.138      13.66
-#  09/Jul/2018:00:01       66.223.179.138      14.13
-#  09/Jul/2018:00:02        216.38.80.221      15.29
-#
+#   zcat apache_log.gz | awk -f most_referer_bandwidth.awk
 #
 
 BEGIN {
