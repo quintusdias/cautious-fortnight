@@ -96,8 +96,34 @@ class TestSuite(unittest.TestCase):
 
         self.assertTrue(p.logger.info.call_count > 1)
 
-    def test_delete(self, mock_logger):
-        self.fail()
+    def test_deleteme(self, mock_logger):
+        """
+        SCENARIO:  the request path shows the command was DELETEME, which is
+        not a recognized HTTP REST command.
 
-    def test_propfind(self, mock_logger):
-        self.fail()
+        EXPECTED RESULT:  The error logger is invoked.
+        """
+        text = ir.read_text('tests.data', 'deleteme.dat')
+        s = io.StringIO(text)
+
+        p = ApacheLogParser('idpgis', s)
+        p.run()
+
+        self.assertEqual(p.logger.warning.call_count, 1)
+
+    def test_out_of_order(self, mock_logger):
+        """
+        SCENARIO:  The records are out of order.
+
+        EXPECTED RESULT:  The time series retrieved from the database are in
+        order.
+        """
+        text = ir.read_text('tests.data', 'out_of_order.dat')
+        s = io.StringIO(text)
+
+        p = ApacheLogParser('idpgis', s)
+        p.run()
+
+        p.referer.get_timeseries()
+
+        self.assertTrue(p.referer.df.date.is_monotonic)

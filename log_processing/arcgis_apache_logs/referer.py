@@ -5,8 +5,6 @@ import datetime as dt
 import urllib.parse
 
 # 3rd party library imports
-from lxml import etree
-import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 import numpy as np
 import pandas as pd
@@ -38,6 +36,8 @@ class RefererProcessor(CommonProcessor):
         Path to database
     project : str
         Either nowcoast or idpgis
+    time_series_sql : str
+        SQL to collect a coherent timeseries of folder/service information.
     """
     def __init__(self, project, **kwargs):
         """
@@ -48,10 +48,15 @@ class RefererProcessor(CommonProcessor):
         """
         super().__init__(project, **kwargs)
 
-        sql = """
-              SELECT * from known_referers
-              """
-        self.known_referers = pd.read_sql(sql, self.conn)
+        self.time_series_sql = """
+            SELECT a.date, SUM(a.hits) as hits, SUM(a.errors) as errors,
+                   SUM(a.nbytes) as nbytes, b.name as referer
+            FROM referer_logs a
+            INNER JOIN known_referers b
+            ON a.id = b.id
+            GROUP BY a.date, referer
+            ORDER BY a.date
+            """
 
     def process_match(self, apache_match):
         """
@@ -77,10 +82,6 @@ class RefererProcessor(CommonProcessor):
         processing.  Turn what we have into a dataframe and aggregate it
         to the appropriate granularity.
         """
-        self.db_access_count += 1
-        msg = f'processing batch of referer records: {self.db_access_count}'
-        self.logger.info(msg)
-
         columns = ['date', 'referer', 'hits', 'errors', 'nbytes']
         df = pd.DataFrame(self.records, columns=columns)
 
@@ -113,6 +114,9 @@ class RefererProcessor(CommonProcessor):
         df = self.replace_referers_with_ids(df)
 
         # Ok, suitable to send to the database now.
+        msg = f'Logging {len(df)} referer records to database.'
+        self.logger.info(msg)
+
         df.to_sql('referer_logs', self.conn, if_exists='append', index=False)
         self.conn.commit()
 
@@ -138,6 +142,10 @@ class RefererProcessor(CommonProcessor):
         unknown_referers = df['referer'][df['id'].isnull()].unique()
         if len(unknown_referers) > 0:
             new_df = pd.Series(unknown_referers, name='name').to_frame()
+
+            msg = f'Logging {len(new_df)} new referer records.'
+            self.logger.info(msg)
+
             new_df.to_sql('known_referers', self.conn,
                           if_exists='append', index=False)
 
@@ -152,31 +160,11 @@ class RefererProcessor(CommonProcessor):
 
         return df
 
-    def get_timeseries(self):
-
-        sql = """
-              SELECT a.date, a.hits, a.errors, a.nbytes,
-                     b.name as referer
-              FROM referer_logs a
-              INNER JOIN known_referers b
-              ON a.id = b.id
-              """
-        df = pd.read_sql(sql, self.conn)
-
-        df = df.groupby(['date', 'referer']).sum().reset_index()
-
-        # Right now the 'date' column is in timestamp form.  We need that
-        # in native datetime.
-        df['date'] = pd.to_datetime(df['date'], unit='s')
-
-        self.df = df
-        self.df_today = self.df[self.df.date.dt.day == self.df.date.max().day]
-
     def process_graphics(self, html_doc):
         self.get_timeseries()
-        self.create_referer_table(html_doc)
-        self.create_referer_hits_plot(html_doc)
-        self.create_referer_bytes_plot(html_doc)
+        self.summarize_referers(html_doc)
+        self.summarize_transactions(html_doc)
+        self.summarize_bandwidth(html_doc)
 
     def get_top_referers(self):
         # who are the top referers for today?
@@ -191,7 +179,7 @@ class RefererProcessor(CommonProcessor):
 
         return top_referers
 
-    def create_referer_bytes_plot(self, html_doc):
+    def summarize_bandwidth(self, html_doc):
         """
         Create a PNG showing the top referers (bytes) over the last few days.
         """
@@ -206,37 +194,13 @@ class RefererProcessor(CommonProcessor):
 
         df = df.pivot(index='date', columns='referer', values='nbytes')
 
-        fig, ax = plt.subplots(figsize=(15, 5))
+        kwargs = {
+            'title': 'GBytes per Hour',
+            'imagefile': 'referers_bytes.png',
+        }
+        self.create_bandwidth_output(df, html_doc, **kwargs)
 
-        df.plot(ax=ax, legend=None)
-
-        # ax.xaxis.set_major_locator(mdates.WeekdayLocator())
-
-        # formatter = mdates.DateFormatter('%b %d')
-        # ax.xaxis.set_major_formatter(formatter)
-        # plt.setp(ax.xaxis.get_majorticklabels(), rotation=20, ha="right")
-        # days_fmt = mdates.DateFormatter('%d\n%b\n%Y')
-        # hours = mdates.HourLocator()
-        # ax.xaxis.set_minor_locator(hours)
-
-        ax.set_title('GBytes per Hour')
-
-        # Shrink the axis to put the legend outside.
-        box = ax.get_position()
-        ax.set_position([box.x0, box.y0, box.width * 0.65, box.height])
-        handles, labels = ax.get_legend_handles_labels()
-        ax.legend(handles[::-1], labels[::-1], loc='center left',
-                  bbox_to_anchor=(1, 0.5))
-
-        path = self.root / 'referers_bytes.png'
-
-        plt.savefig(path)
-
-        body = html_doc.xpath('body')[0]
-        div = etree.SubElement(body, 'div')
-        etree.SubElement(div, 'img', src='referers_bytes.png')
-
-    def create_referer_hits_plot(self, html_doc):
+    def summarize_transactions(self, html_doc):
         """
         Create a PNG showing the top referers over the last few days.
         """
@@ -253,40 +217,14 @@ class RefererProcessor(CommonProcessor):
 
         df = df.pivot(index='date', columns='referer', values='hits')
 
-        fig, ax = plt.subplots(figsize=(15, 5))
+        kwargs = {
+            'title': 'Hits per Hour (not including errors)',
+            'filename': 'referers_hits.png',
+            'yaxis_formatter': FuncFormatter(millions_fcn),
+        }
+        self.create_transactions_output(df, html_doc, **kwargs)
 
-        df.plot(ax=ax, legend=None)
-
-        # ax.xaxis.set_major_locator(mdates.WeekdayLocator())
-
-        # formatter = mdates.DateFormatter('%b %d')
-        # ax.xaxis.set_major_formatter(formatter)
-        # plt.setp(ax.xaxis.get_majorticklabels(), rotation=20, ha="right")
-        # days_fmt = mdates.DateFormatter('%d\n%b\n%Y')
-        # hours = mdates.HourLocator()
-        # ax.xaxis.set_minor_locator(hours)
-
-        formatter = FuncFormatter(millions_fcn)
-        ax.yaxis.set_major_formatter(formatter)
-
-        ax.set_title('Hits per Hour (not including errors)')
-
-        # Shrink the axis to put the legend outside.
-        box = ax.get_position()
-        ax.set_position([box.x0, box.y0, box.width * 0.65, box.height])
-        handles, labels = ax.get_legend_handles_labels()
-        ax.legend(handles[::-1], labels[::-1], loc='center left',
-                  bbox_to_anchor=(1, 0.5))
-
-        path = self.root / 'referers_hits.png'
-
-        plt.savefig(path)
-
-        body = html_doc.xpath('body')[0]
-        div = etree.SubElement(body, 'div')
-        etree.SubElement(div, 'img', src='referers_hits.png')
-
-    def create_referer_table(self, html_doc):
+    def summarize_referers(self, html_doc):
         """
         Calculate
 
@@ -327,24 +265,10 @@ class RefererProcessor(CommonProcessor):
         df = df[reordered_cols]
         df = df.sort_values(by='hits', ascending=False).head(15)
 
-        table, table_css = self.extract_html_table_from_dataframe(df)
-
-        # extract the CSS and place into our own document.
-        style = html_doc.xpath('head/style')[0]
-        style.text = style.text + '\n' + table_css
-
-        body = html_doc.xpath('body')[0]
-        div = etree.SubElement(body, 'div')
-        etree.SubElement(div, 'hr')
-        a = etree.SubElement(div, 'a', name='referers')
-        h1 = etree.SubElement(div, 'h1')
-
-        # Add to the table of contents.
-        toc = html_doc.xpath('body/ul[@class="tableofcontents"]')[0]
-        li = etree.SubElement(toc, 'li')
-        a = etree.SubElement(li, 'a', href='#referers')
-        a.text = 'Top Referers'
-
         yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
-        h1.text = f'Top Referers by Hits: {yesterday}'
-        div.append(table)
+        kwargs = {
+            'aname': 'referers',
+            'atext': 'Top Referers',
+            'h1text': f'Top Referers by Hits: {yesterday}'
+        }
+        self.create_html_table(df, html_doc, **kwargs)

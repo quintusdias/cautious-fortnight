@@ -24,8 +24,8 @@ class ApacheLogParser(object):
         The apache log file (can be stdin).
     logger : object
         Log any pertinent events.
-    apache_regex : object
-        Parses lines from the apache log files.
+    regex : object
+        Regular expression for parsing entries from the apache log files.
     project : str
         Either nowcoast or idpgis
     """
@@ -55,7 +55,7 @@ class ApacheLogParser(object):
             \[(?P<timestamp>\d{2}/\w{3}/\d{4}:\d{2}:\d{2}:\d{2}\s(\+|-)\d{4})\]
             \s
             # The request
-            "(?P<request_op>(GET|HEAD|OPTIONS|POST|PROPFIND))
+            "(?P<request_op>(GET|DELETE|HEAD|OPTIONS|POST|PROPFIND))
             \s
             (?P<path>.*?)
             \s
@@ -113,7 +113,13 @@ class ApacheLogParser(object):
         for line in self.infile:
             m = self.regex.match(line)
             if m is None:
-                self.logger.log(line, logging.WARNING)
+                msg = (
+                    "This line from the apache log files was not matched.\n"
+                    "\n"
+                    "{line}"
+                )
+                self.logger.warning(msg)
+                continue
 
             self.ip_address.process_match(m)
             self.referer.process_match(m)

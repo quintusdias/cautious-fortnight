@@ -1,10 +1,7 @@
 # Standard library imports
 import datetime as dt
-import sqlite3
 
 # 3rd party library imports
-from lxml import etree
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -13,6 +10,12 @@ from .common import CommonProcessor
 
 
 class IPAddressProcessor(CommonProcessor):
+    """
+    Attributes
+    ----------
+    time_series_sql : str
+        SQL to collect a coherent timeseries of folder/service information.
+    """
 
     def __init__(self, project, **kwargs):
         """
@@ -20,6 +23,16 @@ class IPAddressProcessor(CommonProcessor):
         ----------
         """
         super().__init__(project, **kwargs)
+
+        self.time_series_sql = """
+            SELECT a.date, SUM(a.hits) as hits, SUM(a.errors) as errors,
+                   SUM(a.nbytes) as nbytes, b.ip_address
+            FROM ip_address_logs a
+            INNER JOIN known_ip_addresses b
+            ON a.id = b.id
+            GROUP BY a.date, b.ip_address
+            ORDER BY a.date
+            """
 
     def process_match(self, apache_match):
         """
@@ -49,10 +62,6 @@ class IPAddressProcessor(CommonProcessor):
         processing.  Turn what we have into a dataframe and aggregate it
         to the appropriate granularity.
         """
-        self.db_access_count += 1
-        msg = f'processing batch of IP address records: {self.db_access_count}'
-        self.logger.info(msg)
-
         columns = ['date', 'ip_address', 'hits', 'errors', 'nbytes']
         df = pd.DataFrame(self.records, columns=columns)
 
@@ -70,6 +79,9 @@ class IPAddressProcessor(CommonProcessor):
         df = self.replace_ip_addresses_with_ids(df)
 
         # Ok, suitable to send to the database now.
+        msg = f'Logging {len(df)} IP address records to database.'
+        self.logger.info(msg)
+
         df.to_sql('ip_address_logs', self.conn,
                   if_exists='append', index=False)
         self.conn.commit()
@@ -95,6 +107,10 @@ class IPAddressProcessor(CommonProcessor):
         unknown_ips = df['ip_address'][df['id'].isnull()].unique()
         if len(unknown_ips) > 0:
             new_ips_df = pd.Series(unknown_ips, name='ip_address').to_frame()
+
+            msg = f'Logging {len(new_ips_df)} new IP address records.'
+            self.logger.info(msg)
+
             new_ips_df.to_sql('known_ip_addresses', self.conn,
                               if_exists='append', index=False)
 
@@ -128,11 +144,12 @@ class IPAddressProcessor(CommonProcessor):
                         .tolist()
         top_ips = set(top5_hits + top5_nbytes)
 
-        self.create_ip_table(top_ips, html_doc)
-        self.create_ip_plot_by_hits(top_ips, html_doc)
-        self.create_ip_plot_by_nbytes(top_ips, html_doc)
+        self.summarize_ip_addresses(top_ips, html_doc)
+        self.summarize_transactions(top_ips, html_doc)
+        self.summarize_bandwidth(top_ips, html_doc)
 
-    def create_ip_plot_by_hits(self, top_ips, html_doc):
+    def summarize_transactions(self, top_ips, html_doc):
+
         df = self.df[self.df['ip_address'].isin(top_ips)]
         df = df.pivot(index='date', columns='ip_address', values='hits')
 
@@ -140,30 +157,13 @@ class IPAddressProcessor(CommonProcessor):
         ordered_cols = df.max().sort_values(ascending=False).index.values
         df = df[ordered_cols]
 
-        fig, ax = plt.subplots(figsize=(15, 5))
-        df.plot(ax=ax)
+        kwargs = {
+            'title': 'Top IPs:  Hits per Hour',
+            'filename': 'top_ip_hits.png',
+        }
+        self.create_transactions_output(df, html_doc, **kwargs)
 
-        ax.set_title(f'Top IPs:  Hits per Hour')
-
-        # Shrink the axis to put the legend outside.
-        box = ax.get_position()
-        ax.set_position([box.x0, box.y0, box.width * 0.65, box.height])
-        handles, labels = ax.get_legend_handles_labels()
-        # handles = handles[::-1][:10]
-        # labels = labels[::-1][:10]
-        ax.legend(handles, labels, loc='center left', bbox_to_anchor=(1, 0.5))
-
-        path = self.root / f'top_ip_hits.png'
-        if path.exists():
-            path.unlink()
-
-        plt.savefig(path)
-
-        body = html_doc.xpath('body')[0]
-        div = etree.SubElement(body, 'div')
-        etree.SubElement(div, 'img', src=f"{path.stem}{path.suffix}")
-
-    def create_ip_plot_by_nbytes(self, top_ips, html_doc):
+    def summarize_bandwidth(self, top_ips, html_doc):
         """
         Create plot of bandwidth usage of top IP addresses.
 
@@ -182,30 +182,13 @@ class IPAddressProcessor(CommonProcessor):
         ordered_cols = df.max().sort_values(ascending=False).index.values
         df = df[ordered_cols]
 
-        fig, ax = plt.subplots(figsize=(15, 5))
-        df.plot(ax=ax)
+        kwargs = {
+            'title': 'Top IPs:  MBytes per Hour',
+            'imagefile': 'top_ip_nbytes.png'
+        }
+        self.create_bandwidth_output(df, html_doc, **kwargs)
 
-        ax.set_title(f'Top IPs:  MBytes per Hour')
-
-        # Shrink the axis to put the legend outside.
-        box = ax.get_position()
-        ax.set_position([box.x0, box.y0, box.width * 0.65, box.height])
-        handles, labels = ax.get_legend_handles_labels()
-        # handles = handles[::-1][:10]
-        # labels = labels[::-1][:10]
-        ax.legend(handles, labels, loc='center left', bbox_to_anchor=(1, 0.5))
-
-        path = self.root / f'top_ip_nbytes.png'
-        if path.exists():
-            path.unlink()
-
-        plt.savefig(path)
-
-        body = html_doc.xpath('body')[0]
-        div = etree.SubElement(body, 'div')
-        etree.SubElement(div, 'img', src=f"{path.stem}{path.suffix}")
-
-    def create_ip_table(self, top_ips, html_doc):
+    def summarize_ip_addresses(self, top_ips, html_doc):
         df = self.df_today.copy().groupby('ip_address').sum()
 
         total_hits = df['hits'].sum()
@@ -239,44 +222,10 @@ class IPAddressProcessor(CommonProcessor):
 
         df = df.sort_values(by='hits', ascending=False)
 
-        table, css = self.extract_html_table_from_dataframe(df)
-
-        # Put the CSS into place in our own document.
-        style = html_doc.xpath('head/style')[0]
-        style.text = style.text + '\n' + css
-
-        body = html_doc.xpath('body')[0]
-        etree.SubElement(body, 'hr')
-        div = etree.SubElement(body, 'div')
-        a = etree.SubElement(div, 'a', name='iptable')
-        h1 = etree.SubElement(div, 'h1')
-
-        # Add to the table of contents.
-        toc = html_doc.xpath('body/ul[@class="tableofcontents"]')[0]
-        li = etree.SubElement(toc, 'li')
-        a = etree.SubElement(li, 'a', href='#iptable')
-        a.text = 'Top IPs Table'
-
         yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
-        h1.text = f'Top IPs by Hits: {yesterday}'
-        div.append(table)
-
-    def get_timeseries(self):
-
-        sql = """
-              SELECT a.date, a.hits, a.errors, a.nbytes,
-                     b.ip_address
-              FROM ip_address_logs a
-              INNER JOIN known_ip_addresses b
-              ON a.id = b.id
-              """
-        df = pd.read_sql(sql, self.conn)
-
-        df = df.groupby(['date', 'ip_address']).sum().reset_index()
-
-        # Right now the 'date' column is in timestamp form.  We need that
-        # in native datetime.
-        df['date'] = pd.to_datetime(df['date'], unit='s')
-
-        self.df = df
-        self.df_today = self.df[self.df.date.dt.day == self.df.date.max().day]
+        kwargs = {
+            'aname': 'iptable',
+            'atext': 'Top IPs Table',
+            'h1text': f'Top IP Addresses by Hits: {yesterday}',
+        }
+        self.create_html_table(df, html_doc, **kwargs)

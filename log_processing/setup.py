@@ -1,6 +1,4 @@
 # Standard library imports ...
-import pathlib
-import re
 
 # Third party library imports ...
 from setuptools import setup

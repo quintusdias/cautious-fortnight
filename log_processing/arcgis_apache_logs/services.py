@@ -4,8 +4,7 @@ import re
 
 # 3rd party libraries
 from lxml import etree
-import matplotlib.pyplot as plt
-from matplotlib.ticker import FuncFormatter
+from matplotlib.ticker import FuncFormatter, NullFormatter
 import numpy as np
 import pandas as pd
 
@@ -19,6 +18,8 @@ class ServicesProcessor(CommonProcessor):
     ----------
     regex : object
         Parses arcgis folders, services, types from the request path.
+    time_series_sql : str
+        SQL to collect a coherent timeseries of folder/service information.
     """
     def __init__(self, project, **kwargs):
         """
@@ -38,6 +39,16 @@ class ServicesProcessor(CommonProcessor):
                    '''
         self.regex = re.compile(pattern, re.VERBOSE)
 
+        self.time_series_sql = """
+            SELECT
+                a.date, SUM(a.hits) as hits, SUM(a.errors) as errors,
+                SUM(a.nbytes) as nbytes, b.folder, b.service
+            FROM service_logs a
+            INNER JOIN known_services b
+            ON a.id = b.id
+            GROUP BY a.date, b.folder, b.service
+            ORDER BY a.date
+            """
         self.records = []
 
     def process_match(self, apache_match):
@@ -72,10 +83,6 @@ class ServicesProcessor(CommonProcessor):
         processing.  Turn what we have into a dataframe and aggregate it
         to the appropriate granularity.
         """
-        self.db_access_count += 1
-        msg = f'processing batch of raw records: {self.db_access_count}'
-        self.logger.info(msg)
-
         columns = [
             'date', 'folder', 'service', 'hits', 'errors', 'nbytes'
         ]
@@ -96,6 +103,9 @@ class ServicesProcessor(CommonProcessor):
 
         # Have to have the same column names as the database.
         df = self.replace_folders_and_services_with_ids(df)
+
+        msg = f'Logging {len(df)} service records to database.'
+        self.logger.info(msg)
 
         df.to_sql('service_logs', self.conn, if_exists='append', index=False)
         self.conn.commit()
@@ -122,6 +132,10 @@ class ServicesProcessor(CommonProcessor):
         new = new.groupby(['folder', 'service']).count().reset_index()
 
         if len(new) > 0:
+
+            msg = f'Logging {len(new)} service records.'
+            self.logger.info(msg)
+
             new.to_sql('known_services', self.conn,
                        if_exists='append', index=False)
 
@@ -141,29 +155,18 @@ class ServicesProcessor(CommonProcessor):
     def process_graphics(self, html_doc):
         self.get_timeseries()
         self.create_services_table(html_doc)
-        self.create_services_hits_plot(html_doc)
 
-    def get_timeseries(self):
+        # Link in a folder list.
+        toc = html_doc.xpath('body/ul[@class="tableofcontents"]')[0]
+        li = etree.SubElement(toc, 'li')
+        li.text = 'Folders'
 
-        sql = """
-              SELECT
-                  a.date, a.hits, a.errors, a.nbytes, b.folder, b.service
-              FROM service_logs a
-              INNER JOIN known_services b
-              ON a.id = b.id
-              """
-        df = pd.read_sql(sql, self.conn)
+        ul = etree.Element('ul', id='services')
+        li[:] = [ul]
 
-        df = df.groupby(['date', 'folder', 'service']).sum().reset_index()
+        self.summarize_transactions(html_doc)
 
-        # Right now the 'date' column is in timestamp form.  We need that
-        # in native datetime.
-        df['date'] = pd.to_datetime(df['date'], unit='s')
-
-        self.df = df
-        self.df_today = self.df[self.df.date.dt.day == self.df.date.max().day]
-
-    def create_services_hits_plot(self, html_doc):
+    def summarize_transactions(self, html_doc):
         """
         Create a PNG showing the services over the last few days.
         """
@@ -184,8 +187,6 @@ class ServicesProcessor(CommonProcessor):
             # Set the plot order according to the max values of the services.
             df = df[df.max().sort_values().index.values]
 
-            fig, ax = plt.subplots(figsize=(15, 5))
-
             service_max = df.max()
             folder_max = service_max.max()
 
@@ -194,47 +195,20 @@ class ServicesProcessor(CommonProcessor):
 
             if folder_max <= 1:
                 continue
-
-            df.plot(ax=ax, legend=None)
-            # what is the scale of the data?
-            if folder_max < 1000:
-                # Don't bother setting this.
-                pass
+            elif folder_max < 1000:
+                formatter = NullFormatter()
             elif folder_max < 1000000:
                 formatter = FuncFormatter(thousands_fcn)
             else:
                 formatter = FuncFormatter(millions_fcn)
-                ax.yaxis.set_major_formatter(formatter)
 
-            ax.set_title(f'{folder} folder:  Hits per Hour')
-
-            # Shrink the axis to put the legend outside.
-            box = ax.get_position()
-            ax.set_position([box.x0, box.y0, box.width * 0.65, box.height])
-            handles, labels = ax.get_legend_handles_labels()
-            handles = handles[::-1][:7]
-            labels = labels[::-1][:7]
-            ax.legend(handles, labels, loc='center left',
-                      bbox_to_anchor=(1, 0.5))
-
-            path = self.root / f'{folder}_hits.png'
-            if path.exists():
-                path.unlink()
-
-            plt.savefig(path)
-
-            body = html_doc.xpath('body')[0]
-            div = etree.SubElement(body, 'div')
-            a = etree.SubElement(div, 'a', name=folder)
-            h2 = etree.SubElement(div, 'h2')
-            h2.text = folder
-            etree.SubElement(div, 'img', src=f"{path.stem}{path.suffix}")
-
-            # Link us in to the table of contents.
-            ul = body.xpath('.//ul[@id="services"]')[0]
-            li = etree.SubElement(ul, 'li')
-            a = etree.SubElement(li, 'a', href=f'#{folder}')
-            a.text = folder
+            kwargs = {
+                'title': f'{folder} folder:  Hits per Hour',
+                'filename': f'{folder}_hits.png',
+                'yaxis_formatter': formatter,
+                'folder': folder,
+            }
+            self.create_transactions_output(df, html_doc, **kwargs)
 
     def create_services_table(self, html_doc):
         """
@@ -277,25 +251,10 @@ class ServicesProcessor(CommonProcessor):
 
         df = df.sort_values(by='hits', ascending=False)
 
-        table, table_css = self.extract_html_table_from_dataframe(df)
-
-        # extract the CSS and place into our own document.
-        style = html_doc.xpath('head/style')[0]
-        style.text = style.text + '\n' + table_css
-
-        body = html_doc.xpath('body')[0]
-        etree.SubElement(body, 'hr')
-        div = etree.SubElement(body, 'div')
-        a = etree.SubElement(div, 'a', name='servicestable')
-        h1 = etree.SubElement(div, 'h1')
-
-        # Add to the table of contents.
-        toc = html_doc.xpath('body/ul[@class="tableofcontents"]')[0]
-        li = etree.SubElement(toc, 'li')
-        a = etree.SubElement(li, 'a', href='#servicestable')
-        a.text = 'Services Table'
-        etree.SubElement(li, 'ul', id='services')
-
         yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
-        h1.text = f'Services by Hits: {yesterday}'
-        div.append(table)
+        kwargs = {
+            'aname': 'servicetable',
+            'atext': 'Services Table',
+            'h1text': f'Services by Hits: {yesterday}',
+        }
+        self.create_html_table(df, html_doc, **kwargs)
