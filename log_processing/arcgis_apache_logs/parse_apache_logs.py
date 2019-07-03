@@ -10,14 +10,13 @@ import lxml.etree
 from .ip_address import IPAddressProcessor
 from .referer import RefererProcessor
 from .services import ServicesProcessor
+from .summary import SummaryProcessor
 
 
 class ApacheLogParser(object):
     """
     Attributes
     ----------
-    conn, cursor : obj
-        database connectivity
     database_file : path or str
         Path to database
     infile : file-like
@@ -29,7 +28,7 @@ class ApacheLogParser(object):
     project : str
         Either nowcoast or idpgis
     """
-    def __init__(self, project, infile):
+    def __init__(self, project, infile=None):
         """
         Parameters
         ----------
@@ -81,6 +80,7 @@ class ApacheLogParser(object):
         self.ip_address = IPAddressProcessor(self.project, logger=self.logger)
         self.referer = RefererProcessor(self.project, logger=self.logger)
         self.services = ServicesProcessor(self.project, logger=self.logger)
+        self.summarizer = SummaryProcessor(self.project, logger=self.logger)
 
         self.root = pathlib.Path.home() / 'Documents' / 'arcgis_apache_logs'
 
@@ -110,13 +110,30 @@ class ApacheLogParser(object):
 
     def run(self):
 
+        self.preprocess_database()
+        self.parse_input()
+        self.process_graphics()
+
+    def preprocess_database(self):
+        """
+        Do any cleaning necessary before processing any new records.
+        """
+
+        self.ip_address.preprocess_database()
+        self.referer.preprocess_database()
+        self.services.preprocess_database()
+
+    def parse_input(self):
+        if self.infile is None:
+            return
+
         for line in self.infile:
             m = self.regex.match(line)
             if m is None:
                 msg = (
-                    "This line from the apache log files was not matched.\n"
-                    "\n"
-                    "{line}"
+                    f"This line from the apache log files was not matched.\n"
+                    f"\n"
+                    f"{line}"
                 )
                 self.logger.warning(msg)
                 continue
@@ -129,10 +146,9 @@ class ApacheLogParser(object):
         self.referer.flush()
         self.services.flush()
 
-        self.process_graphics()
-
     def process_graphics(self):
 
+        self.summarizer.process_graphics(self.doc)
         self.referer.process_graphics(self.doc)
         self.services.process_graphics(self.doc)
         self.ip_address.process_graphics(self.doc)

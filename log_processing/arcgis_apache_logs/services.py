@@ -4,12 +4,21 @@ import re
 
 # 3rd party libraries
 from lxml import etree
-from matplotlib.ticker import FuncFormatter, NullFormatter
 import numpy as np
 import pandas as pd
 
 # Local imports
-from .common import CommonProcessor, thousands_fcn, millions_fcn
+from .common import CommonProcessor
+
+VERIFIED_FOLDERS = {
+    'idpgis': [
+        'NMFS', 'NOAA', 'NOS', 'NOS_Biogeo_Biomapper', 'NOS_ESI',
+        'NOS_Observations', 'NWS', 'NWS_Climate_Outlooks',
+        'NWS_Forecasts_Guidance_Warnings', 'NWS_Observations', 'NWS_Tropical',
+        'radar'
+    ],
+    'nowcoast': ['nowcoast'],
+}
 
 
 class ServicesProcessor(CommonProcessor):
@@ -50,6 +59,8 @@ class ServicesProcessor(CommonProcessor):
             ORDER BY a.date
             """
         self.records = []
+
+        self.verified_folders = VERIFIED_FOLDERS[self.project]
 
     def verify_database_setup(self):
         """
@@ -185,6 +196,9 @@ class ServicesProcessor(CommonProcessor):
         new = df[['folder', 'service']][df['id'].isnull()]
         new = new.groupby(['folder', 'service']).count().reset_index()
 
+        # Make sure these new folders are all valid folders.
+        new = new[new['folder'].isin(self.verified_folders)]
+
         if len(new) > 0:
 
             msg = f'Logging {len(new)} service records.'
@@ -238,28 +252,27 @@ class ServicesProcessor(CommonProcessor):
 
             df = df.pivot(index='date', columns='service', values='hits')
 
-            # Set the plot order according to the max values of the services.
-            df = df[df.max().sort_values().index.values]
+            # Order them by max value.
+            s = df.max().sort_values(ascending=False)
+            df = df[s.index]
 
             service_max = df.max()
-            folder_max = service_max.max()
 
-            # Drop any services where the total hits are zero.
-            df = df.drop(service_max[service_max == 0].index.values, axis=1)
-
-            if folder_max <= 1:
+            # Drop any services where the total hits too low.
+            df = df.drop(service_max[service_max <= 1].index.values, axis=1)
+            if df.shape[1] == 0:
                 continue
-            elif folder_max < 1000:
-                formatter = NullFormatter()
-            elif folder_max < 1000000:
-                formatter = FuncFormatter(thousands_fcn)
+
+            if df.max().max() > 3600:
+                # Rescale to from hits/hour to hits/second
+                df /= 3600
+                title = f'{folder} folder:  Hits per second'
             else:
-                formatter = FuncFormatter(millions_fcn)
+                title = f'{folder} folder:  Hits per hour'
 
             kwargs = {
-                'title': f'{folder} folder:  Hits per Hour',
+                'title': title,
                 'filename': f'{folder}_hits.png',
-                'yaxis_formatter': formatter,
                 'folder': folder,
             }
             self.write_html_and_image_output(df, html_doc, **kwargs)
@@ -293,13 +306,13 @@ class ServicesProcessor(CommonProcessor):
 
         # Reorder the columns
         reordered_cols = [
-            'GBytes',
-            'GBytes %',
             'hits',
             'hits %',
+            'GBytes',
+            'GBytes %',
             'errors',
             'errors: % of all hits',
-            'errors: % of all errors'
+            'errors: % of all errors',
         ]
         df = df[reordered_cols]
 
@@ -312,3 +325,17 @@ class ServicesProcessor(CommonProcessor):
             'h1text': f'Services by Hits: {yesterday}',
         }
         self.create_html_table(df, html_doc, **kwargs)
+
+    def preprocess_database(self):
+        """
+        Do any cleaning necessary before processing any new records.
+
+        Delete anything older than 30 days.
+        """
+        sql = """
+              DELETE FROM service_logs WHERE date < ?
+              """
+        datenum = (dt.datetime.now() - dt.timedelta(days=30)).timestamp()
+        cursor = self.conn.cursor()
+        cursor.execute(sql, (datenum,))
+        self.conn.commit()

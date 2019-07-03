@@ -14,24 +14,9 @@ do
     get_akamai_logs $project
     
     # Process files just recently downloaded
-    files_to_process=$(find "$root" -mmin -60 -name "*.gz")
+    files_to_process=$(find "$root" -mmin -60 -name "*.gz" | sort)
     
-    # for filename in $files_to_process
-    # do
-    #     echo processing $filename
-    #     gzip -dc "$filename" \
-    #         | tee \
-    #             >(python process_ips.py $project -) \
-    #             >(python process_referer.py $project -) \
-    #             >(python process_services.py $project -) \
-    #     	1> /dev/null
-    # done
-    gzip -dc $files_to_process \
-        | tee \
-            >(python process_ips.py $project -) \
-            >(python process_referer.py $project -) \
-            >(python process_services.py $project -) \
-    	1> /dev/null
+    zcat $files_to_process | parse-arcgis-apache-logs $project --infile -
 
     # Delete any files that are too old
     datestr=$(date +%Y%m%d --date="-10 days")

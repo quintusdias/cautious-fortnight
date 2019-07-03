@@ -5,7 +5,6 @@ import datetime as dt
 import urllib.parse
 
 # 3rd party library imports
-from matplotlib.ticker import FuncFormatter
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -63,53 +62,54 @@ class RefererProcessor(CommonProcessor):
         Verify that all the database tables are setup properly for managing
         the referers.
         """
+
+        cursor = self.conn.cursor()
+
+        # Do the referer tables exist?
         sql = """
               SELECT name
               FROM sqlite_master
               WHERE
                   type='table'
                   AND name NOT LIKE 'sqlite_%'
-                  AND name LIKE '%referer%'
               """
         df = pd.read_sql(sql, self.conn)
-        if len(df) == 2:
-            # We're good.
-            return
 
-        cursor = self.conn.cursor()
+        if 'known_referers' not in df.name.values:
 
-        # Create the known referers table.
-        sql = """
-              CREATE TABLE known_referers (
-                  id integer PRIMARY KEY,
-                  name text
-              )
-              """
-        cursor.execute(sql)
-        sql = """
-              CREATE UNIQUE INDEX idx_referer
-              ON known_referers(name)
-              """
-        cursor.execute(sql)
+            sql = """
+                  CREATE TABLE known_referers (
+                      id integer PRIMARY KEY,
+                      name text
+                  )
+                  """
+            cursor.execute(sql)
+            sql = """
+                  CREATE UNIQUE INDEX idx_referer
+                  ON known_referers(name)
+                  """
+            cursor.execute(sql)
 
-        sql = """
-              CREATE TABLE referer_logs (
-                  date integer,
-                  id integer,
-                  hits integer,
-                  errors integer,
-                  nbytes integer,
-                  FOREIGN KEY (id) REFERENCES known_referers(id)
-              )
-              """
-        cursor.execute(sql)
+        if 'known_referers' not in df.name.values:
 
-        # Unfortunately the index cannot be unique here.
-        sql = """
-              CREATE INDEX idx_referer_logs_date
-              ON referer_logs(date)
-              """
-        cursor.execute(sql)
+            sql = """
+                  CREATE TABLE referer_logs (
+                      date integer,
+                      id integer,
+                      hits integer,
+                      errors integer,
+                      nbytes integer,
+                      FOREIGN KEY (id) REFERENCES known_referers(id)
+                  )
+                  """
+            cursor.execute(sql)
+
+            # Unfortunately the index cannot be unique here.
+            sql = """
+                  CREATE INDEX idx_referer_logs_date
+                  ON referer_logs(date)
+                  """
+            cursor.execute(sql)
 
     def process_match(self, apache_match):
         """
@@ -158,22 +158,40 @@ class RefererProcessor(CommonProcessor):
 
         # Aggregate by the set frequency and referer, taking sums.
         groupers = [pd.Grouper(freq=self.frequency), 'referer']
-        df = df.set_index('date').groupby(groupers).sum().reset_index()
+        df_ref = df.set_index('date').groupby(groupers).sum().reset_index()
 
         # Remake the date into a single column, a timestamp
-        df['date'] = df['date'].astype(np.int64) // 1e9
+        first_date, last_date = df['date'].iloc[0], df['date'].iloc[-1]
+        df_ref['date'] = df_ref['date'].astype(np.int64) // 1e9
 
         # Have to have the same column names as the database.
-        df = self.replace_referers_with_ids(df)
+        df_ref = self.replace_referers_with_ids(df_ref)
 
         # Ok, suitable to send to the database now.
-        msg = f'Logging {len(df)} referer records to database.'
+        msg = (
+            f"Logging {len(df_ref)} referer records in the time range "
+            f"{first_date} - {last_date}"
+        )
         self.logger.info(msg)
 
-        df.to_sql('referer_logs', self.conn, if_exists='append', index=False)
+        df_ref.to_sql('referer_logs', self.conn,
+                      if_exists='append', index=False)
         self.conn.commit()
 
-        # Reset
+        # As a last step, aggregate the data without regard to the referer.
+        df_summary = (df.set_index('date')
+                        .resample(self.frequency)
+                        .sum()
+                        .reset_index())
+
+        # Remake the date into a single column, a timestamp
+        df_summary['date'] = df_summary['date'].astype(np.int64) // 1e9
+
+        df_summary.to_sql('summary', self.conn,
+                          if_exists='append', index=False)
+        self.conn.commit()
+
+        # Reset for the next round of records.
         self.records = []
 
     def replace_referers_with_ids(self, df_orig):
@@ -213,6 +231,20 @@ class RefererProcessor(CommonProcessor):
 
         return df
 
+    def preprocess_database(self):
+        """
+        Do any cleaning necessary before processing any new records.
+
+        Delete anything older than 7 days.
+        """
+        sql = """
+              DELETE FROM referer_logs WHERE date < ?
+              """
+        datenum = (dt.datetime.now() - dt.timedelta(days=7)).timestamp()
+        cursor = self.conn.cursor()
+        cursor.execute(sql, (datenum,))
+        self.conn.commit()
+
     def process_graphics(self, html_doc):
         self.get_timeseries()
         self.summarize_referers(html_doc)
@@ -247,9 +279,13 @@ class RefererProcessor(CommonProcessor):
 
         df = df.pivot(index='date', columns='referer', values='nbytes')
 
+        # Order them by max value.
+        s = df.max().sort_values(ascending=False)
+        df = df[s.index]
+
         kwargs = {
             'title': 'GBytes per Hour',
-            'filename': 'referers_bytes.png',
+            'filename': f'{self.project}_referers_bytes.png',
         }
         self.write_html_and_image_output(df, html_doc, **kwargs)
 
@@ -268,12 +304,20 @@ class RefererProcessor(CommonProcessor):
         df['hits'] = df['hits'] - df['errors']
         df = df[['date', 'referer', 'hits']]
 
+        # Rescale them from hits/hour to hits/second
+        df['hits'] /= 3600
+
         df = df.pivot(index='date', columns='referer', values='hits')
 
+        # Order them by max value.
+        s = df.max().sort_values(ascending=False)
+        df = df[s.index]
+
         kwargs = {
-            'title': 'Hits per Hour (not including errors)',
-            'filename': 'referers_hits.png',
-            'yaxis_formatter': FuncFormatter(millions_fcn),
+            'title': (
+                'Hits per Second (averaged per hour, not including errors)'
+            ),
+            'filename': f'{self.project}_referers_hits.png',
         }
         self.write_html_and_image_output(df, html_doc, **kwargs)
 
@@ -307,10 +351,10 @@ class RefererProcessor(CommonProcessor):
 
         # Reorder the columns
         reordered_cols = [
-            'GBytes',
-            'GBytes %',
             'hits',
             'hits %',
+            'GBytes',
+            'GBytes %',
             'errors',
             'errors: % of all hits',
             'errors: % of all errors'

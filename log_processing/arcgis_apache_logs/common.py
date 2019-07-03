@@ -131,7 +131,8 @@ class CommonProcessor(object):
 
     def write_html_and_image_output(self, df, html_doc, title=None,
                                     filename=None, yaxis_formatter=None,
-                                    folder=None):
+                                    folder=None, text=None):
+
         fig, ax = plt.subplots(figsize=(15, 5))
         df.plot(ax=ax)
 
@@ -145,32 +146,46 @@ class CommonProcessor(object):
         ax.set_position([box.x0, box.y0, box.width * 0.65, box.height])
 
         handles, labels = ax.get_legend_handles_labels()
+
+        # Restrict the legend to just the top seven labels.
+        handles = handles[:7]
+        labels = labels[:7]
         ax.legend(handles, labels, loc='center left', bbox_to_anchor=(1, 0.5))
 
         path = self.root / filename
-        if path.exists():
-            path.unlink()
-
         plt.savefig(path)
+        plt.close(fig)
 
+        # Create the HTML for the image.
         body = html_doc.xpath('body')[0]
         div = etree.SubElement(body, 'div')
-        etree.SubElement(div, 'img', src=f"{path.stem}{path.suffix}")
 
         if folder is not None:
 
-            body = html_doc.xpath('body')[0]
-            div = etree.SubElement(body, 'div')
             a = etree.SubElement(div, 'a', name=folder)
             h2 = etree.SubElement(div, 'h2')
             h2.text = folder
-            etree.SubElement(div, 'img', src=f"{path.stem}{path.suffix}")
+
+            if text is not None:
+                p = etree.SubElement(div, 'p')
+                p.text = text
+
+            etree.SubElement(div, 'img', src=filename)
 
             # Link us in to the table of contents.
             ul = body.xpath('.//ul[@id="services"]')[0]
             li = etree.SubElement(ul, 'li')
             a = etree.SubElement(li, 'a', href=f'#{folder}')
             a.text = folder
+
+        else:
+
+            if text is not None:
+                p = etree.SubElement(div, 'p')
+                p.text = text
+
+            a = etree.SubElement(div, 'a')
+            etree.SubElement(div, 'img', src=filename)
 
     def create_html_table(self, df, html_doc, atext=None, aname=None,
                           h1text=None):

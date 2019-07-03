@@ -206,15 +206,19 @@ class IPAddressProcessor(CommonProcessor):
 
     def summarize_transactions(self, top_ips, html_doc):
 
-        df = self.df[self.df['ip_address'].isin(top_ips)]
+        df = self.df[self.df['ip_address'].isin(top_ips)].copy()
+
+        # Rescale from hits/hour to hits/seconds.
+        df['hits'] /= 3600
+
         df = df.pivot(index='date', columns='ip_address', values='hits')
 
-        # Order the columns by the largest values.
-        ordered_cols = df.max().sort_values(ascending=False).index.values
-        df = df[ordered_cols]
+        # Order them by max value.
+        s = df.max().sort_values(ascending=False)
+        df = df[s.index]
 
         kwargs = {
-            'title': 'Top IPs:  Hits per Hour',
+            'title': 'Top IPs:  Hits per Second',
             'filename': 'top_ip_hits.png',
         }
         self.write_html_and_image_output(df, html_doc, **kwargs)
@@ -234,9 +238,9 @@ class IPAddressProcessor(CommonProcessor):
         df['nbytes'] /= (1024 * 1024)
         df = df.pivot(index='date', columns='ip_address', values='nbytes')
 
-        # Order the columns by the largest values.
-        ordered_cols = df.max().sort_values(ascending=False).index.values
-        df = df[ordered_cols]
+        # Order them by max value.
+        s = df.max().sort_values(ascending=False)
+        df = df[s.index]
 
         kwargs = {
             'title': 'Top IPs:  MBytes per Hour',
@@ -266,10 +270,10 @@ class IPAddressProcessor(CommonProcessor):
 
         # Reorder the columns
         reordered_cols = [
-            'GBytes',
-            'GBytes %',
             'hits',
             'hits %',
+            'GBytes',
+            'GBytes %',
             'errors',
             'errors: % of all hits',
             'errors: % of all errors'
@@ -285,3 +289,17 @@ class IPAddressProcessor(CommonProcessor):
             'h1text': f'Top IP Addresses by Hits: {yesterday}',
         }
         self.create_html_table(df, html_doc, **kwargs)
+
+    def preprocess_database(self):
+        """
+        Do any cleaning necessary before processing any new records.
+
+        Delete anything older than 7 days.
+        """
+        sql = """
+              DELETE FROM ip_address_logs WHERE date < ?
+              """
+        datenum = (dt.datetime.now() - dt.timedelta(days=7)).timestamp()
+        cursor = self.conn.cursor()
+        cursor.execute(sql, (datenum,))
+        self.conn.commit()

@@ -3,6 +3,12 @@
 # Third party library imports ...
 from setuptools import setup
 
+cmdline = 'arcgis_apache_logs.commandline'
+console_scripts = [
+    f'parse-arcgis-apache-logs={cmdline}:parse_arcgis_apache_logs',
+    f'produce-arcgis-apache-graphics={cmdline}:produce_arcgis_apache_graphics',
+],
+
 kwargs = {
     'name': 'ArcGIS-Apache-Logs',
     'description': 'Tools for processing ArcGIS Apache Logs',
@@ -11,9 +17,7 @@ kwargs = {
     'url': 'https://github.com/quintusdias/gis-monitoring',
     'packages': ['arcgis_apache_logs'],
     'entry_points': {
-        'console_scripts': [
-            'parse-arcgis-apache-logs=arcgis_apache_logs.commandline:parse_arcgis_apache_logs',
-        ],
+        'console_scripts': console_scripts,
     },
     'license': 'MIT',
     'install_requires': ['pandas', 'lxml', 'setuptools'],

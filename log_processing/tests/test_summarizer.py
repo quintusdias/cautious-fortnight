@@ -9,7 +9,7 @@ from unittest.mock import patch
 import pandas as pd
 
 # Local imports
-from arcgis_apache_logs import RefererProcessor
+from arcgis_apache_logs import SummaryProcessor
 
 
 class TestSuite(unittest.TestCase):
@@ -43,14 +43,14 @@ class TestSuite(unittest.TestCase):
 
         self.homedir_patcher.stop()
 
-    def test_referer_database_tables_not_initialized(self):
+    def test_summary_database_tables_not_initialized(self):
         """
         SCENARIO:  The database does not exist.
 
         EXPECTED RESULT:  The database is initialized.  There should be
-        two tables.
+        one tables.
         """
-        r = RefererProcessor('idpgis')
+        r = SummaryProcessor('idpgis')
 
         sql = """
               SELECT name
@@ -60,6 +60,6 @@ class TestSuite(unittest.TestCase):
               """
         actual = pd.read_sql(sql, r.conn)
 
-        table_names = ['known_referers', 'referer_logs']
+        table_names = ['summary']
         expected = pd.Series(table_names, name='name')
         pd.testing.assert_series_equal(actual['name'], expected)

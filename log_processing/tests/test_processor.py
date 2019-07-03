@@ -45,6 +45,26 @@ class TestSuite(unittest.TestCase):
 
         self.homedir_patcher.stop()
 
+    def test_bad_folder(self, mock_logger):
+        """
+        SCENARIO:  Seven IDPGIS log records are processed as the database is
+        initialized.  One of the seven records does not come from a recognized
+        folder.  The other six records all come from individual services.
+
+        EXPECTED RESULT:  The known_services table is populated with only six
+        records
+        """
+        text = ir.read_text('tests.data', 'one_invalid_folder.dat')
+        s = io.StringIO(text)
+
+        p = ApacheLogParser('idpgis', s)
+        p.run()
+
+        conn = p.referer.conn
+
+        df = pd.read_sql("SELECT * from known_services", conn)
+        self.assertEqual(df.shape[0], 6)
+
     def test_init_ten_records(self, mock_logger):
         """
         SCENARIO:  Ten IDPGIS log records are processed as the database is
@@ -65,6 +85,9 @@ class TestSuite(unittest.TestCase):
         has seven entries while the ip_logs table gets eight entries (the first
         two log entries are from the same source during the same hour, same
         for the 4th and 5th).
+
+        Since the referers are all "-", that means that the number of records
+        in the summary table match that of the referer_logs table.
 
         The logger should have been called at the INFO level a few times.
         """
@@ -93,6 +116,10 @@ class TestSuite(unittest.TestCase):
 
         df = pd.read_sql("SELECT * from ip_address_logs", conn)
         self.assertEqual(df.shape[0], 8)
+
+        # The data is resampled, so 23 records, one for each hour.
+        df = pd.read_sql("SELECT * from summary", conn)
+        self.assertEqual(df.shape[0], 23)
 
         self.assertTrue(p.logger.info.call_count > 1)
 
