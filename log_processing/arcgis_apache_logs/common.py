@@ -59,111 +59,13 @@ class CommonProcessor(object):
             self.root.mkdir(parents=True, exist_ok=True)
 
         self.database = self.root / f'arcgis_apache_{self.project}.db'
-        if not self.database.exists():
-            self.conn = self.create_database()
-        else:
-            self.conn = sqlite3.connect(self.database)
+        self.conn = sqlite3.connect(self.database)
+        self.verify_database_setup()
 
         self.MAX_RAW_RECORDS = 1000000
 
         self.records = []
         self.frequency = '1H'
-
-    def create_database(self):
-        """
-        Create an SQLITE database for the records.  There will be 6 tables.
-
-        Returns
-        -------
-        connection object
-        """
-        conn = sqlite3.connect(self.database)
-        cursor = conn.cursor()
-
-        # Create the known referers table.
-        sql = """
-              CREATE TABLE known_referers (
-                  id integer PRIMARY KEY,
-                  name text
-              )
-              """
-        cursor.execute(sql)
-        sql = """
-              CREATE UNIQUE INDEX idx_referer
-              ON known_referers(name)
-              """
-        cursor.execute(sql)
-
-        # Create the logs table.
-        sql = """
-              CREATE TABLE referer_logs (
-                  date integer,
-                  id integer,
-                  hits integer,
-                  errors integer,
-                  nbytes integer,
-                  FOREIGN KEY (id) REFERENCES known_referers(id)
-              )
-              """
-        cursor.execute(sql)
-
-        # Create the known IP addresses table.  The IP addresses must be
-        # unique.
-        sql = """
-              CREATE TABLE known_ip_addresses (
-                  id integer PRIMARY KEY,
-                  ip_address text,
-                  name text
-              )
-              """
-        cursor.execute(sql)
-        sql = """
-              CREATE UNIQUE INDEX idx_ip_address
-              ON known_ip_addresses(ip_address)
-              """
-        cursor.execute(sql)
-
-        # Create the IP address logs table.
-        sql = """
-              CREATE TABLE ip_address_logs (
-                  date integer,
-                  id integer,
-                  hits integer,
-                  errors integer,
-                  nbytes integer,
-                  FOREIGN KEY (id) REFERENCES known_ip_addresses(id)
-              )
-              """
-        cursor.execute(sql)
-
-        # Create the known services and logs tables.
-        sql = """
-              CREATE TABLE known_services (
-                  id integer PRIMARY KEY,
-                  folder text,
-                  service text
-              )
-              """
-        cursor.execute(sql)
-        sql = """
-              CREATE UNIQUE INDEX idx_services
-              ON known_services(folder, service)
-              """
-        cursor.execute(sql)
-
-        sql = """
-              CREATE TABLE service_logs (
-                  date integer,
-                  id integer,
-                  hits integer,
-                  errors integer,
-                  nbytes integer,
-                  FOREIGN KEY (id) REFERENCES known_services(id)
-              )
-              """
-        cursor.execute(sql)
-
-        return conn
 
     def extract_html_table_from_dataframe(self, df):
         """
@@ -227,34 +129,9 @@ class CommonProcessor(object):
         self.df = df
         self.df_today = self.df[self.df.date.dt.day == self.df.date.max().day]
 
-    def create_bandwidth_output(self, df, html_doc, title=None,
-                                imagefile=None):
-
-        fig, ax = plt.subplots(figsize=(15, 5))
-        df.plot(ax=ax)
-
-        ax.set_title(title)
-
-        # Shrink the axis to put the legend outside.
-        box = ax.get_position()
-        ax.set_position([box.x0, box.y0, box.width * 0.65, box.height])
-
-        handles, labels = ax.get_legend_handles_labels()
-        ax.legend(handles, labels, loc='center left', bbox_to_anchor=(1, 0.5))
-
-        path = self.root / imagefile
-        if path.exists():
-            path.unlink()
-
-        plt.savefig(path)
-
-        body = html_doc.xpath('body')[0]
-        div = etree.SubElement(body, 'div')
-        etree.SubElement(div, 'img', src=f"{path.stem}{path.suffix}")
-
-    def create_transactions_output(self, df, html_doc, title=None,
-                                   filename=None, yaxis_formatter=None,
-                                   folder=None):
+    def write_html_and_image_output(self, df, html_doc, title=None,
+                                    filename=None, yaxis_formatter=None,
+                                    folder=None):
         fig, ax = plt.subplots(figsize=(15, 5))
         df.plot(ax=ax)
 

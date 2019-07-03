@@ -51,6 +51,60 @@ class ServicesProcessor(CommonProcessor):
             """
         self.records = []
 
+    def verify_database_setup(self):
+        """
+        Verify that all the database tables are setup properly for managing
+        the services.
+        """
+        sql = """
+              SELECT name
+              FROM sqlite_master
+              WHERE
+                  type='table'
+                  AND name NOT LIKE 'sqlite_%'
+                  AND name LIKE '%service%'
+              """
+        df = pd.read_sql(sql, self.conn)
+        if len(df) == 2:
+            # We're good.
+            return
+
+        cursor = self.conn.cursor()
+
+        # Create the known services and logs tables.
+        sql = """
+              CREATE TABLE known_services (
+                  id integer PRIMARY KEY,
+                  folder text,
+                  service text
+              )
+              """
+        cursor.execute(sql)
+        sql = """
+              CREATE UNIQUE INDEX idx_services
+              ON known_services(folder, service)
+              """
+        cursor.execute(sql)
+
+        sql = """
+              CREATE TABLE service_logs (
+                  date integer,
+                  id integer,
+                  hits integer,
+                  errors integer,
+                  nbytes integer,
+                  FOREIGN KEY (id) REFERENCES known_services(id)
+              )
+              """
+        cursor.execute(sql)
+
+        # Unfortunately the index cannot be unique here.
+        sql = """
+              CREATE INDEX idx_services_logs_date
+              ON service_logs(date)
+              """
+        cursor.execute(sql)
+
     def process_match(self, apache_match):
         """
         What services were hit?
@@ -208,7 +262,7 @@ class ServicesProcessor(CommonProcessor):
                 'yaxis_formatter': formatter,
                 'folder': folder,
             }
-            self.create_transactions_output(df, html_doc, **kwargs)
+            self.write_html_and_image_output(df, html_doc, **kwargs)
 
     def create_services_table(self, html_doc):
         """

@@ -60,13 +60,6 @@ class TestSuite(unittest.TestCase):
               """
         actual = pd.read_sql(sql, r.conn)
 
-        table_names = [
-            'ip_address_logs',
-            'known_ip_addresses',
-            'known_referers',
-            'known_services',
-            'referer_logs',
-            'service_logs',
-        ]
+        table_names = ['ip_address_logs', 'known_ip_addresses']
         expected = pd.Series(table_names, name='name')
         pd.testing.assert_series_equal(actual['name'], expected)

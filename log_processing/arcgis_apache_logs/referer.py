@@ -58,6 +58,59 @@ class RefererProcessor(CommonProcessor):
             ORDER BY a.date
             """
 
+    def verify_database_setup(self):
+        """
+        Verify that all the database tables are setup properly for managing
+        the referers.
+        """
+        sql = """
+              SELECT name
+              FROM sqlite_master
+              WHERE
+                  type='table'
+                  AND name NOT LIKE 'sqlite_%'
+                  AND name LIKE '%referer%'
+              """
+        df = pd.read_sql(sql, self.conn)
+        if len(df) == 2:
+            # We're good.
+            return
+
+        cursor = self.conn.cursor()
+
+        # Create the known referers table.
+        sql = """
+              CREATE TABLE known_referers (
+                  id integer PRIMARY KEY,
+                  name text
+              )
+              """
+        cursor.execute(sql)
+        sql = """
+              CREATE UNIQUE INDEX idx_referer
+              ON known_referers(name)
+              """
+        cursor.execute(sql)
+
+        sql = """
+              CREATE TABLE referer_logs (
+                  date integer,
+                  id integer,
+                  hits integer,
+                  errors integer,
+                  nbytes integer,
+                  FOREIGN KEY (id) REFERENCES known_referers(id)
+              )
+              """
+        cursor.execute(sql)
+
+        # Unfortunately the index cannot be unique here.
+        sql = """
+              CREATE INDEX idx_referer_logs_date
+              ON referer_logs(date)
+              """
+        cursor.execute(sql)
+
     def process_match(self, apache_match):
         """
         What referers were given?
@@ -196,9 +249,9 @@ class RefererProcessor(CommonProcessor):
 
         kwargs = {
             'title': 'GBytes per Hour',
-            'imagefile': 'referers_bytes.png',
+            'filename': 'referers_bytes.png',
         }
-        self.create_bandwidth_output(df, html_doc, **kwargs)
+        self.write_html_and_image_output(df, html_doc, **kwargs)
 
     def summarize_transactions(self, html_doc):
         """
@@ -222,7 +275,7 @@ class RefererProcessor(CommonProcessor):
             'filename': 'referers_hits.png',
             'yaxis_formatter': FuncFormatter(millions_fcn),
         }
-        self.create_transactions_output(df, html_doc, **kwargs)
+        self.write_html_and_image_output(df, html_doc, **kwargs)
 
     def summarize_referers(self, html_doc):
         """

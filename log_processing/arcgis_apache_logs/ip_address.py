@@ -34,6 +34,62 @@ class IPAddressProcessor(CommonProcessor):
             ORDER BY a.date
             """
 
+    def verify_database_setup(self):
+        """
+        Verify that all the database tables are setup properly for managing
+        IP addresses.
+        """
+        sql = """
+              SELECT name
+              FROM sqlite_master
+              WHERE
+                  type='table'
+                  AND name NOT LIKE 'sqlite_%'
+                  AND name LIKE '%ip_address%'
+              """
+        df = pd.read_sql(sql, self.conn)
+        if len(df) == 2:
+            # We're good.
+            return
+
+        cursor = self.conn.cursor()
+
+        # Create the known IP addresses table.  The IP addresses must be
+        # unique.
+        sql = """
+              CREATE TABLE known_ip_addresses (
+                  id integer PRIMARY KEY,
+                  ip_address text,
+                  name text
+              )
+              """
+        cursor.execute(sql)
+        sql = """
+              CREATE UNIQUE INDEX idx_ip_address
+              ON known_ip_addresses(ip_address)
+              """
+        cursor.execute(sql)
+
+        # Create the IP address logs table.
+        sql = """
+              CREATE TABLE ip_address_logs (
+                  date integer,
+                  id integer,
+                  hits integer,
+                  errors integer,
+                  nbytes integer,
+                  FOREIGN KEY (id) REFERENCES known_ip_addresses(id)
+              )
+              """
+        cursor.execute(sql)
+
+        # Unfortunately the index cannot be unique here.
+        sql = """
+              CREATE INDEX idx_ip_address_logs_date
+              ON ip_address_logs(date)
+              """
+        cursor.execute(sql)
+
     def process_match(self, apache_match):
         """
         What IP addresses were given?
@@ -161,7 +217,7 @@ class IPAddressProcessor(CommonProcessor):
             'title': 'Top IPs:  Hits per Hour',
             'filename': 'top_ip_hits.png',
         }
-        self.create_transactions_output(df, html_doc, **kwargs)
+        self.write_html_and_image_output(df, html_doc, **kwargs)
 
     def summarize_bandwidth(self, top_ips, html_doc):
         """
@@ -184,9 +240,9 @@ class IPAddressProcessor(CommonProcessor):
 
         kwargs = {
             'title': 'Top IPs:  MBytes per Hour',
-            'imagefile': 'top_ip_nbytes.png'
+            'filename': 'top_ip_nbytes.png'
         }
-        self.create_bandwidth_output(df, html_doc, **kwargs)
+        self.write_html_and_image_output(df, html_doc, **kwargs)
 
     def summarize_ip_addresses(self, top_ips, html_doc):
         df = self.df_today.copy().groupby('ip_address').sum()
