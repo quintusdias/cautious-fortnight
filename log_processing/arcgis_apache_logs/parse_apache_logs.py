@@ -11,6 +11,7 @@ from .ip_address import IPAddressProcessor
 from .referer import RefererProcessor
 from .services import ServicesProcessor
 from .summary import SummaryProcessor
+from .user_agent import UserAgentProcessor
 
 
 class ApacheLogParser(object):
@@ -28,7 +29,7 @@ class ApacheLogParser(object):
     project : str
         Either nowcoast or idpgis
     """
-    def __init__(self, project, infile=None):
+    def __init__(self, project, infile=None, document_root=None):
         """
         Parameters
         ----------
@@ -37,6 +38,11 @@ class ApacheLogParser(object):
         """
         self.project = project
         self.infile = infile
+
+        if document_root is None:
+            self.root = pathlib.Path.home() / 'Documents' / 'arcgis_apache_logs'
+        else:
+            self.root = pathlib.Path(document_root)
 
         self.setup_logger()
 
@@ -54,7 +60,7 @@ class ApacheLogParser(object):
             \[(?P<timestamp>\d{2}/\w{3}/\d{4}:\d{2}:\d{2}:\d{2}\s(\+|-)\d{4})\]
             \s
             # The request
-            "(?P<request_op>(GET|DELETE|HEAD|OPTIONS|POST|PROPFIND))
+            "(?P<request_op>(GET|DELETE|HEAD|OPTIONS|POST|PROPFIND|PUT))
             \s
             (?P<path>.*?)
             \s
@@ -77,12 +83,12 @@ class ApacheLogParser(object):
             '''
         self.regex = re.compile(pattern, re.VERBOSE)
 
-        self.ip_address = IPAddressProcessor(self.project, logger=self.logger)
-        self.referer = RefererProcessor(self.project, logger=self.logger)
-        self.services = ServicesProcessor(self.project, logger=self.logger)
-        self.summarizer = SummaryProcessor(self.project, logger=self.logger)
-
-        self.root = pathlib.Path.home() / 'Documents' / 'arcgis_apache_logs'
+        kwargs = {'logger': self.logger, 'document_root': document_root}
+        self.ip_address = IPAddressProcessor(self.project, **kwargs)
+        self.referer = RefererProcessor(self.project, **kwargs)
+        self.services = ServicesProcessor(self.project, **kwargs)
+        self.summarizer = SummaryProcessor(self.project, **kwargs)
+        self.user_agent = UserAgentProcessor(self.project, **kwargs)
 
         # Setup a skeleton output document.
         self.doc = lxml.etree.Element('html')
@@ -122,6 +128,7 @@ class ApacheLogParser(object):
         self.ip_address.preprocess_database()
         self.referer.preprocess_database()
         self.services.preprocess_database()
+        self.user_agent.preprocess_database()
 
     def parse_input(self):
         if self.infile is None:
@@ -141,10 +148,12 @@ class ApacheLogParser(object):
             self.ip_address.process_match(m)
             self.referer.process_match(m)
             self.services.process_match(m)
+            self.user_agent.process_match(m)
 
         self.ip_address.flush()
         self.referer.flush()
         self.services.flush()
+        self.user_agent.flush()
 
     def process_graphics(self):
 
@@ -152,6 +161,7 @@ class ApacheLogParser(object):
         self.referer.process_graphics(self.doc)
         self.services.process_graphics(self.doc)
         self.ip_address.process_graphics(self.doc)
+        self.user_agent.process_graphics(self.doc)
 
         # Write the HTML document.
         path = self.root / f'{self.project}.html'

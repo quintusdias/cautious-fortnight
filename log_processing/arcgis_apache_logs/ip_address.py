@@ -34,6 +34,8 @@ class IPAddressProcessor(CommonProcessor):
             ORDER BY a.date
             """
 
+        self.data_retention_days = 7
+
     def verify_database_setup(self):
         """
         Verify that all the database tables are setup properly for managing
@@ -299,7 +301,9 @@ class IPAddressProcessor(CommonProcessor):
         sql = """
               DELETE FROM ip_address_logs WHERE date < ?
               """
-        datenum = (dt.datetime.now() - dt.timedelta(days=7)).timestamp()
+        datenum = (
+            dt.datetime.now() - dt.timedelta(days=self.data_retention_days)
+        ).timestamp()
         cursor = self.conn.cursor()
         cursor.execute(sql, (datenum,))
         self.conn.commit()

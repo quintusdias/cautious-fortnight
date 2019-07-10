@@ -62,6 +62,8 @@ class ServicesProcessor(CommonProcessor):
 
         self.verified_folders = VERIFIED_FOLDERS[self.project]
 
+        self.data_retention_days = 30
+
     def verify_database_setup(self):
         """
         Verify that all the database tables are setup properly for managing
@@ -335,7 +337,10 @@ class ServicesProcessor(CommonProcessor):
         sql = """
               DELETE FROM service_logs WHERE date < ?
               """
-        datenum = (dt.datetime.now() - dt.timedelta(days=30)).timestamp()
+        datenum = (
+            dt.datetime.now() - dt.timedelta(days=self.data_retention_days)
+        ).timestamp()
+
         cursor = self.conn.cursor()
         cursor.execute(sql, (datenum,))
         self.conn.commit()

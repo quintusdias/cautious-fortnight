@@ -12,7 +12,7 @@ from unittest.mock import patch
 import pandas as pd
 
 # Local imports
-from arcgis_apache_logs import ApacheLogParser, IPAddressProcessor
+from arcgis_apache_logs import ApacheLogParser, UserAgentProcessor
 
 
 class TestSuite(unittest.TestCase):
@@ -46,14 +46,14 @@ class TestSuite(unittest.TestCase):
 
         self.homedir_patcher.stop()
 
-    def test_database_not_initialized(self):
+    def test_user_agent_database_tables_not_initialized(self):
         """
-        SCENARIO:  The referer database does not exist.
+        SCENARIO:  The database does not exist.
 
-        EXPECTED RESULT:  The IP address database is initialized.
-        There should be two tables, "logs" and "known_ip_addresses".
+        EXPECTED RESULT:  The database is initialized.  There should be
+        two tables.
         """
-        r = IPAddressProcessor('idpgis')
+        r = UserAgentProcessor('idpgis')
 
         sql = """
               SELECT name
@@ -63,7 +63,7 @@ class TestSuite(unittest.TestCase):
               """
         actual = pd.read_sql(sql, r.conn)
 
-        table_names = ['ip_address_logs', 'known_ip_addresses']
+        table_names = ['known_user_agents', 'user_agent_logs']
         expected = pd.Series(table_names, name='name')
         pd.testing.assert_series_equal(actual['name'], expected)
 
@@ -83,29 +83,29 @@ class TestSuite(unittest.TestCase):
         p1 = ApacheLogParser('idpgis', s)
         p1.run()
 
-        df = pd.read_sql('SELECT * FROM ip_address_logs', p1.ip_address.conn)
-        num_ip_address_records = len(df)
+        df = pd.read_sql('SELECT * FROM user_agent_logs', p1.user_agent.conn)
+        num_ua_records = len(df)
 
-        # Update the ip_address log records.
+        # Update the user agent log records.
         df.loc[0, 'date'] = (
             dt.datetime.now()
-            - dt.timedelta(days=p1.ip_address.data_retention_days)
+            - dt.timedelta(days=p1.user_agent.data_retention_days)
             - dt.timedelta(hours=1)
         ).timestamp()
         df.loc[1:, 'date'] = (
             dt.datetime.now()
-            - dt.timedelta(days=p1.ip_address.data_retention_days)
+            - dt.timedelta(days=p1.user_agent.data_retention_days)
             + dt.timedelta(hours=1)
         ).timestamp()
 
-        df.to_sql('ip_address_logs', p1.ip_address.conn,
+        df.to_sql('user_agent_logs', p1.user_agent.conn,
                   if_exists='replace', index=False)
-        p1.ip_address.conn.commit()
+        p1.user_agent.conn.commit()
 
         # This is the 2nd time around.  The one log record should have been
         # deleted.
         p2 = ApacheLogParser('idpgis')
-        p2.ip_address.preprocess_database()
+        p2.user_agent.preprocess_database()
 
-        df = pd.read_sql('SELECT * FROM ip_address_logs', p2.ip_address.conn)
-        self.assertEqual(len(df), num_ip_address_records - 1)
+        df = pd.read_sql('SELECT * FROM user_agent_logs', p2.user_agent.conn)
+        self.assertEqual(len(df), num_ua_records - 1)

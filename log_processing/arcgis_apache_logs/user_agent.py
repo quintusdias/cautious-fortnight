@@ -2,7 +2,6 @@
 
 # Standard library imports
 import datetime as dt
-import urllib.parse
 
 # 3rd party library imports
 import numpy as np
@@ -25,7 +24,7 @@ def millions_fcn(x, pos):
     return f'{(x/1e6):.2f}M'
 
 
-class RefererProcessor(CommonProcessor):
+class UserAgentProcessor(CommonProcessor):
     """
     Attributes
     ----------
@@ -42,18 +41,16 @@ class RefererProcessor(CommonProcessor):
         """
         Parameters
         ----------
-        known_referers : dataframe
-            All referers that have been previously encountered.
         """
         super().__init__(project, **kwargs)
 
         self.time_series_sql = """
             SELECT a.date, SUM(a.hits) as hits, SUM(a.errors) as errors,
-                   SUM(a.nbytes) as nbytes, b.name as referer
-            FROM referer_logs a
-            INNER JOIN known_referers b
+                   SUM(a.nbytes) as nbytes, b.name as user_agent
+            FROM user_agent_logs a
+            INNER JOIN known_user_agents b
             ON a.id = b.id
-            GROUP BY a.date, referer
+            GROUP BY a.date, user_agent
             ORDER BY a.date
             """
 
@@ -62,12 +59,12 @@ class RefererProcessor(CommonProcessor):
     def verify_database_setup(self):
         """
         Verify that all the database tables are setup properly for managing
-        the referers.
+        the user_agents.
         """
 
         cursor = self.conn.cursor()
 
-        # Do the referer tables exist?
+        # Do the user_agent tables exist?
         sql = """
               SELECT name
               FROM sqlite_master
@@ -77,54 +74,54 @@ class RefererProcessor(CommonProcessor):
               """
         df = pd.read_sql(sql, self.conn)
 
-        if 'known_referers' not in df.name.values:
+        if 'known_user_agents' not in df.name.values:
 
             sql = """
-                  CREATE TABLE known_referers (
+                  CREATE TABLE known_user_agents (
                       id integer PRIMARY KEY,
                       name text
                   )
                   """
             cursor.execute(sql)
             sql = """
-                  CREATE UNIQUE INDEX idx_referer
-                  ON known_referers(name)
+                  CREATE UNIQUE INDEX idx_user_agent
+                  ON known_user_agents(name)
                   """
             cursor.execute(sql)
 
-        if 'known_referers' not in df.name.values:
+        if 'known_user_agents' not in df.name.values:
 
             sql = """
-                  CREATE TABLE referer_logs (
+                  CREATE TABLE user_agent_logs (
                       date integer,
                       id integer,
                       hits integer,
                       errors integer,
                       nbytes integer,
-                      FOREIGN KEY (id) REFERENCES known_referers(id)
+                      FOREIGN KEY (id) REFERENCES known_user_agents(id)
                   )
                   """
             cursor.execute(sql)
 
             # Unfortunately the index cannot be unique here.
             sql = """
-                  CREATE INDEX idx_referer_logs_date
-                  ON referer_logs(date)
+                  CREATE INDEX idx_user_agent_logs_date
+                  ON user_agent_logs(date)
                   """
             cursor.execute(sql)
 
     def process_match(self, apache_match):
         """
-        What referers were given?
+        What user_agents were given?
         """
         timestamp = apache_match.group('timestamp')
-        referer = apache_match.group('referer')
+        user_agent = apache_match.group('user_agent')
         status_code = int(apache_match.group('status_code'))
         nbytes = int(apache_match.group('nbytes'))
 
         error = 1 if status_code < 200 or status_code >= 400 else 0
 
-        self.records.append((timestamp, referer, 1, error, nbytes))
+        self.records.append((timestamp, user_agent, 1, error, nbytes))
         if len(self.records) == self.MAX_RAW_RECORDS:
             self.process_records()
 
@@ -137,7 +134,7 @@ class RefererProcessor(CommonProcessor):
         processing.  Turn what we have into a dataframe and aggregate it
         to the appropriate granularity.
         """
-        columns = ['date', 'referer', 'hits', 'errors', 'nbytes']
+        columns = ['date', 'user_agent', 'hits', 'errors', 'nbytes']
         df = pd.DataFrame(self.records, columns=columns)
 
         # Convert the apache timestamp into a python timestamp.  Make the
@@ -146,20 +143,8 @@ class RefererProcessor(CommonProcessor):
         df['date'] = pd.to_datetime(df['date'], format=format)
         df['nbytes'] = df['nbytes'].astype(int)
 
-        # Throw away any the query string in the referer.
-        def fcn(referer):
-            p = urllib.parse.urlparse(referer)
-            if p.query == '':
-                # No query string, use the referer as-is.
-                pass
-            else:
-                referer = f"{p.scheme}://{p.netloc}{p.path}"
-            return referer
-
-        df['referer'] = df['referer'].apply(fcn)
-
-        # Aggregate by the set frequency and referer, taking sums.
-        groupers = [pd.Grouper(freq=self.frequency), 'referer']
+        # Aggregate by the set frequency and user_agent, taking sums.
+        groupers = [pd.Grouper(freq=self.frequency), 'user_agent']
         df_ref = df.set_index('date').groupby(groupers).sum().reset_index()
 
         # Remake the date into a single column, a timestamp
@@ -167,69 +152,57 @@ class RefererProcessor(CommonProcessor):
         df_ref['date'] = df_ref['date'].astype(np.int64) // 1e9
 
         # Have to have the same column names as the database.
-        df_ref = self.replace_referers_with_ids(df_ref)
+        df_ref = self.replace_user_agents_with_ids(df_ref)
 
         # Ok, suitable to send to the database now.
         msg = (
-            f"Logging {len(df_ref)} referer records in the time range "
+            f"Logging {len(df_ref)} user_agent records in the time range "
             f"{first_date} - {last_date}"
         )
         self.logger.info(msg)
 
-        df_ref.to_sql('referer_logs', self.conn,
+        df_ref.to_sql('user_agent_logs', self.conn,
                       if_exists='append', index=False)
-        self.conn.commit()
-
-        # As a last step, aggregate the data without regard to the referer.
-        df_summary = (df.set_index('date')
-                        .resample(self.frequency)
-                        .sum()
-                        .reset_index())
-
-        # Remake the date into a single column, a timestamp
-        df_summary['date'] = df_summary['date'].astype(np.int64) // 1e9
-
-        df_summary.to_sql('summary', self.conn,
-                          if_exists='append', index=False)
         self.conn.commit()
 
         # Reset for the next round of records.
         self.records = []
 
-    def replace_referers_with_ids(self, df_orig):
+    def replace_user_agents_with_ids(self, df_orig):
         """
-        Don't log the actual referer names to the database, log the ID instead.
+        Don't log the actual user_agent names to the database, log the ID
+        instead.
         """
 
         sql = """
-              SELECT * from known_referers
+              SELECT * from known_user_agents
               """
-        known_referers = pd.read_sql(sql, self.conn)
+        known_user_agents = pd.read_sql(sql, self.conn)
 
-        # Get the referer IDs
-        df = pd.merge(df_orig, known_referers,
-                      how='left', left_on='referer', right_on='name')
+        # Get the user_agent IDs
+        df = pd.merge(df_orig, known_user_agents,
+                      how='left', left_on='user_agent', right_on='name')
 
-        # How many referers have NaN for IDs?  This must populate the known
-        # referers table before going further.
-        unknown_referers = df['referer'][df['id'].isnull()].unique()
-        if len(unknown_referers) > 0:
-            new_df = pd.Series(unknown_referers, name='name').to_frame()
+        # How many user_agents have NaN for IDs?  This must populate the known
+        # user_agents table before going further.
+        unknown_user_agents = df['user_agent'][df['id'].isnull()].unique()
+        if len(unknown_user_agents) > 0:
+            new_df = pd.Series(unknown_user_agents, name='name').to_frame()
 
-            msg = f'Logging {len(new_df)} new referer records.'
+            msg = f'Logging {len(new_df)} new user_agent records.'
             self.logger.info(msg)
 
-            new_df.to_sql('known_referers', self.conn,
+            new_df.to_sql('known_user_agents', self.conn,
                           if_exists='append', index=False)
 
             sql = """
-                  SELECT * from known_referers
+                  SELECT * from known_user_agents
                   """
-            known_referers = pd.read_sql(sql, self.conn)
-            df = pd.merge(df_orig, known_referers,
-                          how='left', left_on='referer', right_on='name')
+            known_user_agents = pd.read_sql(sql, self.conn)
+            df = pd.merge(df_orig, known_user_agents,
+                          how='left', left_on='user_agent', right_on='name')
 
-        df.drop(['referer', 'name'], axis='columns', inplace=True)
+        df.drop(['user_agent', 'name'], axis='columns', inplace=True)
 
         return df
 
@@ -240,7 +213,7 @@ class RefererProcessor(CommonProcessor):
         Delete anything older than 7 days.
         """
         sql = """
-              DELETE FROM referer_logs WHERE date < ?
+              DELETE FROM user_agent_logs WHERE date < ?
               """
         datenum = (
             dt.datetime.now()
@@ -253,37 +226,39 @@ class RefererProcessor(CommonProcessor):
 
     def process_graphics(self, html_doc):
         self.get_timeseries()
-        self.summarize_referers(html_doc)
+        self.summarize_user_agents(html_doc)
         self.summarize_transactions(html_doc)
         self.summarize_bandwidth(html_doc)
 
-    def get_top_referers(self):
-        # who are the top referers for today?
+    def get_top_user_agents(self):
+        # who are the top user_agents for today?
         df = self.df_today.copy()
 
         df['valid_hits'] = df['hits'] - df['errors']
-        top_referers = (df.groupby('referer')
-                          .sum()
-                          .sort_values(by='valid_hits', ascending=False)
-                          .head(n=7)
-                          .index)
+        top_user_agents = (df.groupby('user_agent')
+                             .sum()
+                             .sort_values(by='valid_hits', ascending=False)
+                             .head(n=7)
+                             .index)
 
-        return top_referers
+        return top_user_agents
 
     def summarize_bandwidth(self, html_doc):
         """
-        Create a PNG showing the top referers (bytes) over the last few days.
+        Create a PNG showing the top user_agents (bytes) over the last few
+        days.
         """
-        top_referers = self.get_top_referers()
+        top_user_agents = self.get_top_user_agents()
 
         # Now restrict the hourly data over the last few days to those
-        # referers.  Then restrict to valid hits.  And rename valid_hits to
+        # user_agents.  Then restrict to valid hits.  And rename valid_hits to
         # hits.
-        df = self.df[self.df.referer.isin(top_referers)].sort_values(by='date')
-        df = df[['date', 'referer', 'nbytes']]
+        idx = self.df.user_agent.isin(top_user_agents)
+        df = self.df[idx].sort_values(by='date')
+        df = df[['date', 'user_agent', 'nbytes']]
         df['nbytes'] /= (1024 ** 3)
 
-        df = df.pivot(index='date', columns='referer', values='nbytes')
+        df = df.pivot(index='date', columns='user_agent', values='nbytes')
 
         # Order them by max value.
         s = df.max().sort_values(ascending=False)
@@ -291,29 +266,31 @@ class RefererProcessor(CommonProcessor):
 
         kwargs = {
             'title': 'GBytes per Hour',
-            'filename': f'{self.project}_referers_bytes.png',
+            'filename': f'{self.project}_user_agents_bytes.png',
         }
         self.write_html_and_image_output(df, html_doc, **kwargs)
 
     def summarize_transactions(self, html_doc):
         """
-        Create a PNG showing the top referers over the last few days.
+        Create a PNG showing the top user_agents over the last few days.
         """
-        top_referers = self.get_top_referers()
+        top_user_agents = self.get_top_user_agents()
 
         df = self.df.copy()
 
         # Now restrict the hourly data over the last few days to those
-        # referers.  Then restrict to valid hits.  And rename valid_hits to
+        # user_agents.  Then restrict to valid hits.  And rename valid_hits to
         # hits.
-        df = df[df.referer.isin(top_referers)].sort_values(by='date').copy()
+        idx = df.user_agent.isin(top_user_agents)
+        df = df[idx].sort_values(by='date').copy()
+
         df['hits'] = df['hits'] - df['errors']
-        df = df[['date', 'referer', 'hits']]
+        df = df[['date', 'user_agent', 'hits']]
 
         # Rescale them from hits/hour to hits/second
         df['hits'] /= 3600
 
-        df = df.pivot(index='date', columns='referer', values='hits')
+        df = df.pivot(index='date', columns='user_agent', values='hits')
 
         # Order them by max value.
         s = df.max().sort_values(ascending=False)
@@ -323,21 +300,21 @@ class RefererProcessor(CommonProcessor):
             'title': (
                 'Hits per Second (averaged per hour, not including errors)'
             ),
-            'filename': f'{self.project}_referers_hits.png',
+            'filename': f'{self.project}_user_agents_hits.png',
         }
         self.write_html_and_image_output(df, html_doc, **kwargs)
 
-    def summarize_referers(self, html_doc):
+    def summarize_user_agents(self, html_doc):
         """
         Calculate
 
-              I) percentage of hits for each referer
-             II) percentage of hits for each referer that are 403s
-            III) percentage of total 403s for each referer
+              I) percentage of hits for each user_agent
+             II) percentage of hits for each user_agent that are 403s
+            III) percentage of total 403s for each user_agent
 
         Just for the latest day, though.
         """
-        df = self.df_today.copy().groupby('referer').sum()
+        df = self.df_today.copy().groupby('user_agent').sum()
 
         total_hits = df['hits'].sum()
         total_bytes = df['nbytes'].sum()
@@ -370,8 +347,8 @@ class RefererProcessor(CommonProcessor):
 
         yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
         kwargs = {
-            'aname': 'referers',
-            'atext': 'Top Referers',
-            'h1text': f'Top Referers by Hits: {yesterday}'
+            'aname': 'user_agents',
+            'atext': 'Top UserAgents',
+            'h1text': f'Top UserAgents by Hits: {yesterday}'
         }
         self.create_html_table(df, html_doc, **kwargs)

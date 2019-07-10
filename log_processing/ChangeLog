@@ -1,2 +1,20 @@
+July 12, 2019 - Release v0.0.4
+    - Fix plot size.
+    - Add command line support for document root
+    - Add support for user agents
+    - Add tests for data retention policy
+    - Fix unrecognized PUT REST command
+
+July 09, 2019 - Release v0.0.3
+    - Add summary support
+
+July 02, 2019 - Release v0.0.2
+    - Fix unrecognized REST command.
+    - Simplify time series acquisition from database.
+    - Separate the databases, one database for nowcoast, one for idpgis.
+    - Refactor get_timeseries method.
+    - Make the retrieved timeseries always be in order.
+
 July 02, 2019 - Release v0.0.1
     - Processes the referer, IP address, and path.
+

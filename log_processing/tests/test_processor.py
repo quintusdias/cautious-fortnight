@@ -117,6 +117,12 @@ class TestSuite(unittest.TestCase):
         df = pd.read_sql("SELECT * from ip_address_logs", conn)
         self.assertEqual(df.shape[0], 8)
 
+        df = pd.read_sql("SELECT * from known_user_agents", conn)
+        self.assertEqual(df.shape[0], 7)
+
+        df = pd.read_sql("SELECT * from user_agent_logs", conn)
+        self.assertEqual(df.shape[0], 8)
+
         # The data is resampled, so 23 records, one for each hour.
         df = pd.read_sql("SELECT * from summary", conn)
         self.assertEqual(df.shape[0], 23)
@@ -154,3 +160,18 @@ class TestSuite(unittest.TestCase):
         p.referer.get_timeseries()
 
         self.assertTrue(p.referer.df.date.is_monotonic)
+
+    def test_puts(self, mock_logger):
+        """
+        SCENARIO:  The requests are all "PUT"s.
+
+        EXPECTED RESULT:  The results are recorded, not dropped.
+        """
+        text = ir.read_text('tests.data', 'put.dat')
+        s = io.StringIO(text)
+
+        p = ApacheLogParser('idpgis', s)
+        p.run()
+
+        df = pd.read_sql('select * from referer_logs', p.referer.conn)
+        self.assertTrue(len(df) > 0)

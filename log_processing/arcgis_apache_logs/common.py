@@ -44,7 +44,7 @@ class CommonProcessor(object):
     records : list
         Raw records collected, one for each apache log entry.
     """
-    def __init__(self, project, logger=None):
+    def __init__(self, project, document_root=None, logger=None):
 
         self.project = project
 
@@ -53,7 +53,10 @@ class CommonProcessor(object):
         else:
             self.logger = logging.getLogger(__name__)
 
-        self.root = pathlib.Path.home() / 'Documents' / 'arcgis_apache_logs'
+        if document_root is None:
+            self.root = pathlib.Path.home() / 'Documents' / 'arcgis_apache_logs'
+        else:
+            self.root = pathlib.Path(document_root)
 
         if not self.root.exists():
             self.root.mkdir(parents=True, exist_ok=True)
@@ -133,7 +136,7 @@ class CommonProcessor(object):
                                     filename=None, yaxis_formatter=None,
                                     folder=None, text=None):
 
-        fig, ax = plt.subplots(figsize=(15, 5))
+        fig, ax = plt.subplots(figsize=(15, 7))
         df.plot(ax=ax)
 
         if yaxis_formatter is not None:
