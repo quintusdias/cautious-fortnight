@@ -80,7 +80,10 @@ class IPAddressProcessor(CommonProcessor):
                   hits integer,
                   errors integer,
                   nbytes integer,
-                  FOREIGN KEY (id) REFERENCES known_ip_addresses(id)
+                  CONSTRAINT fk_known_ip_address_id
+                      FOREIGN KEY (id)
+                      REFERENCES known_ip_addresses(id)
+                      ON DELETE CASCADE
               )
               """
         cursor.execute(sql)
@@ -92,40 +95,14 @@ class IPAddressProcessor(CommonProcessor):
               """
         cursor.execute(sql)
 
-    def process_match(self, apache_match):
-        """
-        What IP addresses were given?
-        """
-        timestamp = apache_match.group('timestamp')
-        ip_address = apache_match.group('ip_address')
-        status_code = int(apache_match.group('status_code'))
-        nbytes = int(apache_match.group('nbytes'))
-
-        error = 1 if status_code < 200 or status_code >= 400 else 0
-
-        self.records.append((timestamp, ip_address, 1, error, nbytes))
-        if len(self.records) == self.MAX_RAW_RECORDS:
-            self.process_raw_records()
-
-    def flush(self):
-        """
-        If any records are left after going thru each log entry, we need to
-        do one more round of raw log processing.
-        """
-        self.process_raw_records()
-
-    def process_raw_records(self):
+    def process_raw_records(self, df):
         """
         We have reached a limit on how many records we accumulate before
         processing.  Turn what we have into a dataframe and aggregate it
         to the appropriate granularity.
         """
         columns = ['date', 'ip_address', 'hits', 'errors', 'nbytes']
-        df = pd.DataFrame(self.records, columns=columns)
-
-        format = '%d/%b/%Y:%H:%M:%S %z'
-        df['date'] = pd.to_datetime(df['date'], format=format)
-        df['nbytes'] = df['nbytes'].astype(int)
+        df = df[columns].copy()
 
         # Aggregate by the set frequency and referer, taking sums.
         groupers = [pd.Grouper(freq=self.frequency), 'ip_address']
@@ -135,10 +112,6 @@ class IPAddressProcessor(CommonProcessor):
         df['date'] = df['date'].astype(np.int64) // 1e9
 
         df = self.replace_ip_addresses_with_ids(df)
-
-        # Ok, suitable to send to the database now.
-        msg = f'Logging {len(df)} IP address records to database.'
-        self.logger.info(msg)
 
         df.to_sql('ip_address_logs', self.conn,
                   if_exists='append', index=False)
@@ -153,7 +126,7 @@ class IPAddressProcessor(CommonProcessor):
         """
 
         sql = """
-              SELECT * from known_ip_addresses
+              SELECT id, ip_address from known_ip_addresses
               """
         known_ips = pd.read_sql(sql, self.conn)
 
@@ -165,9 +138,6 @@ class IPAddressProcessor(CommonProcessor):
         unknown_ips = df['ip_address'][df['id'].isnull()].unique()
         if len(unknown_ips) > 0:
             new_ips_df = pd.Series(unknown_ips, name='ip_address').to_frame()
-
-            msg = f'Logging {len(new_ips_df)} new IP address records.'
-            self.logger.info(msg)
 
             new_ips_df.to_sql('known_ip_addresses', self.conn,
                               if_exists='append', index=False)
@@ -183,7 +153,12 @@ class IPAddressProcessor(CommonProcessor):
         return df
 
     def process_graphics(self, html_doc):
-        """
+        """Create the HTML and graphs for the IP addresses.
+
+        Parameters
+        ----------
+        html_doc : lxml.etree.ElementTree
+            HTML document for the logs.
         """
         self.get_timeseries()
 

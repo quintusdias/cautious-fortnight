@@ -5,6 +5,8 @@ import re
 
 # 3rd party library imports
 import lxml.etree
+import numpy as np
+import pandas as pd
 
 # local imports
 from .ip_address import IPAddressProcessor
@@ -40,7 +42,9 @@ class ApacheLogParser(object):
         self.infile = infile
 
         if document_root is None:
-            self.root = pathlib.Path.home() / 'Documents' / 'arcgis_apache_logs'
+            self.root = pathlib.Path.home() \
+                        / 'Documents' \
+                        / 'arcgis_apache_logs'
         else:
             self.root = pathlib.Path(document_root)
 
@@ -56,8 +60,9 @@ class ApacheLogParser(object):
             # Remote user, always -?
             -
             \s
-            # Time of request
-            \[(?P<timestamp>\d{2}/\w{3}/\d{4}:\d{2}:\d{2}:\d{2}\s(\+|-)\d{4})\]
+            # Time of request.  The timezone is always UTC, so don't bother
+            # parsing it.
+            \[(?P<timestamp>\d{2}/\w{3}/\d{4}:\d{2}:\d{2}:\d{2})\s.....\]
             \s
             # The request
             "(?P<request_op>(GET|DELETE|HEAD|OPTIONS|POST|PROPFIND|PUT))
@@ -134,6 +139,7 @@ class ApacheLogParser(object):
         if self.infile is None:
             return
 
+        records = []
         for line in self.infile:
             m = self.regex.match(line)
             if m is None:
@@ -145,17 +151,41 @@ class ApacheLogParser(object):
                 self.logger.warning(msg)
                 continue
 
-            self.ip_address.process_match(m)
-            self.referer.process_match(m)
-            self.services.process_match(m)
-            self.user_agent.process_match(m)
+            # the 4th row is to designate a "hit".
+            records.append((
+                m.group('timestamp'),
+                m.group('ip_address'),
+                m.group('path'),
+                1,
+                int(m.group('status_code')),
+                int(m.group('nbytes')),
+                m.group('referer'),
+                m.group('user_agent')
+            ))
 
-        self.ip_address.flush()
-        self.referer.flush()
-        self.services.flush()
-        self.user_agent.flush()
+        columns = [
+            'date', 'ip_address', 'path', 'hits', 'status_code', 'nbytes',
+            'referer', 'user_agent'
+        ]
+        df = pd.DataFrame.from_records(records, columns=columns)    
+
+        format = '%d/%b/%Y:%H:%M:%S'
+        df['date'] = pd.to_datetime(df['date'], format=format)
+
+        df['errors'] = df.eval(
+            'status_code < 200 or status_code >= 400'
+        ).astype(int)
+
+        self.ip_address.process_raw_records(df)
+        self.referer.process_raw_records(df)
+        self.services.process_raw_records(df)
+        self.user_agent.process_raw_records(df)
 
     def process_graphics(self):
+
+        if self.infile is not None:
+            # Do not produce graphics when parsing.
+            return
 
         self.summarizer.process_graphics(self.doc)
         self.referer.process_graphics(self.doc)

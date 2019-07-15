@@ -54,7 +54,9 @@ class CommonProcessor(object):
             self.logger = logging.getLogger(__name__)
 
         if document_root is None:
-            self.root = pathlib.Path.home() / 'Documents' / 'arcgis_apache_logs'
+            self.root = pathlib.Path.home() \
+                        / 'Documents' \
+                        / 'arcgis_apache_logs'
         else:
             self.root = pathlib.Path(document_root)
 
@@ -63,9 +65,13 @@ class CommonProcessor(object):
 
         self.database = self.root / f'arcgis_apache_{self.project}.db'
         self.conn = sqlite3.connect(self.database)
+
+        # Force foreign key support.
+        self.conn.execute("PRAGMA foreign_keys = 1")
+
         self.verify_database_setup()
 
-        self.MAX_RAW_RECORDS = 1000000
+        self.MAX_RAW_RECORDS = 100000000
 
         self.records = []
         self.frequency = '1H'

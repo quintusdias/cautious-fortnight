@@ -98,7 +98,10 @@ class UserAgentProcessor(CommonProcessor):
                       hits integer,
                       errors integer,
                       nbytes integer,
-                      FOREIGN KEY (id) REFERENCES known_user_agents(id)
+                      CONSTRAINT fk_user_agents_id
+                          FOREIGN KEY (id)
+                          REFERENCES known_user_agents(id)
+                          ON DELETE CASCADE
                   )
                   """
             cursor.execute(sql)
@@ -110,59 +113,27 @@ class UserAgentProcessor(CommonProcessor):
                   """
             cursor.execute(sql)
 
-    def process_match(self, apache_match):
-        """
-        What user_agents were given?
-        """
-        timestamp = apache_match.group('timestamp')
-        user_agent = apache_match.group('user_agent')
-        status_code = int(apache_match.group('status_code'))
-        nbytes = int(apache_match.group('nbytes'))
-
-        error = 1 if status_code < 200 or status_code >= 400 else 0
-
-        self.records.append((timestamp, user_agent, 1, error, nbytes))
-        if len(self.records) == self.MAX_RAW_RECORDS:
-            self.process_records()
-
-    def flush(self):
-        self.process_records()
-
-    def process_records(self):
+    def process_raw_records(self, df):
         """
         We have reached a limit on how many records we accumulate before
         processing.  Turn what we have into a dataframe and aggregate it
         to the appropriate granularity.
         """
         columns = ['date', 'user_agent', 'hits', 'errors', 'nbytes']
-        df = pd.DataFrame(self.records, columns=columns)
-
-        # Convert the apache timestamp into a python timestamp.  Make the
-        # number of bytes numeric.
-        format = '%d/%b/%Y:%H:%M:%S %z'
-        df['date'] = pd.to_datetime(df['date'], format=format)
-        df['nbytes'] = df['nbytes'].astype(int)
+        df = df[columns].copy()
 
         # Aggregate by the set frequency and user_agent, taking sums.
         groupers = [pd.Grouper(freq=self.frequency), 'user_agent']
-        df_ref = df.set_index('date').groupby(groupers).sum().reset_index()
+        df = df.set_index('date').groupby(groupers).sum().reset_index()
 
         # Remake the date into a single column, a timestamp
-        first_date, last_date = df['date'].iloc[0], df['date'].iloc[-1]
-        df_ref['date'] = df_ref['date'].astype(np.int64) // 1e9
+        df['date'] = df['date'].astype(np.int64) // 1e9
 
         # Have to have the same column names as the database.
-        df_ref = self.replace_user_agents_with_ids(df_ref)
+        df = self.replace_user_agents_with_ids(df)
 
-        # Ok, suitable to send to the database now.
-        msg = (
-            f"Logging {len(df_ref)} user_agent records in the time range "
-            f"{first_date} - {last_date}"
-        )
-        self.logger.info(msg)
-
-        df_ref.to_sql('user_agent_logs', self.conn,
-                      if_exists='append', index=False)
+        df.to_sql('user_agent_logs', self.conn,
+                  if_exists='append', index=False)
         self.conn.commit()
 
         # Reset for the next round of records.
@@ -188,9 +159,6 @@ class UserAgentProcessor(CommonProcessor):
         unknown_user_agents = df['user_agent'][df['id'].isnull()].unique()
         if len(unknown_user_agents) > 0:
             new_df = pd.Series(unknown_user_agents, name='name').to_frame()
-
-            msg = f'Logging {len(new_df)} new user_agent records.'
-            self.logger.info(msg)
 
             new_df.to_sql('known_user_agents', self.conn,
                           if_exists='append', index=False)

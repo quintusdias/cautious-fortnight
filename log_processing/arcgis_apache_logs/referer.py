@@ -101,7 +101,10 @@ class RefererProcessor(CommonProcessor):
                       hits integer,
                       errors integer,
                       nbytes integer,
-                      FOREIGN KEY (id) REFERENCES known_referers(id)
+                      CONSTRAINT fk_known_referers_id
+                          FOREIGN KEY (id)
+                          REFERENCES known_referers(id)
+                          ON DELETE CASCADE
                   )
                   """
             cursor.execute(sql)
@@ -113,38 +116,14 @@ class RefererProcessor(CommonProcessor):
                   """
             cursor.execute(sql)
 
-    def process_match(self, apache_match):
-        """
-        What referers were given?
-        """
-        timestamp = apache_match.group('timestamp')
-        referer = apache_match.group('referer')
-        status_code = int(apache_match.group('status_code'))
-        nbytes = int(apache_match.group('nbytes'))
-
-        error = 1 if status_code < 200 or status_code >= 400 else 0
-
-        self.records.append((timestamp, referer, 1, error, nbytes))
-        if len(self.records) == self.MAX_RAW_RECORDS:
-            self.process_records()
-
-    def flush(self):
-        self.process_records()
-
-    def process_records(self):
+    def process_raw_records(self, df):
         """
         We have reached a limit on how many records we accumulate before
         processing.  Turn what we have into a dataframe and aggregate it
         to the appropriate granularity.
         """
         columns = ['date', 'referer', 'hits', 'errors', 'nbytes']
-        df = pd.DataFrame(self.records, columns=columns)
-
-        # Convert the apache timestamp into a python timestamp.  Make the
-        # number of bytes numeric.
-        format = '%d/%b/%Y:%H:%M:%S %z'
-        df['date'] = pd.to_datetime(df['date'], format=format)
-        df['nbytes'] = df['nbytes'].astype(int)
+        df = df[columns].copy()
 
         # Throw away any the query string in the referer.
         def fcn(referer):
@@ -163,18 +142,10 @@ class RefererProcessor(CommonProcessor):
         df_ref = df.set_index('date').groupby(groupers).sum().reset_index()
 
         # Remake the date into a single column, a timestamp
-        first_date, last_date = df['date'].iloc[0], df['date'].iloc[-1]
         df_ref['date'] = df_ref['date'].astype(np.int64) // 1e9
 
         # Have to have the same column names as the database.
         df_ref = self.replace_referers_with_ids(df_ref)
-
-        # Ok, suitable to send to the database now.
-        msg = (
-            f"Logging {len(df_ref)} referer records in the time range "
-            f"{first_date} - {last_date}"
-        )
-        self.logger.info(msg)
 
         df_ref.to_sql('referer_logs', self.conn,
                       if_exists='append', index=False)
@@ -216,9 +187,6 @@ class RefererProcessor(CommonProcessor):
         if len(unknown_referers) > 0:
             new_df = pd.Series(unknown_referers, name='name').to_frame()
 
-            msg = f'Logging {len(new_df)} new referer records.'
-            self.logger.info(msg)
-
             new_df.to_sql('known_referers', self.conn,
                           if_exists='append', index=False)
 
@@ -252,6 +220,13 @@ class RefererProcessor(CommonProcessor):
         self.conn.commit()
 
     def process_graphics(self, html_doc):
+        """Create the HTML and graphs for the referers.
+
+        Parameters
+        ----------
+        html_doc : lxml.etree.ElementTree
+            HTML document for the logs.
+        """
         self.get_timeseries()
         self.summarize_referers(html_doc)
         self.summarize_transactions(html_doc)

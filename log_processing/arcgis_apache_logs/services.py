@@ -10,16 +10,6 @@ import pandas as pd
 # Local imports
 from .common import CommonProcessor
 
-VERIFIED_FOLDERS = {
-    'idpgis': [
-        'NMFS', 'NOAA', 'NOS', 'NOS_Biogeo_Biomapper', 'NOS_ESI',
-        'NOS_Observations', 'NWS', 'NWS_Climate_Outlooks',
-        'NWS_Forecasts_Guidance_Warnings', 'NWS_Observations', 'NWS_Tropical',
-        'radar'
-    ],
-    'nowcoast': ['nowcoast'],
-}
-
 
 class ServicesProcessor(CommonProcessor):
     """
@@ -44,23 +34,22 @@ class ServicesProcessor(CommonProcessor):
                    /services
                    /(?P<folder>\w+)
                    /(?P<service>\w+)
-                   /.*
+                   /(?P<service_type>\w+)
+                   .*
                    '''
         self.regex = re.compile(pattern, re.VERBOSE)
 
         self.time_series_sql = """
             SELECT
                 a.date, SUM(a.hits) as hits, SUM(a.errors) as errors,
-                SUM(a.nbytes) as nbytes, b.folder, b.service
+                SUM(a.nbytes) as nbytes, b.folder, b.service, b.service_type
             FROM service_logs a
             INNER JOIN known_services b
             ON a.id = b.id
-            GROUP BY a.date, b.folder, b.service
+            GROUP BY a.date, b.folder, b.service, b.service_type
             ORDER BY a.date
             """
         self.records = []
-
-        self.verified_folders = VERIFIED_FOLDERS[self.project]
 
         self.data_retention_days = 30
 
@@ -89,13 +78,14 @@ class ServicesProcessor(CommonProcessor):
               CREATE TABLE known_services (
                   id integer PRIMARY KEY,
                   folder text,
-                  service text
+                  service text,
+                  service_type text
               )
               """
         cursor.execute(sql)
         sql = """
               CREATE UNIQUE INDEX idx_services
-              ON known_services(folder, service)
+              ON known_services(folder, service, service_type)
               """
         cursor.execute(sql)
 
@@ -106,7 +96,10 @@ class ServicesProcessor(CommonProcessor):
                   hits integer,
                   errors integer,
                   nbytes integer,
-                  FOREIGN KEY (id) REFERENCES known_services(id)
+                  CONSTRAINT fk_known_services_id
+                      FOREIGN KEY (id)
+                      REFERENCES known_services(id)
+                      ON DELETE CASCADE
               )
               """
         cursor.execute(sql)
@@ -118,61 +111,32 @@ class ServicesProcessor(CommonProcessor):
               """
         cursor.execute(sql)
 
-    def process_match(self, apache_match):
-        """
-        What services were hit?
-        """
-        timestamp = apache_match.group('timestamp')
-        path = apache_match.group('path')
-        status_code = int(apache_match.group('status_code'))
-        nbytes = int(apache_match.group('nbytes'))
-
-        error = 1 if status_code < 200 or status_code >= 400 else 0
-
-        m = self.regex.match(path)
-        if m is None:
-            return
-
-        folder = m.group('folder')
-        service = m.group('service')
-
-        record = (timestamp, folder, service, 1, error, nbytes)
-        self.records.append(record)
-        if len(self.records) == self.MAX_RAW_RECORDS:
-            self.process_raw_records()
-
-    def flush(self):
-        self.process_raw_records()
-
-    def process_raw_records(self):
+    def process_raw_records(self, df):
         """
         We have reached a limit on how many records we accumulate before
         processing.  Turn what we have into a dataframe and aggregate it
         to the appropriate granularity.
         """
-        columns = [
-            'date', 'folder', 'service', 'hits', 'errors', 'nbytes'
-        ]
-        df = pd.DataFrame(self.records, columns=columns)
+        columns = ['date', 'path', 'hits', 'errors', 'nbytes']
+        df = df[columns].copy()
 
-        format = '%d/%b/%Y:%H:%M:%S %z'
-        df['date'] = pd.to_datetime(df['date'], format=format)
+        df_svc = df['path'].str.extract(self.regex)
 
-        df['nbytes'] = df['nbytes'].astype(int)
+        df = pd.concat((df, df_svc), axis='columns')
+        df = df.drop('path', axis='columns')
 
         # Aggregate by the set frequency and service, taking sums.
-        groupers = [pd.Grouper(freq=self.frequency), 'folder', 'service']
-        df = df.set_index('date').groupby(groupers).sum()
+        groupers = [
+            pd.Grouper(freq=self.frequency),
+            'folder', 'service', 'service_type'
+        ]
+        df = df.set_index('date').groupby(groupers).sum().reset_index()
 
-        df = df.reset_index()
-
+        # Remake the date into a single column, a timestamp
         df['date'] = df['date'].astype(np.int64) // 1e9
 
         # Have to have the same column names as the database.
         df = self.replace_folders_and_services_with_ids(df)
-
-        msg = f'Logging {len(df)} service records to database.'
-        self.logger.info(msg)
 
         df.to_sql('service_logs', self.conn, if_exists='append', index=False)
         self.conn.commit()
@@ -187,42 +151,35 @@ class ServicesProcessor(CommonProcessor):
               """
         known_services = pd.read_sql(sql, self.conn)
 
+        group_cols = ['folder', 'service', 'service_type']
+
         # Get the service IDs
         df = pd.merge(df_orig, known_services,
                       how='left',
-                      left_on=['folder', 'service'],
-                      right_on=['folder', 'service'])
+                      left_on=group_cols,
+                      right_on=group_cols)
 
-        # How many services have NaN for IDs?  This must populate the known
-        # referers table before going further.
-        new = df[['folder', 'service']][df['id'].isnull()]
-        new = new.groupby(['folder', 'service']).count().reset_index()
+        # How many services have NaN for IDs?  This must be dropped.
+        dfnull = df[df.id.isnull()]
+        n = len(dfnull)
+        msg = f"Dropping {n} unmatched IDs"
+        self.logger.info(msg)
+        df = df.dropna(subset=['id'])
 
-        # Make sure these new folders are all valid folders.
-        new = new[new['folder'].isin(self.verified_folders)]
-
-        if len(new) > 0:
-
-            msg = f'Logging {len(new)} service records.'
-            self.logger.info(msg)
-
-            new.to_sql('known_services', self.conn,
-                       if_exists='append', index=False)
-
-            sql = """
-                  SELECT * from known_services
-                  """
-            known_services = pd.read_sql(sql, self.conn)
-            df = pd.merge(df_orig, known_services,
-                          how='left',
-                          left_on=['folder', 'service'],
-                          right_on=['folder', 'service'])
-
-        df.drop(['folder', 'service'], axis='columns', inplace=True)
+        # We have the service ID, we don't need the folder, service, or
+        # service_type columns anymore.
+        df = df.drop(group_cols, axis='columns')
 
         return df
 
     def process_graphics(self, html_doc):
+        """Create the HTML and graphs for the services.
+
+        Parameters
+        ----------
+        html_doc : lxml.etree.ElementTree
+            HTML document for the logs.
+        """
         self.get_timeseries()
         self.create_services_table(html_doc)
 
@@ -250,6 +207,16 @@ class ServicesProcessor(CommonProcessor):
             df = self.df[self.df.folder == folder].copy()
 
             df['hits'] = df['hits'] - df['errors']
+            df = df[['date', 'service', 'service_type', 'hits']]
+
+            # If there are services with overlapping names, e.g. CO_OPS
+            # mapserver and featureservers, combine the service and service_type
+            # columns.  Otherwise drop the service_type column.
+            dfg = df.groupby(['service', 'service_type']).count()
+            if not np.all(np.diff(dfg.index.codes[0]) > 0):
+                # Overlapping names, so collapse the service and service_type
+                # columns.
+                df['service'] = df['service'] + '/' + df['service_type']
             df = df[['date', 'service', 'hits']]
 
             df = df.pivot(index='date', columns='service', values='hits')
@@ -288,7 +255,7 @@ class ServicesProcessor(CommonProcessor):
 
         Just for the latest day, though.
         """
-        df = self.df_today.copy().groupby('service').sum()
+        df = self.df_today.copy().groupby(['service', 'service_type']).sum()
 
         total_hits = df['hits'].sum()
         total_bytes = df['nbytes'].sum()
@@ -298,10 +265,6 @@ class ServicesProcessor(CommonProcessor):
         df['hits %'] = df['hits'] / total_hits * 100
         df['GBytes'] = df['nbytes'] / (1024 ** 3)  # GBytes
         df['GBytes %'] = df['nbytes'] / total_bytes * 100
-
-        idx = df['errors'].isnull()
-        df.loc[idx, ('errors')] = 0
-        df['errors'] = df['errors'].astype(np.uint64)
 
         df['errors: % of all hits'] = df['errors'] / total_hits * 100
         df['errors: % of all errors'] = df['errors'] / total_errors * 100

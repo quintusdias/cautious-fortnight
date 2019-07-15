@@ -1,49 +1,17 @@
 # Standard library imports
 import importlib.resources as ir
 import io
-import os
-import pathlib
-import tempfile
-import unittest
 from unittest.mock import patch
 
 # 3rd party library imports
 import pandas as pd
 
 from arcgis_apache_logs import ApacheLogParser
+from .test_core import TestCore
 
 
 @patch('arcgis_apache_logs.common.logging.getLogger')
-class TestSuite(unittest.TestCase):
-
-    def setUp(self):
-        """
-        Create a temporary directory in which to create artifacts (often the
-        current directory).
-        """
-
-        self.starting_dir = pathlib.Path.cwd()
-        self.tempdir = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tempdir.cleanup)
-
-        os.chdir(self.tempdir.name)
-
-        fake_home_dir = tempfile.TemporaryDirectory()
-        self.fake_home_dir = pathlib.Path(fake_home_dir.name)
-        self.addCleanup(fake_home_dir.cleanup)
-
-        patchee = 'arcgis_apache_logs.common.pathlib.Path.home'
-        self.homedir_patcher = patch(patchee, return_value=self.fake_home_dir)
-        self.homedir_patcher.start()
-
-    def tearDown(self):
-        """
-        Change back to the starting directory and remove any artifacts created
-        during a test.
-        """
-        os.chdir(self.starting_dir)
-
-        self.homedir_patcher.stop()
+class TestSuite(TestCore):
 
     def test_bad_folder(self, mock_logger):
         """
@@ -51,19 +19,20 @@ class TestSuite(unittest.TestCase):
         initialized.  One of the seven records does not come from a recognized
         folder.  The other six records all come from individual services.
 
-        EXPECTED RESULT:  The known_services table is populated with only six
-        records
+        EXPECTED RESULT:  The known_services table is populated with only the
+        seven records that it was initially populated with.
         """
         text = ir.read_text('tests.data', 'one_invalid_folder.dat')
         s = io.StringIO(text)
 
         p = ApacheLogParser('idpgis', s)
+        self.initialize_known_services_table(p.services)
         p.run()
 
         conn = p.referer.conn
 
         df = pd.read_sql("SELECT * from known_services", conn)
-        self.assertEqual(df.shape[0], 6)
+        self.assertEqual(df.shape[0], 7)
 
     def test_init_ten_records(self, mock_logger):
         """
@@ -95,6 +64,7 @@ class TestSuite(unittest.TestCase):
         s = io.StringIO(text)
 
         p = ApacheLogParser('idpgis', s)
+        self.initialize_known_services_table(p.services)
         p.run()
 
         conn = p.referer.conn
@@ -127,7 +97,7 @@ class TestSuite(unittest.TestCase):
         df = pd.read_sql("SELECT * from summary", conn)
         self.assertEqual(df.shape[0], 23)
 
-        self.assertTrue(p.logger.info.call_count > 1)
+        self.assertEqual(p.logger.info.call_count, 1)
 
     def test_deleteme(self, mock_logger):
         """
@@ -175,3 +145,33 @@ class TestSuite(unittest.TestCase):
 
         df = pd.read_sql('select * from referer_logs', p.referer.conn)
         self.assertTrue(len(df) > 0)
+
+    def test_co_ops(self, mock_logger):
+        """
+        SCENARIO:  There are ten records for the 4 CO_OPS FeatureServer and
+        MapServer.
+
+        EXPECTED RESULT:  There are hits recorded for the CO_OPS_Stations
+        and CO_OPS Products MapServers and FeatureServers.  There are
+        2 hits for the CO_OPS Products.
+        """
+        services = [
+            ('NOS_Observations', 'CO_OPS_Stations', 'FeatureServer'),
+            ('NOS_Observations', 'CO_OPS_Stations', 'MapServer'),
+            ('NOS_Observations', 'CO_OPS_Products', 'FeatureServer'),
+            ('NOS_Observations', 'CO_OPS_Products', 'MapServer'),
+        ]
+
+        # Put ten records into the database.
+        text = ir.read_text('tests.data', 'ten_co_ops.dat')
+        s = io.StringIO(text)
+
+        p1 = ApacheLogParser('idpgis', s)
+        self.initialize_known_services_table(p1.services, services=services)
+        p1.parse_input()
+
+        df = pd.read_sql("SELECT * from service_logs", p1.services.conn)
+        print(df)
+        df = df.groupby('id').count()
+        self.assertEqual(len(df), 4)
+
