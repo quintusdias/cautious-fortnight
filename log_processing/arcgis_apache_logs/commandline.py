@@ -7,6 +7,9 @@ from .parse_apache_logs import ApacheLogParser
 
 
 def parse_arcgis_apache_logs():
+    """
+    Entry point for parsing the log fragments.
+    """
 
     parser = argparse.ArgumentParser()
 
@@ -24,10 +27,27 @@ def parse_arcgis_apache_logs():
 
     log_processor = ApacheLogParser(args.project, infile=args.infile,
                                     document_root=args.document_root)
-    log_processor.run()
+    log_processor.parse_input()
 
 
 def produce_arcgis_apache_graphics():
+    """
+    Entry point for creating the HTML and graphics.
+    """
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('project', choices=['idpgis', 'nowcoast'])
+    args = parser.parse_args()
+
+    p = ApacheLogParser(args.project, infile=None)
+    p.produce_graphics()
+
+
+def prune_arcgis_apache_database():
+    """
+    Entry point for cleaning up the database.
+    """
 
     parser = argparse.ArgumentParser()
 
@@ -35,4 +55,4 @@ def produce_arcgis_apache_graphics():
     args = parser.parse_args()
 
     processor = ApacheLogParser(args.project, infile=None)
-    processor.run()
+    processor.preprocess_database()

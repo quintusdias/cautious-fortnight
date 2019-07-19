@@ -6,6 +6,7 @@ from setuptools import setup
 cmdline = 'arcgis_apache_logs.commandline'
 console_scripts = [
     f'parse-arcgis-apache-logs={cmdline}:parse_arcgis_apache_logs',
+    f'prune-arcgis-apache-database={cmdline}:prune_arcgis_apache_database',
     f'produce-arcgis-apache-graphics={cmdline}:produce_arcgis_apache_graphics',
 ],
 

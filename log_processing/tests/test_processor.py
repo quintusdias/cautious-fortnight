@@ -27,7 +27,7 @@ class TestSuite(TestCore):
 
         p = ApacheLogParser('idpgis', s)
         self.initialize_known_services_table(p.services)
-        p.run()
+        p.parse_input()
 
         conn = p.referer.conn
 
@@ -65,7 +65,7 @@ class TestSuite(TestCore):
 
         p = ApacheLogParser('idpgis', s)
         self.initialize_known_services_table(p.services)
-        p.run()
+        p.parse_input()
 
         conn = p.referer.conn
 
@@ -110,7 +110,7 @@ class TestSuite(TestCore):
         s = io.StringIO(text)
 
         p = ApacheLogParser('idpgis', s)
-        p.run()
+        p.parse_input()
 
         self.assertEqual(p.logger.warning.call_count, 1)
 
@@ -125,7 +125,7 @@ class TestSuite(TestCore):
         s = io.StringIO(text)
 
         p = ApacheLogParser('idpgis', s)
-        p.run()
+        p.parse_input()
 
         p.referer.get_timeseries()
 
@@ -141,7 +141,7 @@ class TestSuite(TestCore):
         s = io.StringIO(text)
 
         p = ApacheLogParser('idpgis', s)
-        p.run()
+        p.parse_input()
 
         df = pd.read_sql('select * from referer_logs', p.referer.conn)
         self.assertTrue(len(df) > 0)

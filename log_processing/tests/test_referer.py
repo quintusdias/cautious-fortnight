@@ -49,7 +49,7 @@ class TestSuite(TestCore):
         s = io.StringIO(text)
 
         p1 = ApacheLogParser('idpgis', s)
-        p1.run()
+        p1.parse_input()
 
         df = pd.read_sql('SELECT * FROM referer_logs', p1.referer.conn)
         num_referer_records = len(df)

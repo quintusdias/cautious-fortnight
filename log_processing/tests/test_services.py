@@ -50,7 +50,7 @@ class TestSuite(TestCore):
 
         p1 = ApacheLogParser('idpgis', s)
         self.initialize_known_services_table(p1.services)
-        p1.run()
+        p1.parse_input()
 
         df = pd.read_sql('SELECT * FROM service_logs', p1.services.conn)
         num_service_records = len(df)

@@ -6,6 +6,8 @@ set -x
 for project in nowcoast idpgis
 do
 
+    prune-arcgis-apache-database $project
+
     root=$HOME/data/logs/akamai/"$project"/incoming
     
     # Delete files that are older than a week.

@@ -81,7 +81,7 @@ class TestSuite(unittest.TestCase):
         s = io.StringIO(text)
 
         p1 = ApacheLogParser('idpgis', s)
-        p1.run()
+        p1.parse_input()
 
         df = pd.read_sql('SELECT * FROM user_agent_logs', p1.user_agent.conn)
         num_ua_records = len(df)

@@ -112,18 +112,11 @@ class ApacheLogParser(object):
         ch = logging.StreamHandler()
         ch.setLevel(logging.INFO)
 
-        # Create a formatter
         format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         formatter = logging.Formatter(format)
         ch.setFormatter(formatter)
 
         self.logger.addHandler(ch)
-
-    def run(self):
-
-        self.preprocess_database()
-        self.parse_input()
-        self.process_graphics()
 
     def preprocess_database(self):
         """
@@ -167,7 +160,7 @@ class ApacheLogParser(object):
             'date', 'ip_address', 'path', 'hits', 'status_code', 'nbytes',
             'referer', 'user_agent'
         ]
-        df = pd.DataFrame.from_records(records, columns=columns)    
+        df = pd.DataFrame.from_records(records, columns=columns)
 
         format = '%d/%b/%Y:%H:%M:%S'
         df['date'] = pd.to_datetime(df['date'], format=format)
