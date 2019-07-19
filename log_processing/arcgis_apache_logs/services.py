@@ -30,19 +30,38 @@ class ServicesProcessor(CommonProcessor):
         pattern = r'''
                    /(nowcoast|idpgis).ncep.noaa.gov.akadns.net
                    /arcgis
-                   (/rest)?
+                   (?P<rest>/rest)?
                    /services
                    /(?P<folder>\w+)
                    /(?P<service>\w+)
                    /(?P<service_type>\w+)
-                   .*
+                   (
+                       (
+                           # an export map draw
+                           (?P<export>/(export|exportImage))
+                           .+?
+                           (?P<imageformat>f=image)
+                       )
+                       |
+                       (
+                           # a WMS map draw
+                           (?P<wmsserver>/wmsserver)
+                           .+?
+                           (?P<wmsgetmap>request=getmap)
+                       )
+                   )?
                    '''
-        self.regex = re.compile(pattern, re.VERBOSE)
+        self.regex = re.compile(pattern, re.VERBOSE | re.IGNORECASE)
 
         self.time_series_sql = """
             SELECT
-                a.date, SUM(a.hits) as hits, SUM(a.errors) as errors,
-                SUM(a.nbytes) as nbytes, b.folder, b.service, b.service_type
+                a.date,
+                SUM(a.hits) as hits,
+                SUM(a.errors) as errors,
+                SUM(a.nbytes) as nbytes,
+                SUM(a.export_mapdraws) as export_mapdraws,
+                SUM(a.wms_mapdraws) as wms_mapdraws,
+                b.folder, b.service, b.service_type
             FROM service_logs a
             INNER JOIN known_services b
             ON a.id = b.id
@@ -96,6 +115,8 @@ class ServicesProcessor(CommonProcessor):
                   hits integer,
                   errors integer,
                   nbytes integer,
+                  export_mapdraws integer,
+                  wms_mapdraws integer,
                   CONSTRAINT fk_known_services_id
                       FOREIGN KEY (id)
                       REFERENCES known_services(id)
@@ -122,7 +143,15 @@ class ServicesProcessor(CommonProcessor):
 
         df_svc = df['path'].str.extract(self.regex)
 
-        df = pd.concat((df, df_svc), axis='columns')
+        # Cleanly determine export and WMS map draws.
+        df_svc['export_mapdraws'] = (~df_svc['export'].isnull()).astype(int)
+        df_svc['wms_mapdraws'] = (~df_svc['wmsgetmap'].isnull()).astype(int)
+
+        cols = [
+            'folder', 'service', 'service_type', 'export_mapdraws',
+            'wms_mapdraws'
+        ]
+        df = pd.concat((df, df_svc[cols]), axis='columns')
         df = df.drop('path', axis='columns')
 
         # Aggregate by the set frequency and service, taking sums.
@@ -210,8 +239,8 @@ class ServicesProcessor(CommonProcessor):
             df = df[['date', 'service', 'service_type', 'hits']]
 
             # If there are services with overlapping names, e.g. CO_OPS
-            # mapserver and featureservers, combine the service and service_type
-            # columns.  Otherwise drop the service_type column.
+            # mapserver and featureservers, combine the service and
+            # service_type columns.  Otherwise drop the service_type column.
             dfg = df.groupby(['service', 'service_type']).count()
             if not np.all(np.diff(dfg.index.codes[0]) > 0):
                 # Overlapping names, so collapse the service and service_type
@@ -260,9 +289,11 @@ class ServicesProcessor(CommonProcessor):
         total_hits = df['hits'].sum()
         total_bytes = df['nbytes'].sum()
         total_errors = df['errors'].sum()
+        df['mapdraws'] = df['export_mapdraws'] + df['wms_mapdraws']
 
-        df = df[['hits', 'nbytes', 'errors']].copy()
+        df = df[['hits', 'nbytes', 'errors', 'mapdraws']].copy()
         df['hits %'] = df['hits'] / total_hits * 100
+        df['mapdraw %'] = df['mapdraws'] / df['hits'] * 100
         df['GBytes'] = df['nbytes'] / (1024 ** 3)  # GBytes
         df['GBytes %'] = df['nbytes'] / total_bytes * 100
 
@@ -273,6 +304,7 @@ class ServicesProcessor(CommonProcessor):
         reordered_cols = [
             'hits',
             'hits %',
+            'mapdraw %',
             'GBytes',
             'GBytes %',
             'errors',
@@ -284,10 +316,17 @@ class ServicesProcessor(CommonProcessor):
         df = df.sort_values(by='hits', ascending=False)
 
         yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
+
+        ptext = (
+            "\"hits %\" is the ratio of service hits to the total number of "
+            "hits, so this column should add to 100.  \"mapdraw %\" is the "
+            "ratio of service mapdraws to the service hits."
+        )
         kwargs = {
             'aname': 'servicetable',
             'atext': 'Services Table',
             'h1text': f'Services by Hits: {yesterday}',
+            'ptext': ptext,
         }
         self.create_html_table(df, html_doc, **kwargs)
 

@@ -10,6 +10,7 @@ import pandas as pd
 import requests
 import sqlite3
 
+
 def add_service_type_column(conn):
     cursor = conn.cursor()
     sql = """
@@ -18,6 +19,7 @@ def add_service_type_column(conn):
           """
     cursor.execute(sql)
     conn.commit()
+
 
 def get_services(project):
     url = f"https://{project}.ncep.noaa.gov/arcgis/rest/services"
@@ -33,7 +35,8 @@ def get_services(project):
         j = r.json()
         for item in j['services']:
             services.append(f"{item['name']}/{item['type']}")
-    return services        
+    return services
+
 
 def update_known_services(conn, services):
     cursor = conn.cursor()
@@ -45,8 +48,9 @@ def update_known_services(conn, services):
               SET service_type = ?
               WHERE folder = ? AND service = ?
               """
-        rs = cursor.execute(sql, (svc_type, folder, service))
+        cursor.execute(sql, (svc_type, folder, service))
     conn.commit()
+
 
 def recreate_indices(conn):
     cursor = conn.cursor()
@@ -54,7 +58,7 @@ def recreate_indices(conn):
           DROP INDEX idx_services
           """
     cursor.execute(sql)
-    
+
     sql = """
           CREATE UNIQUE INDEX idx_services
           ON known_services(folder, service, service_type)
@@ -62,6 +66,7 @@ def recreate_indices(conn):
     cursor.execute(sql)
     conn.commit()
     print('done?')
+
 
 def check_table_nulls(conn):
 
@@ -90,6 +95,7 @@ def check_table_nulls(conn):
     print(f'deleted {rs.rowcount}')
     conn.commit()
 
+
 def run(project, dbfile):
 
     conn = sqlite3.connect(dbfile)
@@ -107,6 +113,5 @@ if __name__ == '__main__':
     parser.add_argument('dbfile', help='SQLITE database file')
 
     args = parser.parse_args()
-    
-    run(args.project, args.dbfile)
 
+    run(args.project, args.dbfile)

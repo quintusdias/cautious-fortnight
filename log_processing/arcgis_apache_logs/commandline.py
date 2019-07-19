@@ -41,7 +41,7 @@ def produce_arcgis_apache_graphics():
     args = parser.parse_args()
 
     p = ApacheLogParser(args.project, infile=None)
-    p.produce_graphics()
+    p.process_graphics()
 
 
 def prune_arcgis_apache_database():

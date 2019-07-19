@@ -34,6 +34,49 @@ class TestSuite(TestCore):
         df = pd.read_sql("SELECT * from known_services", conn)
         self.assertEqual(df.shape[0], 7)
 
+    def test_export_mapdraw(self, mock_logger):
+        """
+        SCENARIO:  Ten IDPGIS log records are processed, six of them have
+        export mapdraws.
+
+        EXPECTED RESULT:  There is a single record in the service_logs table
+        that marks a wms map draw.
+        """
+        text = ir.read_text('tests.data', 'export.dat')
+        s = io.StringIO(text)
+
+        p = ApacheLogParser('idpgis', s)
+        self.initialize_known_services_table(p.services)
+        p.parse_input()
+
+        p.services.get_timeseries()
+        df = p.services.df
+        self.assertEqual(df.loc[1]['export_mapdraws'], 3)
+        self.assertEqual(df.loc[2]['export_mapdraws'], 3)
+        s = df.sum()
+        self.assertEqual(s['export_mapdraws'], 6)
+
+    def test_wms_get_map(self, mock_logger):
+        """
+        SCENARIO:  Ten IDPGIS log records are processed, one of them has a
+        WMS getmap operation.
+
+        EXPECTED RESULT:  There is a single record in the service_logs table
+        that marks a wms map draw.
+        """
+        text = ir.read_text('tests.data', 'ten.dat')
+        s = io.StringIO(text)
+
+        p = ApacheLogParser('idpgis', s)
+        self.initialize_known_services_table(p.services)
+        p.parse_input()
+
+        p.services.get_timeseries()
+        df = p.services.df
+        self.assertEqual(df.loc[6]['wms_mapdraws'], 1)
+        s = df.sum()
+        self.assertEqual(s['wms_mapdraws'], 1)
+
     def test_init_ten_records(self, mock_logger):
         """
         SCENARIO:  Ten IDPGIS log records are processed as the database is
@@ -171,7 +214,5 @@ class TestSuite(TestCore):
         p1.parse_input()
 
         df = pd.read_sql("SELECT * from service_logs", p1.services.conn)
-        print(df)
         df = df.groupby('id').count()
         self.assertEqual(len(df), 4)
-

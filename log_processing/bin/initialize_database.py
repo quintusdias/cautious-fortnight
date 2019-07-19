@@ -8,9 +8,9 @@ import argparse
 
 import pandas as pd
 import requests
-import sqlite3
 
 from arcgis_apache_logs import ApacheLogParser
+
 
 def get_services(project):
     url = f"https://{project}.ncep.noaa.gov/arcgis/rest/services"
@@ -29,15 +29,18 @@ def get_services(project):
             service_type = item['type']
             records.append((folder, service, service_type))
 
-    df = pd.DataFrame.from_records(records, columns=['folder', 'service', 'service_type'])
-    return df        
+    columns = ['folder', 'service', 'service_type']
+    df = pd.DataFrame.from_records(records, columns=columns)
+    return df
+
 
 def run(project, root):
 
     p = ApacheLogParser(project, document_root=root)
 
     df = get_services(project)
-    df.to_sql('known_services', p.services.conn, index=False, if_exists='append')
+    df.to_sql('known_services', p.services.conn,
+              index=False, if_exists='append')
     p.services.conn.commit()
 
 
@@ -48,7 +51,5 @@ if __name__ == '__main__':
     parser.add_argument('root', help='SQLITE database file parent dir')
 
     args = parser.parse_args()
-    
+
     run(args.project, args.root)
-
-

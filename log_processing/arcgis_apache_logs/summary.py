@@ -50,7 +50,7 @@ class SummaryProcessor(CommonProcessor):
 
         cursor = self.conn.cursor()
 
-        # Do the referer tables exist?
+        # Do the summary tables exist?
         sql = """
               SELECT name
               FROM sqlite_master

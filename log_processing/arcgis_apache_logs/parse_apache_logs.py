@@ -5,7 +5,6 @@ import re
 
 # 3rd party library imports
 import lxml.etree
-import numpy as np
 import pandas as pd
 
 # local imports

@@ -105,6 +105,7 @@ class CommonProcessor(object):
         format = {
             'hits': '{:,.0f}',
             'hits %': '{:.1f}',
+            'mapdraw %': '{:.1f}',
             'GBytes': '{:,.1f}',
             'GBytes %': '{:.1f}',
             'errors': '{:,.0f}',
@@ -197,7 +198,7 @@ class CommonProcessor(object):
             etree.SubElement(div, 'img', src=filename)
 
     def create_html_table(self, df, html_doc, atext=None, aname=None,
-                          h1text=None):
+                          h1text=None, ptext=None):
         """
         Create a <TABLE> from the dataframe.
         """
@@ -213,6 +214,11 @@ class CommonProcessor(object):
         etree.SubElement(div, 'hr')
         a = etree.SubElement(div, 'a', name=aname)
         h1 = etree.SubElement(div, 'h1')
+        h1.text = h1text
+
+        if ptext is not None:
+            p = etree.SubElement(div, 'p')
+            p.text = ptext
 
         # Add to the table of contents.
         toc = html_doc.xpath('body/ul[@class="tableofcontents"]')[0]
@@ -220,5 +226,4 @@ class CommonProcessor(object):
         a = etree.SubElement(li, 'a', href=f'#{aname}')
         a.text = atext
 
-        h1.text = h1text
         div.append(table)
