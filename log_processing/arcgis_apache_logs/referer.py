@@ -92,7 +92,7 @@ class RefererProcessor(CommonProcessor):
                   """
             cursor.execute(sql)
 
-        if 'known_referers' not in df.name.values:
+        if 'referer_logs' not in df.name.values:
 
             sql = """
                   CREATE TABLE referer_logs (
@@ -111,8 +111,8 @@ class RefererProcessor(CommonProcessor):
 
             # Unfortunately the index cannot be unique here.
             sql = """
-                  CREATE INDEX idx_referer_logs_date
-                  ON referer_logs(date)
+                  CREATE UNIQUE INDEX idx_referer_logs_date
+                  ON referer_logs(date, id)
                   """
             cursor.execute(sql)
 
@@ -147,6 +147,8 @@ class RefererProcessor(CommonProcessor):
         # Have to have the same column names as the database.
         df_ref = self.replace_referers_with_ids(df_ref)
 
+        df_ref = self.merge_with_database(df_ref, 'referer_logs')
+
         df_ref.to_sql('referer_logs', self.conn,
                       if_exists='append', index=False)
         self.conn.commit()
@@ -159,6 +161,8 @@ class RefererProcessor(CommonProcessor):
 
         # Remake the date into a single column, a timestamp
         df_summary['date'] = df_summary['date'].astype(np.int64) // 1e9
+
+        df_summary = self.merge_with_database(df_summary, 'summary')
 
         df_summary.to_sql('summary', self.conn,
                           if_exists='append', index=False)

@@ -142,6 +142,52 @@ class TestSuite(TestCore):
 
         self.assertEqual(p.logger.info.call_count, 1)
 
+    def test_records_aggregated(self, mock_logger):
+        """
+        SCENARIO:  Ten records come in, then the same ten records offset by 30
+        minutes come in.
+
+        EXPECTED RESULT:  The tables reflect fully aggregated data.
+        """
+        text = ir.read_text('tests.data', 'ten.dat')
+        s = io.StringIO(text)
+
+        p = ApacheLogParser('idpgis', s)
+        self.initialize_known_services_table(p.services)
+        p.parse_input()
+
+        # Get the current number of records in the tables.
+        df = pd.read_sql("SELECT * from referer_logs", p.referer.conn)
+        n_referer_recs = df.shape[0]
+        df = pd.read_sql("SELECT * from service_logs", p.services.conn)
+        n_service_recs = df.shape[0]
+        df = pd.read_sql("SELECT * from ip_address_logs", p.ip_address.conn)
+        n_ip_address_recs = df.shape[0]
+        df = pd.read_sql("SELECT * from user_agent_logs", p.user_agent.conn)
+        n_user_agent_recs = df.shape[0]
+
+        text = ir.read_text('tests.data', 'another_ten.dat')
+        s = io.StringIO(text)
+
+        p = ApacheLogParser('idpgis', s)
+        p.parse_input()
+
+        # There is only 1 new referer record.  All the others fell into
+        # existing bins.
+        df = pd.read_sql("SELECT * from referer_logs", p.referer.conn)
+        self.assertEqual(df.shape[0], n_referer_recs + 1)
+
+        # Out of the ten new records, only 3 new service records  drop into new
+        # bins.
+        df = pd.read_sql("SELECT * from service_logs", p.services.conn)
+        self.assertEqual(df.shape[0], n_service_recs + 3)
+
+        df = pd.read_sql("SELECT * from ip_address_logs", p.ip_address.conn)
+        self.assertEqual(df.shape[0], n_ip_address_recs + 3)
+
+        df = pd.read_sql("SELECT * from user_agent_logs", p.user_agent.conn)
+        self.assertEqual(df.shape[0], n_user_agent_recs + 3)
+
     def test_deleteme(self, mock_logger):
         """
         SCENARIO:  the request path shows the command was DELETEME, which is
@@ -153,6 +199,7 @@ class TestSuite(TestCore):
         s = io.StringIO(text)
 
         p = ApacheLogParser('idpgis', s)
+        self.initialize_known_services_table(p.services)
         p.parse_input()
 
         self.assertEqual(p.logger.warning.call_count, 1)
@@ -168,6 +215,7 @@ class TestSuite(TestCore):
         s = io.StringIO(text)
 
         p = ApacheLogParser('idpgis', s)
+        self.initialize_known_services_table(p.services)
         p.parse_input()
 
         p.referer.get_timeseries()
@@ -184,6 +232,7 @@ class TestSuite(TestCore):
         s = io.StringIO(text)
 
         p = ApacheLogParser('idpgis', s)
+        self.initialize_known_services_table(p.services)
         p.parse_input()
 
         df = pd.read_sql('select * from referer_logs', p.referer.conn)

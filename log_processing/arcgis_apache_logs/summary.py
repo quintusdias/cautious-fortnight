@@ -72,9 +72,8 @@ class SummaryProcessor(CommonProcessor):
                   """
             cursor.execute(sql)
 
-            # Unfortunately the index cannot be unique here.
             sql = """
-                  CREATE INDEX idx_summary_date
+                  CREATE UNIQUE INDEX idx_summary_date
                   ON summary(date)
                   """
             cursor.execute(sql)
@@ -90,19 +89,6 @@ class SummaryProcessor(CommonProcessor):
         self.get_timeseries()
         self.summarize_transactions(html_doc)
         self.summarize_bandwidth(html_doc)
-
-    def get_top_referers(self):
-        # who are the top referers for today?
-        df = self.df_today.copy()
-
-        df['valid_hits'] = df['hits'] - df['errors']
-        top_referers = (df.groupby('referer')
-                          .sum()
-                          .sort_values(by='valid_hits', ascending=False)
-                          .head(n=7)
-                          .index)
-
-        return top_referers
 
     def summarize_bandwidth(self, html_doc):
         """

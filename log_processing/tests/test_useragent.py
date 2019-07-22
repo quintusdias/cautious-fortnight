@@ -5,7 +5,6 @@ import io
 import os
 import pathlib
 import tempfile
-import unittest
 from unittest.mock import patch
 
 # 3rd party library imports
@@ -13,9 +12,10 @@ import pandas as pd
 
 # Local imports
 from arcgis_apache_logs import ApacheLogParser, UserAgentProcessor
+from .test_core import TestCore
 
 
-class TestSuite(unittest.TestCase):
+class TestSuite(TestCore):
 
     def setUp(self):
         """
@@ -81,6 +81,7 @@ class TestSuite(unittest.TestCase):
         s = io.StringIO(text)
 
         p1 = ApacheLogParser('idpgis', s)
+        self.initialize_known_services_table(p1.services)
         p1.parse_input()
 
         df = pd.read_sql('SELECT * FROM user_agent_logs', p1.user_agent.conn)

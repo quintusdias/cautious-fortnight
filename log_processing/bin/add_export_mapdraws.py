@@ -2,7 +2,6 @@
 import argparse
 
 import pandas as pd
-import requests
 import sqlite3
 
 
@@ -28,7 +27,6 @@ def run(dbfile):
     conn.commit()
 
 
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
@@ -37,4 +35,3 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     run(args.dbfile)
-s

@@ -113,6 +113,8 @@ class IPAddressProcessor(CommonProcessor):
 
         df = self.replace_ip_addresses_with_ids(df)
 
+        df = self.merge_with_database(df, 'ip_address_logs')
+
         df.to_sql('ip_address_logs', self.conn,
                   if_exists='append', index=False)
         self.conn.commit()

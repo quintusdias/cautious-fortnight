@@ -7,7 +7,6 @@
 import argparse
 
 import pandas as pd
-import requests
 import sqlite3
 
 
@@ -31,7 +30,6 @@ def run(dbfile):
     print(df.loc[0]['sql'])
 
     conn.commit()
-
 
 
 if __name__ == '__main__':

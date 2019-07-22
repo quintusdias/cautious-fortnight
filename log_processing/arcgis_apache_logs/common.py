@@ -65,6 +65,7 @@ class CommonProcessor(object):
 
         self.database = self.root / f'arcgis_apache_{self.project}.db'
         self.conn = sqlite3.connect(self.database)
+        self.cursor = self.conn.cursor()
 
         # Force foreign key support.
         self.conn.execute("PRAGMA foreign_keys = 1")
@@ -227,3 +228,42 @@ class CommonProcessor(object):
         a.text = atext
 
         div.append(table)
+
+    def merge_with_database(self, df_current, table):
+        """
+        The current set of records may overlap with existing records in the
+        database, so we must merge them.
+        """
+        start = df_current.loc[0].date
+
+        # Get everything from the database after this time.
+        sql = f"""
+               SELECT *
+               FROM {table}
+               WHERE date >= ?
+               ORDER BY date
+               """
+        df_database = pd.read_sql(sql, self.conn, params=(start,))
+        if df_database.shape[0] == 0:
+            # Nothing to merge.
+            return df_current
+
+        # Delete those rows, as we will be replacing them.
+        sql = f"""
+               DELETE
+               FROM {table}
+               WHERE date >= ?
+               """
+        rs = self.cursor.execute(sql, (start,))
+        self.logger.info(f"Deleting {rs.rowcount} from {table}.")
+
+        # Aggregate the two dataframes together.
+        if table == 'summary':
+            group_cols = ['date']
+        else:
+            group_cols = ['date', 'id']
+        df = (pd.concat((df_current, df_database), axis='index', sort=False)
+                .groupby(group_cols)
+                .sum()
+                .reset_index())
+        return df

@@ -125,10 +125,9 @@ class ServicesProcessor(CommonProcessor):
               """
         cursor.execute(sql)
 
-        # Unfortunately the index cannot be unique here.
         sql = """
-              CREATE INDEX idx_services_logs_date
-              ON service_logs(date)
+              CREATE UNIQUE INDEX idx_services_logs_date
+              ON service_logs(date, id)
               """
         cursor.execute(sql)
 
@@ -166,6 +165,8 @@ class ServicesProcessor(CommonProcessor):
 
         # Have to have the same column names as the database.
         df = self.replace_folders_and_services_with_ids(df)
+
+        df = self.merge_with_database(df, 'service_logs')
 
         df.to_sql('service_logs', self.conn, if_exists='append', index=False)
         self.conn.commit()

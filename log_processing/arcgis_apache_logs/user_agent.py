@@ -89,7 +89,7 @@ class UserAgentProcessor(CommonProcessor):
                   """
             cursor.execute(sql)
 
-        if 'known_user_agents' not in df.name.values:
+        if 'user_agent_logs' not in df.name.values:
 
             sql = """
                   CREATE TABLE user_agent_logs (
@@ -106,10 +106,9 @@ class UserAgentProcessor(CommonProcessor):
                   """
             cursor.execute(sql)
 
-            # Unfortunately the index cannot be unique here.
             sql = """
-                  CREATE INDEX idx_user_agent_logs_date
-                  ON user_agent_logs(date)
+                  CREATE UNIQUE INDEX idx_user_agent_logs_date
+                  ON user_agent_logs(date, id)
                   """
             cursor.execute(sql)
 
@@ -131,6 +130,8 @@ class UserAgentProcessor(CommonProcessor):
 
         # Have to have the same column names as the database.
         df = self.replace_user_agents_with_ids(df)
+
+        df = self.merge_with_database(df, 'user_agent_logs')
 
         df.to_sql('user_agent_logs', self.conn,
                   if_exists='append', index=False)

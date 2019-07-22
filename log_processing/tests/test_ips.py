@@ -49,6 +49,7 @@ class TestSuite(TestCore):
         s = io.StringIO(text)
 
         p1 = ApacheLogParser('idpgis', s)
+        self.initialize_known_services_table(p1.services)
         p1.parse_input()
 
         df = pd.read_sql('SELECT * FROM ip_address_logs', p1.ip_address.conn)
