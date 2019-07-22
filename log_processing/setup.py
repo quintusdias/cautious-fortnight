@@ -22,7 +22,7 @@ kwargs = {
     },
     'license': 'MIT',
     'install_requires': ['pandas', 'lxml', 'setuptools'],
-    'version': '0.0.5',
+    'version': '0.0.6',
 }
 
 kwargs['classifiers'] = [
