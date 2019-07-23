@@ -173,6 +173,7 @@ class ApacheLogParser(object):
         self.referer.process_raw_records(df)
         self.services.process_raw_records(df)
         self.user_agent.process_raw_records(df)
+        self.summarizer.process_raw_records(df)
 
     def process_graphics(self):
 

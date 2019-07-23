@@ -4,6 +4,7 @@
 
 # 3rd party library imports
 import lxml.etree
+import numpy as np
 import pandas as pd
 import seaborn as sns
 
@@ -66,6 +67,7 @@ class SummaryProcessor(CommonProcessor):
                   CREATE TABLE summary (
                       date integer,
                       hits integer,
+                      mapdraws integer,
                       errors integer,
                       nbytes integer
                   )
@@ -83,6 +85,42 @@ class SummaryProcessor(CommonProcessor):
         Do any cleaning necessary before processing any new records.
         """
         self.conn.execute('VACUUM')
+        self.conn.commit()
+
+    def process_raw_records(self, df):
+
+        columns = ['date', 'hits', 'errors', 'nbytes']
+        df = df[columns].copy()
+
+        # As a last step, aggregate the data without regard to the referer.
+        df = (df.set_index('date')
+                .resample(self.frequency)
+                .sum()
+                .reset_index())
+
+        # Remake the date into a single column, a timestamp
+        df['date'] = df['date'].astype(np.int64) // 1e9
+
+        df = self.merge_with_database(df, 'summary')
+
+        # Now merge with the map draw information from the services table.
+        starting_date = df.loc[0]['date']
+        sql = """
+              SELECT date,
+                     SUM(export_mapdraws) as export_mapdraws,
+                     SUM(wms_mapdraws) as wms_mapdraws
+              FROM service_logs
+              WHERE date > ?
+              GROUP BY date
+              """
+        df_svc = pd.read_sql(sql, self.conn, params=(starting_date,))
+        df = pd.merge(df, df_svc, on='date', how='left')
+        df = df.fillna(value=0)
+
+        df['mapdraws'] = df['export_mapdraws'] + df['wms_mapdraws']
+        df = df.drop(['export_mapdraws', 'wms_mapdraws'], axis='columns')
+
+        df.to_sql('summary', self.conn, if_exists='append', index=False)
         self.conn.commit()
 
     def process_graphics(self, html_doc):

@@ -153,21 +153,6 @@ class RefererProcessor(CommonProcessor):
                       if_exists='append', index=False)
         self.conn.commit()
 
-        # As a last step, aggregate the data without regard to the referer.
-        df_summary = (df.set_index('date')
-                        .resample(self.frequency)
-                        .sum()
-                        .reset_index())
-
-        # Remake the date into a single column, a timestamp
-        df_summary['date'] = df_summary['date'].astype(np.int64) // 1e9
-
-        df_summary = self.merge_with_database(df_summary, 'summary')
-
-        df_summary.to_sql('summary', self.conn,
-                          if_exists='append', index=False)
-        self.conn.commit()
-
         # Reset for the next round of records.
         self.records = []
 

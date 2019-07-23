@@ -254,7 +254,7 @@ class CommonProcessor(object):
                FROM {table}
                WHERE date >= ?
                """
-        rs = self.cursor.execute(sql, (start,))
+        self.cursor.execute(sql, (start,))
 
         # Aggregate the two dataframes together.
         if table == 'summary':
