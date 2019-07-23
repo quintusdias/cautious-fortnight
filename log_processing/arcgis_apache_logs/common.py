@@ -255,7 +255,6 @@ class CommonProcessor(object):
                WHERE date >= ?
                """
         rs = self.cursor.execute(sql, (start,))
-        self.logger.info(f"Deleting {rs.rowcount} from {table}.")
 
         # Aggregate the two dataframes together.
         if table == 'summary':

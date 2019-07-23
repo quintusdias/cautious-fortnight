@@ -78,6 +78,13 @@ class SummaryProcessor(CommonProcessor):
                   """
             cursor.execute(sql)
 
+    def preprocess_database(self):
+        """
+        Do any cleaning necessary before processing any new records.
+        """
+        self.conn.execute('VACUUM')
+        self.conn.commit()
+
     def process_graphics(self, html_doc):
 
         body = html_doc.xpath('body')[0]
