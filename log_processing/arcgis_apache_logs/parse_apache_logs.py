@@ -6,6 +6,7 @@ import re
 # 3rd party library imports
 import lxml.etree
 import pandas as pd
+import requests
 
 # local imports
 from .ip_address import IPAddressProcessor
@@ -102,6 +103,51 @@ class ApacheLogParser(object):
         body = lxml.etree.SubElement(self.doc, 'body')
         ul = lxml.etree.SubElement(body, 'ul')
         ul.attrib['class'] = 'tableofcontents'
+
+    def initialize_database(self):
+        """
+        Examine the project web site and populate the services database with
+        existing services.
+        """
+        df = self.retrieve_services()
+
+        df.to_sql('known_services', self.services.conn,
+                  index=False, if_exists='append')
+        self.services.conn.commit()
+
+    def retrieve_services(self):
+        """
+        Examine the project web site and retrieve a list of the services.
+        """
+        url = f"https://{self.project}.ncep.noaa.gov/arcgis/rest/services"
+        params = {'f': 'json'}
+        r = requests.get(url, params=params)
+        r.raise_for_status()
+
+        j = r.json()
+        folders = j['folders']
+        records = []
+        for folder in folders:
+
+            # Retrieve the JSON metadata for the folder, which will contain
+            # the list of all services.
+            url = (
+                f"https://{self.project}.ncep.noaa.gov"
+                f"/arcgis/rest/services/{folder}"
+            )
+            r = requests.get(url, params=params)
+            r.raise_for_status()
+
+            # Save each service.
+            j = r.json()
+            for item in j['services']:
+                folder, service = item['name'].split('/')
+                service_type = item['type']
+                records.append((folder, service, service_type))
+
+        columns = ['folder', 'service', 'service_type']
+        df = pd.DataFrame.from_records(records, columns=columns)
+        return df
 
     def setup_logger(self):
 

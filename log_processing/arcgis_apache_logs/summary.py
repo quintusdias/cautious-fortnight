@@ -37,7 +37,8 @@ class SummaryProcessor(CommonProcessor):
                 date,
                 SUM(hits) as hits,
                 SUM(errors) as errors,
-                SUM(nbytes) as nbytes
+                SUM(nbytes) as nbytes,
+                SUM(mapdraws) as mapdraws
             FROM summary
             GROUP BY date
             ORDER BY date
@@ -110,7 +111,7 @@ class SummaryProcessor(CommonProcessor):
                      SUM(export_mapdraws) as export_mapdraws,
                      SUM(wms_mapdraws) as wms_mapdraws
               FROM service_logs
-              WHERE date > ?
+              WHERE date >= ?
               GROUP BY date
               """
         df_svc = pd.read_sql(sql, self.conn, params=(starting_date,))
@@ -170,11 +171,13 @@ class SummaryProcessor(CommonProcessor):
         # referers.  Then restrict to valid hits.  And rename valid_hits to
         # hits.
         df['hits'] = df['hits'] - df['errors']
-        df = df[['date', 'hits']]
+        df = df[['date', 'hits', 'errors', 'mapdraws']]
         df = df.set_index('date')
 
         # Turn the data from hits/hour to hits/second
         df['hits'] /= 3600
+        df['errors'] /= 3600
+        df['mapdraws'] /= 3600
 
         # Get the maximum over the last day and overall maximum.
         df_last24 = df.tail(n=24)

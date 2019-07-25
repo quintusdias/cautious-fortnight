@@ -44,6 +44,25 @@ def produce_arcgis_apache_graphics():
     p.process_graphics()
 
 
+def init_db():
+    """
+    Entry point for initializing the database.
+    """
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('project', choices=['idpgis', 'nowcoast'])
+
+    help = "Initialize the database in this directory."
+    parser.add_argument('--document-root', nargs='?', help=help)
+
+    args = parser.parse_args()
+
+    processor = ApacheLogParser(args.project, document_root=args.document_root,
+                                infile=None)
+    processor.initialize_database()
+
+
 def prune_arcgis_apache_database():
     """
     Entry point for cleaning up the database.
