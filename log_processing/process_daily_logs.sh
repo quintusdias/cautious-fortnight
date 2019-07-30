@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -x
+set -e
 
 # for project in nowcoast idpgis
 for project in nowcoast idpgis

@@ -234,7 +234,7 @@ class CommonProcessor(object):
         The current set of records may overlap with existing records in the
         database, so we must merge them.
         """
-        start = df_current.loc[0].date
+        start = df_current.iloc[0].date
 
         # Get everything from the database after this time.
         sql = f"""

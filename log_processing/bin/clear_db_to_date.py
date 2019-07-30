@@ -5,6 +5,7 @@
 # Create the new index
 
 import argparse
+import datetime as dt
 import pathlib
 import sqlite3
 
@@ -15,9 +16,7 @@ def run(project, root):
     conn = sqlite3.connect(dbfile)
     cursor = conn.cursor()
 
-    # off by 3 hours.
-    # date = dt.datetime(2019,7,16,0,0,0).timestamp()
-    date = 1563235200
+    date = dt.datetime(2019, 7, 27, 20, 0, 0).timestamp()
     print(date)
 
     sql = """

@@ -117,6 +117,7 @@ class IPAddressProcessor(CommonProcessor):
 
         df.to_sql('ip_address_logs', self.conn,
                   if_exists='append', index=False)
+
         self.conn.commit()
 
         self.records = []
@@ -273,14 +274,37 @@ class IPAddressProcessor(CommonProcessor):
         """
         Do any cleaning necessary before processing any new records.
 
-        Delete anything older than 7 days.
+        If it's Monday, just drop the tables.
         """
-        sql = """
-              DELETE FROM ip_address_logs WHERE date < ?
-              """
-        datenum = (
-            dt.datetime.now() - dt.timedelta(days=self.data_retention_days)
-        ).timestamp()
         cursor = self.conn.cursor()
-        cursor.execute(sql, (datenum,))
+
+        if dt.date.today().weekday() != 0:
+            # If it's not Monday, do nothing.
+            return
+
+        # Ok, it's Monday, drop the IP address tables, they will be recreated.
+        sql = """
+              DROP INDEX idx_ip_address_logs_date
+              """
+        self.logger.info(sql)
+        cursor.execute(sql)
+
+        sql = """
+              DROP TABLE ip_address_logs
+              """
+        self.logger.info(sql)
+        cursor.execute(sql)
+
+        sql = """
+              DROP INDEX idx_ip_address
+              """
+        self.logger.info(sql)
+        cursor.execute(sql)
+
+        sql = """
+              DROP TABLE known_ip_addresses
+              """
+        self.logger.info(sql)
+        cursor.execute(sql)
+
         self.conn.commit()

@@ -1,7 +1,4 @@
 # Standard libraary imports
-import datetime as dt
-import importlib.resources as ir
-import io
 import os
 import pathlib
 import tempfile
@@ -11,7 +8,7 @@ from unittest.mock import patch
 import pandas as pd
 
 # Local imports
-from arcgis_apache_logs import ApacheLogParser, UserAgentProcessor
+from arcgis_apache_logs import UserAgentProcessor
 from .test_core import TestCore
 
 
@@ -66,47 +63,3 @@ class TestSuite(TestCore):
         table_names = ['known_user_agents', 'user_agent_logs']
         expected = pd.Series(table_names, name='name')
         pd.testing.assert_series_equal(actual['name'], expected)
-
-    @patch('arcgis_apache_logs.common.logging.getLogger')
-    def test_data_retention(self, mock_logger):
-        """
-        SCENARIO:  There are ten records just processed, one that is under
-        the data retention threshold, the others are over.
-
-        EXPECTED RESULT:  The older log record should be expunged upon the
-        next run.
-        """
-        # Put ten records into the database.
-        text = ir.read_text('tests.data', 'ten.dat')
-        s = io.StringIO(text)
-
-        p1 = ApacheLogParser('idpgis', s)
-        self.initialize_known_services_table(p1.services)
-        p1.parse_input()
-
-        df = pd.read_sql('SELECT * FROM user_agent_logs', p1.user_agent.conn)
-        num_ua_records = len(df)
-
-        # Update the user agent log records.
-        df.loc[0, 'date'] = (
-            dt.datetime.now()
-            - dt.timedelta(days=p1.user_agent.data_retention_days)
-            - dt.timedelta(hours=1)
-        ).timestamp()
-        df.loc[1:, 'date'] = (
-            dt.datetime.now()
-            - dt.timedelta(days=p1.user_agent.data_retention_days)
-            + dt.timedelta(hours=1)
-        ).timestamp()
-
-        df.to_sql('user_agent_logs', p1.user_agent.conn,
-                  if_exists='replace', index=False)
-        p1.user_agent.conn.commit()
-
-        # This is the 2nd time around.  The one log record should have been
-        # deleted.
-        p2 = ApacheLogParser('idpgis')
-        p2.user_agent.preprocess_database()
-
-        df = pd.read_sql('SELECT * FROM user_agent_logs', p2.user_agent.conn)
-        self.assertEqual(len(df), num_ua_records - 1)

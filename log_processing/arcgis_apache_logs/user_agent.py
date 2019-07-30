@@ -181,16 +181,37 @@ class UserAgentProcessor(CommonProcessor):
 
         Delete anything older than 7 days.
         """
-        sql = """
-              DELETE FROM user_agent_logs WHERE date < ?
-              """
-        datenum = (
-            dt.datetime.now()
-            - dt.timedelta(days=self.data_retention_days)
-        ).timestamp()
+        if dt.date.today().weekday() != 0:
+            # If it's not Monday, do nothing.
+            return
 
+        # Ok, it's Monday, drop the IP address tables, they will be recreated.
         cursor = self.conn.cursor()
-        cursor.execute(sql, (datenum,))
+
+        sql = """
+              DROP INDEX idx_user_agent_logs_date
+              """
+        self.logger.info(sql)
+        cursor.execute(sql)
+
+        sql = """
+              DROP TABLE user_agent_logs
+              """
+        self.logger.info(sql)
+        cursor.execute(sql)
+
+        sql = """
+              DROP INDEX idx_user_agent
+              """
+        self.logger.info(sql)
+        cursor.execute(sql)
+
+        sql = """
+              DROP TABLE known_user_agents
+              """
+        self.logger.info(sql)
+        cursor.execute(sql)
+
         self.conn.commit()
 
     def process_graphics(self, html_doc):
