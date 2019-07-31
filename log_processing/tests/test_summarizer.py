@@ -15,7 +15,7 @@ class TestSuite(TestCore):
         SCENARIO:  The database does not exist.
 
         EXPECTED RESULT:  The database is initialized.  There should be
-        one tables.
+        three tables.
         """
         r = SummaryProcessor('idpgis')
 
@@ -27,6 +27,6 @@ class TestSuite(TestCore):
               """
         actual = pd.read_sql(sql, r.conn)
 
-        table_names = ['summary']
+        table_names = ['burst_staging', 'burst_summary', 'summary']
         expected = pd.Series(table_names, name='name')
         pd.testing.assert_series_equal(actual['name'], expected)

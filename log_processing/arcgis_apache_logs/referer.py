@@ -5,6 +5,7 @@ import datetime as dt
 import urllib.parse
 
 # 3rd party library imports
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -273,6 +274,9 @@ class RefererProcessor(CommonProcessor):
         s = df.max().sort_values(ascending=False)
         df = df[s.index]
 
+        fig, ax = plt.subplots(figsize=(15, 7))
+        df.plot(ax=ax)
+
         kwargs = {
             'title': 'GBytes per Hour',
             'filename': f'{self.project}_referers_bytes.png',
@@ -302,6 +306,9 @@ class RefererProcessor(CommonProcessor):
         # Order them by max value.
         s = df.max().sort_values(ascending=False)
         df = df[s.index]
+
+        fig, ax = plt.subplots(figsize=(15, 7))
+        df.plot(ax=ax)
 
         kwargs = {
             'title': (

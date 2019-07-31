@@ -4,6 +4,7 @@ import re
 
 # 3rd party libraries
 from lxml import etree
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -268,6 +269,9 @@ class ServicesProcessor(CommonProcessor):
                 title = f'{folder} folder:  Hits per second'
             else:
                 title = f'{folder} folder:  Hits per hour'
+
+            fig, ax = plt.subplots(figsize=(15, 7))
+            df.plot(ax=ax)
 
             kwargs = {
                 'title': title,

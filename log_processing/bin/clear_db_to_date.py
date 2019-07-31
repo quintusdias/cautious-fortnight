@@ -16,7 +16,7 @@ def run(project, root):
     conn = sqlite3.connect(dbfile)
     cursor = conn.cursor()
 
-    date = dt.datetime(2019, 7, 27, 20, 0, 0).timestamp()
+    date = dt.datetime(2019, 8, 11, 20, 0, 0).timestamp()
     print(date)
 
     sql = """
@@ -25,7 +25,7 @@ def run(project, root):
           """
     for table in [
         'summary', 'ip_address_logs', 'service_logs', 'referer_logs',
-        'user_agent_logs'
+        'user_agent_logs', 'burst_staging'
     ]:
         print(table)
         # df = pd.read_sql(sql2, conn, params=(date,))

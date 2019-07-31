@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 
 set -x
-set -e
 
-# for project in nowcoast idpgis
 for project in nowcoast idpgis
 do
 
@@ -34,4 +32,6 @@ do
         rm $HOME/data/logs/akamai/$project/incoming/*.*.*-*-"$datestr"*.gz
     done	
     
+    rsync -avz ~/Documents/arcgis_apache_logs/*.{html,png} jevans@cerebrus:/var/www/html/gis
+
 done

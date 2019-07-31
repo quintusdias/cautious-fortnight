@@ -4,6 +4,7 @@
 import datetime as dt
 
 # 3rd party library imports
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -254,6 +255,9 @@ class UserAgentProcessor(CommonProcessor):
         s = df.max().sort_values(ascending=False)
         df = df[s.index]
 
+        fig, ax = plt.subplots(figsize=(15, 7))
+        df.plot(ax=ax)
+
         kwargs = {
             'title': 'GBytes per Hour',
             'filename': f'{self.project}_user_agents_bytes.png',
@@ -285,6 +289,9 @@ class UserAgentProcessor(CommonProcessor):
         # Order them by max value.
         s = df.max().sort_values(ascending=False)
         df = df[s.index]
+
+        fig, ax = plt.subplots(figsize=(15, 7))
+        df.plot(ax=ax)
 
         kwargs = {
             'title': (

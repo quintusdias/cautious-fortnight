@@ -2,6 +2,7 @@
 import datetime as dt
 
 # 3rd party library imports
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -197,6 +198,9 @@ class IPAddressProcessor(CommonProcessor):
         s = df.max().sort_values(ascending=False)
         df = df[s.index]
 
+        fig, ax = plt.subplots(figsize=(15, 7))
+        df.plot(ax=ax)
+
         kwargs = {
             'title': 'Top IPs:  Hits per Second',
             'filename': 'top_ip_hits.png',
@@ -221,6 +225,9 @@ class IPAddressProcessor(CommonProcessor):
         # Order them by max value.
         s = df.max().sort_values(ascending=False)
         df = df[s.index]
+
+        fig, ax = plt.subplots(figsize=(15, 7))
+        df.plot(ax=ax)
 
         kwargs = {
             'title': 'Top IPs:  MBytes per Hour',
