@@ -16,7 +16,7 @@ def run(project, root):
     conn = sqlite3.connect(dbfile)
     cursor = conn.cursor()
 
-    date = dt.datetime(2019, 8, 11, 20, 0, 0).timestamp()
+    date = dt.datetime(2019, 8, 25, 20, 0, 0).timestamp()
     print(date)
 
     sql = """

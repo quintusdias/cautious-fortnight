@@ -14,7 +14,8 @@ def parse_arcgis_apache_logs():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('project', choices=['idpgis', 'nowcoast'])
-    parser.add_argument('--infile', type=argparse.FileType('r'),
+    parser.add_argument('--infile',
+                        type=argparse.FileType(mode='r', errors='replace'),
                         default=sys.stdin, nargs='?')
 
     help = (
