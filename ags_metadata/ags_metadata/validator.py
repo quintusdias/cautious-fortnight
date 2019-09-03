@@ -37,10 +37,16 @@ class Validator(object):
     """
     Validates XML files according to 19115-2 schema.
     """
-    def __init__(self):
+    def __init__(self, logger):
         """
         Load the 19115-2 schema so that every XML file produced is validated.
+
+        Parameters
+        ----------
+        logger : standard library logger
         """
+        self.logger = logger
+
         # Interpolate the path to the XSD files.
         path = pathlib.Path(__file__).parent / 'data'
         schema_doc = _SCHEMA_DOC.format(install_root=path.as_uri())

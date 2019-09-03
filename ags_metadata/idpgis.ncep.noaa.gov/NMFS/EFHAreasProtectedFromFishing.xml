@@ -14,7 +14,7 @@
   <gmd:contact>
   </gmd:contact>
   <gmd:dateStamp>
-    <gco:Date>2018-03-30</gco:Date>
+    <gco:Date>2019-11-02</gco:Date>
   </gmd:dateStamp>
   <gmd:metadataStandardName>
     <gco:CharacterString>2003/Cor.1:2006 (ISO 19115), 2007 (ISO/TS 19139)</gco:CharacterString>
@@ -54,7 +54,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2018-03-30</gco:Date>
+                <gco:Date>2019-11-02</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision">revision</gmd:CI_DateTypeCode>
@@ -89,7 +89,7 @@ Designated EFH areas where fishing or the use of fishing gears has been restrict
       <gmd:graphicOverview>
         <gmd:MD_BrowseGraphic>
           <gmd:fileName>
-            <gco:CharacterString>https://idpgis.ncep.noaa.gov/arcgis/rest/services/NMFS/EFHAreasProtectedFromFishing/MapServer/export?bbox=-2.4121131362880602E7,-2.9357001845071476E7,2.4121131362880588E7,3.611464042560442E7&amp;f=image</gco:CharacterString>
+            <gco:CharacterString>https://idpgis.ncep.noaa.gov/arcgis/rest/services/NMFS/EFHAreasProtectedFromFishing/MapServer/export?bbox=-2.849696930329119E7,-3.529563904991443E7,2.8496969303291183E7,4.2053277630447365E7&amp;f=image</gco:CharacterString>
           </gmd:fileName>
           <gmd:fileType>
             <gco:CharacterString>PNG</gco:CharacterString>
@@ -205,7 +205,7 @@ Designated EFH areas where fishing or the use of fishing gears has been restrict
                 <gco:Decimal>179.99998854118684</gco:Decimal>
               </gmd:eastBoundLongitude>
               <gmd:southBoundLatitude>
-                <gco:Decimal>14.93000046991605</gco:Decimal>
+                <gco:Decimal>14.930000469916058</gco:Decimal>
               </gmd:southBoundLatitude>
               <gmd:northBoundLatitude>
                 <gco:Decimal>65.83010338863521</gco:Decimal>

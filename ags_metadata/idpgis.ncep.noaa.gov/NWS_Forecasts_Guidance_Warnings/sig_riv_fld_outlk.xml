@@ -14,7 +14,7 @@
   <gmd:contact>
   </gmd:contact>
   <gmd:dateStamp>
-    <gco:Date>2018-03-30</gco:Date>
+    <gco:Date>2019-11-02</gco:Date>
   </gmd:dateStamp>
   <gmd:metadataStandardName>
     <gco:CharacterString>2003/Cor.1:2006 (ISO 19115), 2007 (ISO/TS 19139)</gco:CharacterString>
@@ -52,7 +52,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2018-03-30</gco:Date>
+                <gco:Date>2019-11-02</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision">revision</gmd:CI_DateTypeCode>
@@ -180,16 +180,16 @@
                 <gco:Boolean>1</gco:Boolean>
               </gmd:extentTypeCode>
               <gmd:westBoundLongitude>
-                <gco:Decimal>-143.22000000019978</gco:Decimal>
+                <gco:Decimal>-124.38701384799998</gco:Decimal>
               </gmd:westBoundLongitude>
               <gmd:eastBoundLongitude>
-                <gco:Decimal>-57.4100000000999</gco:Decimal>
+                <gco:Decimal>-67.0089993389999</gco:Decimal>
               </gmd:eastBoundLongitude>
               <gmd:southBoundLatitude>
-                <gco:Decimal>17.52999999960042</gco:Decimal>
+                <gco:Decimal>24.950004516000092</gco:Decimal>
               </gmd:southBoundLatitude>
               <gmd:northBoundLatitude>
-                <gco:Decimal>52.51000000019991</gco:Decimal>
+                <gco:Decimal>49.60300758200003</gco:Decimal>
               </gmd:northBoundLatitude>
             </gmd:EX_GeographicBoundingBox>
           </gmd:geographicElement>

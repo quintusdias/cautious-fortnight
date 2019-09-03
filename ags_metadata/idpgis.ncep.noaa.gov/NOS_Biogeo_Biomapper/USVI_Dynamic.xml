@@ -14,7 +14,7 @@
   <gmd:contact>
   </gmd:contact>
   <gmd:dateStamp>
-    <gco:Date>2018-03-30</gco:Date>
+    <gco:Date>2019-11-02</gco:Date>
   </gmd:dateStamp>
   <gmd:metadataStandardName>
     <gco:CharacterString>2003/Cor.1:2006 (ISO 19115), 2007 (ISO/TS 19139)</gco:CharacterString>
@@ -54,7 +54,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2018-03-30</gco:Date>
+                <gco:Date>2019-11-02</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision">revision</gmd:CI_DateTypeCode>
@@ -184,10 +184,10 @@ For more information, see http://coastalscience.noaa.gov/projects/detail?key=182
                 <gco:Decimal>-64.42499021324441</gco:Decimal>
               </gmd:eastBoundLongitude>
               <gmd:southBoundLatitude>
-                <gco:Decimal>17.616349433589118</gco:Decimal>
+                <gco:Decimal>17.616349433589114</gco:Decimal>
               </gmd:southBoundLatitude>
               <gmd:northBoundLatitude>
-                <gco:Decimal>18.41665568399232</gco:Decimal>
+                <gco:Decimal>18.416655683992328</gco:Decimal>
               </gmd:northBoundLatitude>
             </gmd:EX_GeographicBoundingBox>
           </gmd:geographicElement>

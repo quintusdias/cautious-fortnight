@@ -14,7 +14,7 @@
   <gmd:contact>
   </gmd:contact>
   <gmd:dateStamp>
-    <gco:Date>2018-03-30</gco:Date>
+    <gco:Date>2019-11-02</gco:Date>
   </gmd:dateStamp>
   <gmd:metadataStandardName>
     <gco:CharacterString>2003/Cor.1:2006 (ISO 19115), 2007 (ISO/TS 19139)</gco:CharacterString>
@@ -54,7 +54,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2018-03-30</gco:Date>
+                <gco:Date>2019-11-02</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision">revision</gmd:CI_DateTypeCode>
@@ -87,7 +87,7 @@
       <gmd:graphicOverview>
         <gmd:MD_BrowseGraphic>
           <gmd:fileName>
-            <gco:CharacterString>https://idpgis.ncep.noaa.gov/arcgis/rest/services/NOS_Biogeo_Biomapper/AS_Imagery/MapServer/export?bbox=-1.895401061428316E7,-1538206.5014596246,-1.880866311543551E7,-1337792.3500651307&amp;f=image</gco:CharacterString>
+            <gco:CharacterString>https://idpgis.ncep.noaa.gov/arcgis/rest/services/NOS_Biogeo_Biomapper/AS_Imagery/MapServer/export?bbox=-1.9251413327876806E7,-1948283.8191970713,-1.8511260401841864E7,-927715.0323276832&amp;f=image</gco:CharacterString>
           </gmd:fileName>
           <gmd:fileType>
             <gco:CharacterString>PNG</gco:CharacterString>
@@ -191,10 +191,10 @@
                 <gco:Decimal>-168.1313650668311</gco:Decimal>
               </gmd:eastBoundLongitude>
               <gmd:southBoundLatitude>
-                <gco:Decimal>-14.565492564768343</gco:Decimal>
+                <gco:Decimal>-14.56549256476834</gco:Decimal>
               </gmd:southBoundLatitude>
               <gmd:northBoundLatitude>
-                <gco:Decimal>-11.041592123241033</gco:Decimal>
+                <gco:Decimal>-11.041592123241022</gco:Decimal>
               </gmd:northBoundLatitude>
             </gmd:EX_GeographicBoundingBox>
           </gmd:geographicElement>

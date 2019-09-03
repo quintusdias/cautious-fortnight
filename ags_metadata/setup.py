@@ -17,9 +17,7 @@ kwargs = {
     'package_data': {
         'ags_metadata': [
             'data/*.xml',
-            'data/schema/gmd/*.xsd',
-            'data/schema/gmi/*.xsd',
-            'data/schema/srv/*.xsd',
+            'data/schema/*/*.xsd',
             'data/xsl/*.xsl',
             'data/*.txt',
         ]
@@ -30,6 +28,7 @@ kwargs = {
         'requests>=2.12.1',
         'setuptools>=27.2.0',
         'pyyaml>=3.12',
+        'pyproj',
     ],
     'version': '0.1.0',
 }

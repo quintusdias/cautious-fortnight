@@ -14,7 +14,7 @@
   <gmd:contact>
   </gmd:contact>
   <gmd:dateStamp>
-    <gco:Date>2018-03-30</gco:Date>
+    <gco:Date>2019-11-02</gco:Date>
   </gmd:dateStamp>
   <gmd:metadataStandardName>
     <gco:CharacterString>2003/Cor.1:2006 (ISO 19115), 2007 (ISO/TS 19139)</gco:CharacterString>
@@ -54,7 +54,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2018-03-30</gco:Date>
+                <gco:Date>2019-11-02</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision">revision</gmd:CI_DateTypeCode>
@@ -88,7 +88,7 @@
       <gmd:graphicOverview>
         <gmd:MD_BrowseGraphic>
           <gmd:fileName>
-            <gco:CharacterString>https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Forecasts_Guidance_Warnings/rfc_dly_qpe/MapServer/export?bbox=-1.574715081357923E7,2441678.3619210683,-6858729.35322077,1.4748723460878935E7&amp;f=image</gco:CharacterString>
+            <gco:CharacterString>https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Forecasts_Guidance_Warnings/rfc_dly_qpe/MapServer/export?bbox=-1.4774864518111475E7,1315511.0768215545,-4997226.763033786,1.4853778737698354E7&amp;f=image</gco:CharacterString>
           </gmd:fileName>
           <gmd:fileType>
             <gco:CharacterString>PNG</gco:CharacterString>
@@ -101,22 +101,22 @@
             <gco:CharacterString>National Weather Service</gco:CharacterString>
           </gmd:keyword>
           <gmd:keyword>
-            <gco:CharacterString> River Forecast Center</gco:CharacterString>
+            <gco:CharacterString>River Forecast Center</gco:CharacterString>
           </gmd:keyword>
           <gmd:keyword>
-            <gco:CharacterString> Quantitative Precipitation Estimates</gco:CharacterString>
+            <gco:CharacterString>Quantitative Precipitation Estimates</gco:CharacterString>
           </gmd:keyword>
           <gmd:keyword>
-            <gco:CharacterString> NWS</gco:CharacterString>
+            <gco:CharacterString>NWS</gco:CharacterString>
           </gmd:keyword>
           <gmd:keyword>
-            <gco:CharacterString> RFC</gco:CharacterString>
+            <gco:CharacterString>RFC</gco:CharacterString>
           </gmd:keyword>
           <gmd:keyword>
-            <gco:CharacterString> QPF</gco:CharacterString>
+            <gco:CharacterString>QPF</gco:CharacterString>
           </gmd:keyword>
           <gmd:keyword>
-            <gco:CharacterString> AHPS</gco:CharacterString>
+            <gco:CharacterString>AHPS</gco:CharacterString>
           </gmd:keyword>
           <gmd:type>
             <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme" codeSpace="ISOTC211/19115">theme</gmd:MD_KeywordTypeCode>
@@ -195,16 +195,16 @@
                 <gco:Boolean>1</gco:Boolean>
               </gmd:extentTypeCode>
               <gmd:westBoundLongitude>
-                <gco:Decimal>-179.99999550841463</gco:Decimal>
+                <gco:Decimal>-178.0660774988552</gco:Decimal>
               </gmd:westBoundLongitude>
               <gmd:eastBoundLongitude>
-                <gco:Decimal>179.99999550841463</gco:Decimal>
+                <gco:Decimal>-59.87108840719627</gco:Decimal>
               </gmd:eastBoundLongitude>
               <gmd:southBoundLatitude>
-                <gco:Decimal>-88.99999992161116</gco:Decimal>
+                <gco:Decimal>13.699037235437148</gco:Decimal>
               </gmd:southBoundLatitude>
               <gmd:northBoundLatitude>
-                <gco:Decimal>88.99999992161116</gco:Decimal>
+                <gco:Decimal>75.74118443255378</gco:Decimal>
               </gmd:northBoundLatitude>
             </gmd:EX_GeographicBoundingBox>
           </gmd:geographicElement>

@@ -14,7 +14,7 @@
   <gmd:contact>
   </gmd:contact>
   <gmd:dateStamp>
-    <gco:Date>2018-03-30</gco:Date>
+    <gco:Date>2019-11-02</gco:Date>
   </gmd:dateStamp>
   <gmd:metadataStandardName>
     <gco:CharacterString>2003/Cor.1:2006 (ISO 19115), 2007 (ISO/TS 19139)</gco:CharacterString>
@@ -54,7 +54,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2018-03-30</gco:Date>
+                <gco:Date>2019-11-02</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision">revision</gmd:CI_DateTypeCode>
@@ -70,9 +70,7 @@
       <gmd:abstract>
         <gco:CharacterString>NDGD Air Quality Forecast Guidance for surface dust concentration. Concentration units are micrograms per cubic meter. For further information please visit our website at 
 
-.  
-
-This is a time enabled image service with WMS and WCS capabilities enabled. Forecast guidance is issued twice daily based on 6Z and 12Z model runs. Forecast information is provided in one hour intervals for the subsequent 48-hour period. Client applications may require users to specify time range parameters to view time sliced or loop data.
+. This is a time enabled image service with WMS and WCS capabilities enabled. Forecast guidance is issued twice daily based on 6Z and 12Z model runs. Forecast information is provided in one hour intervals for the subsequent 48-hour period. Client applications may require users to specify time range parameters to view time sliced or loop data.
 
 Link to graphical web page: 
 
@@ -84,8 +82,7 @@ Questions/Concerns about the service, please contact the
 
  team 
 
-This map is time-enabled.
-</gco:CharacterString>
+This map is time-enabled.</gco:CharacterString>
       </gmd:abstract>
       <gmd:purpose>
         <gco:CharacterString/>

@@ -6,6 +6,7 @@ import logging
 import os
 import pathlib
 import re
+import sys
 import warnings
 
 # Third-party library imports ...
@@ -68,50 +69,63 @@ class RestToIso(object):
         Complete ISO 19115-2 document
     """
 
-    def __init__(self, config_file, verbose='info', output_root=None):
+    def __init__(self, config_file, outdir, verbose='info'):
         """
         Parameters
         ----------
         config_file : str or path
             path to YAML configuration file
+        outdir : str or path
+            Place the output in this directory, creating it if necessary.
         verbose : str
             corresponds to a logging package log level
-        output_root : str
-            Where to write the resulting records.
         """
         self.validate = True
         self.parser = etree.XMLParser(remove_blank_text=True)
 
         with open(config_file, 'rt') as f:
-            self.config = yaml.load(f.read())
+            self.config = yaml.load(f.read(), Loader=yaml.FullLoader)
 
+        if isinstance(outdir, str):
+            outdir = pathlib.Path(outdir)
+
+        self.output_directory = outdir / self.config['server'] / 'xml'
+        if not self.output_directory.exists():
+            self.output_directory.mkdir(parents=True, exist_ok=True)
+        
         self.session = requests.Session()
 
-        logging.basicConfig(level=logging.INFO)
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(_logging_level[verbose])
+        self.setup_logger(verbose)
 
         # DEV and QA sites have trouble with SSL certs.  We allow for this
         # check to be suppressed.
         # self.session.verify = self.config['verify_ssl_cert']
         self.session.verify = False
 
-        self.base_url = (f"https://{self.config['server']}"
-                         f"/arcgis/rest/services/")
+        self.base_url = (
+            f"https://{self.config['server']}/arcgis/rest/services/"
+        )
 
-        if output_root is None:
-            self.output_directory = pathlib.Path(self.config['server'])
-        else:
-            self.output_directory = pathlib.Path(output_root)
+        self.validator = Validator(self.logger)
 
-        self.validator = Validator()
+    def setup_logger(self, verbose):
+        self.logger = logging.getLogger('rest2iso')
+        self.logger.setLevel(_logging_level[verbose])
+
+        format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        formatter = logging.Formatter(format)
+
+        sh = logging.StreamHandler(sys.stdout)
+        sh.setFormatter(formatter)
+        self.logger.addHandler(sh)
 
     def load_service_metadata(self):
         """
         Retrieve the REST HTML, JSON for a single service.
         """
-        url = (f"{self.base_url}"
-               f"/{self.folder}/{self.service}/{self.service_type}")
+        url = (
+            f"{self.base_url}/{self.folder}/{self.service}/{self.service_type}"
+        )
         r = self.session.get(url)
         r.raise_for_status()
         self.rest_html = r.content.decode('utf-8')
@@ -957,8 +971,8 @@ class RestToIso(object):
 
 class NowCoastRestToIso(RestToIso):
 
-    def __init__(self, config_file, verbose='info'):
-        super().__init__(config_file, verbose=verbose)
+    def __init__(self, config_file, outdir, verbose='info'):
+        super().__init__(config_file, outdir, verbose=verbose)
 
     def _retrieve_rest_references(self):
         """

@@ -1,6 +1,6 @@
 <gmi:MI_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gmi="http://www.isotc211.org/2005/gmi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gsr="http://www.isotc211.org/2005/gsr" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:gmx="http://www.isotc211.org/2005/gmx" xsi:schemaLocation="http://www.isotc211.org/2005/gmi http://www.ngdc.noaa.gov/metadata/published/xsd/schema.xsd">
   <gmd:fileIdentifier>
-    <gco:CharacterString>gov.noaa.nos.ocs.nowcoast:operational_obs_meteoceanhydro_insitu_pts_geolinks</gco:CharacterString>
+    <gco:CharacterString>gov.noaa.nos.ocs.nowcoast:nowcoast.obs_meteoceanhydro_insitu_pts_geolinks</gco:CharacterString>
   </gmd:fileIdentifier>
   <gmd:language>
     <gco:CharacterString>eng; USA</gco:CharacterString>
@@ -11,10 +11,10 @@
   <gmd:hierarchyLevel>
     <gmd:MD_ScopeCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="service">service</gmd:MD_ScopeCode>
   </gmd:hierarchyLevel>
-  <gmd:contact xlink:title="NOS IMO Lead Metadata Manager" xlink:href="https://www.ngdc.noaa.gov/docucomp/32d6e1a5-1415-4494-9512-0d3030c9c940">
+  <gmd:contact>
   </gmd:contact>
   <gmd:dateStamp>
-    <gco:Date>2017-03-21</gco:Date>
+    <gco:Date>2019-11-02</gco:Date>
   </gmd:dateStamp>
   <gmd:metadataStandardName>
     <gco:CharacterString>2003/Cor.1:2006 (ISO 19115), 2007 (ISO/TS 19139)</gco:CharacterString>
@@ -54,85 +54,29 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2017-03-21</gco:Date>
+                <gco:Date>2019-11-02</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision">revision</gmd:CI_DateTypeCode>
               </gmd:dateType>
             </gmd:CI_Date>
           </gmd:date>
-          <gmd:citedResponsibleParty xlink:title="DOC/NOAA/NOS/OCS nowCOAST Team" xlink:href="https://www.ngdc.noaa.gov/docucomp/6441d46e-f370-40bb-81ce-276651e9c661">
-            <gmd:CI_ResponsibleParty>
-              <gmd:role>
-                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="principalInvestigator">principalInvestigator</gmd:CI_RoleCode>
-              </gmd:role>
-            </gmd:CI_ResponsibleParty>
-          </gmd:citedResponsibleParty>
-          <gmd:citedResponsibleParty xlink:title="DOC/NOAA/NOS/OCS &gt; Office of Coast Survey, NOS, NOAA, Department of Commerce" xlink:href="https://www.ngdc.noaa.gov/docucomp/68070943-b376-49b4-bb5b-f2f2722195e6">
-            <gmd:CI_ResponsibleParty>
-              <gmd:role>
-                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="publisher">publisher</gmd:CI_RoleCode>
-              </gmd:role>
-            </gmd:CI_ResponsibleParty>
-          </gmd:citedResponsibleParty>
+          <gmd:citedResponsibleParty/>
           <gmd:presentationForm>
             <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital">mapDigital</gmd:CI_PresentationFormCode>
           </gmd:presentationForm>
         </gmd:CI_Citation>
       </gmd:citation>
       <gmd:abstract>
-        <gco:CharacterString>Map Information:
-
-This nowCOAST geolinks map service provides maps depicting the locations of surface and upper-air in-situ observing stations along with hyperlinks to the web sites posting the latest data from these observing stations. The web sites are operated by NOAA, EPA, USGS or local or state governmental agencies. The surface observations include 1) weather observations, 2) ocean/estuary/lake observations, 3) river observations, 4) water quality observations, and 5) air quality observations. These five types of observations are described briefly below.
-
-The hyperlinks to the web pages posting the observations can be accessed by performing an identify or query operation on the desired map layer, which will return the attributes of any matching feature(s). The hyperlink is stored in the "URL" attribute field.
-
-
-Weather Observations:
-:
-
-The weather observations layer includes links to NOAA web pages posting the latest meteorological data from terrestrial and maritime surface observing sites. The terrestrial stations consist of the following networks: ASOS, AWOS, Remote Automated Weather Station (RAWS) network, non-automated weather stations, U.S. Climate Reference Network (CRN), several state DOT Road Weather Information Systems and U.S. Historical Climatology Network Modernization. The maritime sites include stations and platforms of the following networks: NOS/CO-OPS' National Water Level Observation Network (NWLON) and Physical Oceanographic Real-Time System (PORTS), NWS/NDBC's Coastal-Marine Automated Network (C-MAN) and Fixed Buoy network, and Regional Ocean Observing Associations' fixed buoys and stations.
-
-
-Ocean/Estuary/Lake Observations:
-:
-
-The ocean/estuary/lake observations layer includes links to mainly NOAA and USGS web pages posting the latest physical oceanographic or limnological data (e.g. water temperature, salinity, wave heights, water level, water currents) from nation-wide observing networks including: NOS/CO-OPS NWLON and NOS/CO-OPS PORTS networks, USGS National Streamflow Information Program networks, NWS/NDBC and partners' fixed buoys, NWS/NDBC and partners' coastal stations, Canadian water level observing network, National Estuarine Research Reserve System network, and Environment Canada fixed buoys. It also includes regional, state, and local observing networks. Examples include the Great Bay (NH) Environmental Monitoring Network and offshore fixed drilling platforms in the Gulf of Mexico.
-
-
-River Observations:
-:
-
-The river observations layer includes links to NWS and USGS web pages posting the latest river observations (e.g. stage or gage height, pool elevation, discharge, water temperature, specific conductivity) from the USGS National Streamflow Information Program networks and NWS-coordinated Automated Flood Warning Systems (AFWS), also referred to as the Integrated Flood Observing and Warning System (IFLOWS).
-
-
-Water Quality Observations:
-:
-
-The water quality observations layer includes links to mainly USGS and NOAA web pages posting the latest water quality observations (e.g. pH, turbidity, dissolved oxygen, nitrate) from the USGS National Streamflow Information Program networks, National Estuarine Research Reserve System network, and some state environmental agencies (e.g. Maryland Dept. of Natural Resources).
-
-
-Air Quality Observations:
-:
-
-The air quality observations layer includes links to U.S. EPA web pages posting the latest air quality observations (e.g. Air Quality Index, Ozone, Particulates) from from local, state, tribal, and federal observing sites via the centralized U.S. EPA AirNow web site.
-
-
-Upper-Air Observations:
-:
-
-The upper air, in-situ observations layer includes links to NWS web pages posting the latest atmospheric sounding data from radiosondes released at upper-air observing stations around the U.S. The data are usually valid at 00 or 12 UTC. The web pages display the observed data using different types of plots (e.g. Skew-T, Hodograph) along with a variety of severe weather indices (e.g. CAPE, Supercell Composite Parameter). These pages were developed by NWS/NCEP/SPC to help weather forecasters with real-time sounding analysis and diagnosis. Help in interpreting the data, indices, and plots can be found at the two SPC web pages listed in the References section.</gco:CharacterString>
+        <gco:CharacterString></gco:CharacterString>
       </gmd:abstract>
       <gmd:purpose>
-          <gco:CharacterString>
-              Provide users with situational awareness/coastal intelligence of the recent past, present, and future environmental conditions for the coastal US.
-          </gco:CharacterString>
+        <gco:CharacterString/>
       </gmd:purpose>
       <gmd:status>
         <gmd:MD_ProgressCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ProgressCode" codeListValue="onGoing"/>
       </gmd:status>
-      <gmd:pointOfContact xlink:title="DOC/NOAA/NOS/OCS nowCOAST Team" xlink:href="https://www.ngdc.noaa.gov/docucomp/6441d46e-f370-40bb-81ce-276651e9c661">
-      </gmd:pointOfContact>
+      <gmd:pointOfContact> </gmd:pointOfContact>
       <gmd:resourceMaintenance>
         <gmd:MD_MaintenanceInformation>
           <gmd:maintenanceAndUpdateFrequency>
@@ -143,7 +87,7 @@ The upper air, in-situ observations layer includes links to NWS web pages postin
       <gmd:graphicOverview>
         <gmd:MD_BrowseGraphic>
           <gmd:fileName>
-            <gco:CharacterString>https://nowcoast.noaa.gov/arcgis/rest/services/nowcoast/obs_meteoceanhydro_insitu_pts_geolinks/MapServer/export?bbox=-1.647768613376689E7,1342361.53251766,-4507912.194219008,7597124.04204268&amp;f=image</gco:CharacterString>
+            <gco:CharacterString>https://nowcoast.noaa.gov/arcgis/rest/services/nowcoast/obs_meteoceanhydro_insitu_pts_geolinks/MapServer/export?bbox=-1.6410217248829119E7,413672.1751389452,-4575381.079156779,8525813.399421396&amp;f=image</gco:CharacterString>
           </gmd:fileName>
           <gmd:fileType>
             <gco:CharacterString>PNG</gco:CharacterString>
@@ -152,48 +96,177 @@ The upper air, in-situ observations layer includes links to NWS web pages postin
       </gmd:graphicOverview>
       <gmd:descriptiveKeywords>
         <gmd:MD_Keywords>
-          <gmd:keyword><gco:CharacterString>surface</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>in-situ</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>observations</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>near-real-time</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>weather</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>river</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>marine weather</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>air quality</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>water quality</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>radisonde</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>upper-air</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>NWS</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>NOAA</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>NOS</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>NESDIS</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>IOOS</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>NDBC</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>CO-OPS</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>FAA</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>USGS</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>ASOS</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>AWOS</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>RAWS</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>CRN</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>stations</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>fixed buoys</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>drifting buoys</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>VOS ships</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>ferries</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>airports</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>C-MAN</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>NWLON</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>PORTS</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>METAR</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>mesonets</gco:CharacterString></gmd:keyword><gmd:keyword><gco:CharacterString>MADIS</gco:CharacterString></gmd:keyword><gmd:type>
+          <gmd:keyword>
+            <gco:CharacterString>surface</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>in-situ</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>observations</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>near-real-time</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>weather</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>river</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>marine weather</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>air quality</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>water quality</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>radisonde</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>upper-air</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>NWS</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>NOAA</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>NOS</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>NESDIS</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>IOOS</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>NDBC</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>CO-OPS</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>FAA</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>USGS</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>ASOS</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>AWOS</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>RAWS</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>CRN</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>stations</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>fixed buoys</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>drifting buoys</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>VOS ships</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>ferries</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>airports</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>C-MAN</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>NWLON</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>PORTS</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>METAR</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>mesonets</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString>MADIS</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:type>
             <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme" codeSpace="ISOTC211/19115">theme</gmd:MD_KeywordTypeCode>
           </gmd:type>
           <gmd:thesaurusName>
-              <gmd:CI_Citation>
-                  <gmd:title>
-                      <gco:CharacterString/>
-                  </gmd:title>
-                  <gmd:date gco:nilReason="unknown"/>
-              </gmd:CI_Citation>
+            <gmd:CI_Citation>
+              <gmd:title>
+                <gco:CharacterString/>
+              </gmd:title>
+              <gmd:date gco:nilReason="unknown"/>
+            </gmd:CI_Citation>
           </gmd:thesaurusName>
         </gmd:MD_Keywords>
       </gmd:descriptiveKeywords>
       <gmd:descriptiveKeywords xlink:title="WMO Theme">
         <gmd:MD_Keywords>
-          <gmd:keyword><gco:CharacterString>observationPlatform</gco:CharacterString></gmd:keyword><gmd:type>
+          <gmd:keyword>
+            <gco:CharacterString>observationPlatform</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:type>
             <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme" codeSpace="ISOTC211/19115">theme</gmd:MD_KeywordTypeCode>
           </gmd:type>
           <gmd:thesaurusName xlink:title="WMO CodeList (WMO_CategoryCode)" xlink:href="https://www.ngdc.noaa.gov/docucomp/6f8caad8-8177-4fb6-8b87-7ac98a3518ca">
+            <gmd:CI_Citation>
+              <gmd:title>
+                <gco:CharacterString>WMO Dataset Keywords</gco:CharacterString>
+              </gmd:title>
+              <gmd:date>
+                <gmd:CI_Date>
+                  <gmd:date>
+                    <gco:Date>2014-04-26</gco:Date>
+                  </gmd:date>
+                  <gmd:dateType>
+                    <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision"/>
+                  </gmd:dateType>
+                </gmd:CI_Date>
+              </gmd:date>
+            </gmd:CI_Citation>
           </gmd:thesaurusName>
         </gmd:MD_Keywords>
       </gmd:descriptiveKeywords>
       <gmd:descriptiveKeywords xlink:title="GCMD Place">
         <gmd:MD_Keywords>
-          <gmd:keyword><gco:CharacterString>CONTINENT &gt; NORTH AMERICA &gt; UNITED STATES OF AMERICA</gco:CharacterString></gmd:keyword><gmd:type>
+          <gmd:keyword>
+            <gco:CharacterString>CONTINENT &gt; NORTH AMERICA &gt; UNITED STATES OF AMERICA</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:type>
             <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="place">place</gmd:MD_KeywordTypeCode>
           </gmd:type>
           <gmd:thesaurusName>
             <gmd:CI_Citation>
-                <gmd:title>
-                    <gco:CharacterString>NASA/GCMD Location Keywords</gco:CharacterString>
-                </gmd:title>
-                <gmd:date>
-                    <gmd:CI_Date>
-                        <gmd:date>
-                            <gco:Date>2016-05-11</gco:Date>
-                        </gmd:date>
-                        <gmd:dateType>
-                            <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision"/>
-                        </gmd:dateType>
-                    </gmd:CI_Date>
-                </gmd:date>
+              <gmd:title>
+                <gco:CharacterString>NASA/GCMD Location Keywords</gco:CharacterString>
+              </gmd:title>
+              <gmd:date>
+                <gmd:CI_Date>
+                  <gmd:date>
+                    <gco:Date>2017-07-25</gco:Date>
+                  </gmd:date>
+                  <gmd:dateType>
+                    <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision"/>
+                  </gmd:dateType>
+                </gmd:CI_Date>
+              </gmd:date>
             </gmd:CI_Citation>
           </gmd:thesaurusName>
         </gmd:MD_Keywords>
@@ -219,10 +292,7 @@ The upper air, in-situ observations layer includes links to NWS web pages postin
       <gmd:descriptiveKeywords xlink:title="GCMD Data Center">
         <gmd:MD_Keywords>
           <gmd:keyword>
-            <gco:CharacterString>DOC/NOAA/NOS/OCS &gt; Office of Coast Survey, National Ocean Service, NOAA, U.S. Department of Commerce</gco:CharacterString>
-          </gmd:keyword>
-          <gmd:keyword>
-            <gco:CharacterString>DOC/NOAA/NWS/NCEP &gt; National Centers for Environmental Prediction, National Weather Service, NOAA, U.S. Department of Commerce</gco:CharacterString>
+            <gco:CharacterString/>
           </gmd:keyword>
           <gmd:type>
             <gmd:MD_KeywordTypeCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="dataCenter">dataCenter</gmd:MD_KeywordTypeCode>
@@ -240,19 +310,14 @@ The upper air, in-situ observations layer includes links to NWS web pages postin
             <gmd:MD_RestrictionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions">otherRestrictions</gmd:MD_RestrictionCode>
           </gmd:useConstraints>
           <gmd:otherConstraints>
-            <gco:CharacterString>Distribution Liability: NOAA makes no warranty regarding these data, expressed or implied, nor does the fact of distribution constitute such a warranty.  These data are not to be used for navigation.</gco:CharacterString>
+            <gco:CharacterString/>
           </gmd:otherConstraints>
         </gmd:MD_LegalConstraints>
       </gmd:resourceConstraints>
       <gmd:resourceConstraints>
         <gmd:MD_Constraints>
           <gmd:useLimitation>
-            <gco:CharacterString>This operational server maintains a current database of meteorological and hydrological data, historical data, and written information generated by the NWS or received from other official sources. In addition, this server accesses in realtime a selection of current official weather observations, forecasts, and warnings from U.S. government sources for use by the national and international community. In an effort to enhance the science, experimental products may be accessible on this server and care must be taken when using such products as they are intended for research use.  This server is available 24 hours a day, seven days a week . Timely delivery of data and products from this server through the Internet is not guaranteed.
-
-Use of NOAA/NWS Data and Products
-The information on National Weather Service (NWS) Web pages are in the public domain, unless specifically noted otherwise, and may be used without charge for any lawful purpose so long as you do not: 1) claim it is your own (e.g., by claiming copyright for NWS information -- see below), 2) use it in a manner that implies an endorsement or affiliation with NOAA/NWS, or 3) modify its content and then present it as official government material. You also cannot present information of your own in a way that makes it appear to be official government information.  Before using information obtained from any NWS Web page special attention should be given to the date and time of the data and products being displayed. 
-
-The user assumes the entire risk related to its use of information on NWS Web pages. NWS is provides such information "as is," and NWS disclaims any and all warranties, whether express or implied, including (without limitation) any implied warranties of merchantability or fitness for a particular purpose. In no event will NWS be liable to you or to any third party for any direct, indirect, incidental, consequential, special or exemplary damages or lost profit resulting from any use or misuse of this data.</gco:CharacterString>
+            <gco:CharacterString/>
           </gmd:useLimitation>
         </gmd:MD_Constraints>
       </gmd:resourceConstraints>
@@ -260,7 +325,7 @@ The user assumes the entire risk related to its use of information on NWS Web pa
         <gco:LocalName>ArcGIS Map Service</gco:LocalName>
       </srv:serviceType>
       <srv:serviceTypeVersion>
-        <gco:CharacterString>10.2</gco:CharacterString>
+        <gco:CharacterString>10.5</gco:CharacterString>
       </srv:serviceTypeVersion>
       <srv:extent>
         <gmd:EX_Extent>
@@ -270,23 +335,22 @@ The user assumes the entire risk related to its use of information on NWS Web pa
                 <gco:Boolean>1</gco:Boolean>
               </gmd:extentTypeCode>
               <gmd:westBoundLongitude>
-                <gco:Decimal>-177.7500175522128</gco:Decimal>
+                <gco:Decimal>-177.738</gco:Decimal>
               </gmd:westBoundLongitude>
               <gmd:eastBoundLongitude>
-                <gco:Decimal>179.99998698047202</gco:Decimal>
+                <gco:Decimal>179.21699999999998</gco:Decimal>
               </gmd:eastBoundLongitude>
               <gmd:southBoundLatitude>
-                <gco:Decimal>-46.84000000000001</gco:Decimal>
+                <gco:Decimal>-55.0</gco:Decimal>
               </gmd:southBoundLatitude>
               <gmd:northBoundLatitude>
-                <gco:Decimal>82.5</gco:Decimal>
+                <gco:Decimal>74.717</gco:Decimal>
               </gmd:northBoundLatitude>
             </gmd:EX_GeographicBoundingBox>
           </gmd:geographicElement>
           <gmd:temporalElement>
             <gmd:EX_TemporalExtent>
-              <gmd:extent>
-                </gmd:extent>
+              <gmd:extent/>
             </gmd:EX_TemporalExtent>
           </gmd:temporalElement>
         </gmd:EX_Extent>
@@ -297,7 +361,7 @@ The user assumes the entire risk related to its use of information on NWS Web pa
       <srv:containsOperations xlink:title="ArcGIS for Server REST Endpoint">
         <srv:SV_OperationMetadata>
           <srv:operationName>
-            <gco:CharacterString>ArcGIS for Server REST endpoint nowCOAST map service</gco:CharacterString>
+            <gco:CharacterString/>
           </srv:operationName>
           <srv:DCP gco:nilReason="unknown"/>
           <srv:connectPoint>
@@ -312,10 +376,10 @@ The user assumes the entire risk related to its use of information on NWS Web pa
                 <gco:CharacterString>ArcGIS Map Service</gco:CharacterString>
               </gmd:applicationProfile>
               <gmd:name>
-                <gco:CharacterString>obs_meteoceanhydro_insitu_pts_geolinks Map Service</gco:CharacterString>
+                <gco:CharacterString>obs_meteoceanhydro_insitu_pts_geolinks Map Service Connect Point</gco:CharacterString>
               </gmd:name>
               <gmd:description>
-                <gco:CharacterString>REST endpoint for obs_meteoceanhydro_insitu_pts_geolinks Map Service</gco:CharacterString>
+                <gco:CharacterString>REST endpoint for nowCOAST obs_meteoceanhydro_insitu_pts_geolinks Map Service</gco:CharacterString>
               </gmd:description>
               <gmd:function>
                 <gmd:CI_OnLineFunctionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">information</gmd:CI_OnLineFunctionCode>
@@ -327,13 +391,13 @@ The user assumes the entire risk related to its use of information on NWS Web pa
       <srv:containsOperations xlink:title="WMS Get Capabilities">
         <srv:SV_OperationMetadata>
           <srv:operationName>
-            <gco:CharacterString>WMS Get Capabilities for nowCOAST map service</gco:CharacterString>
+            <gco:CharacterString/>
           </srv:operationName>
           <srv:DCP/>
           <srv:connectPoint>
             <gmd:CI_OnlineResource>
               <gmd:linkage>
-                <gmd:URL>https://nowcoast.noaa.gov/arcgis/services/nowcoast/obs_meteoceanhydro_insitu_pts_geolinks/MapServer/WMSServer?request=GetCapabilities%26service=WMS</gmd:URL>
+                <gmd:URL>http://nowcoast.noaa.gov/arcgis/services/nowcoast/obs_meteoceanhydro_insitu_pts_geolinks/MapServer/WMSServer?request=GetCapabilities%26service=WMS</gmd:URL>
               </gmd:linkage>
               <gmd:protocol>
                 <gco:CharacterString>OGC:WMS</gco:CharacterString>
@@ -342,10 +406,10 @@ The user assumes the entire risk related to its use of information on NWS Web pa
                 <gco:CharacterString>Open Geospatial Consortium Web Map Service (WMS)</gco:CharacterString>
               </gmd:applicationProfile>
               <gmd:name>
-                <gco:CharacterString>nowCOAST obs_meteoceanhydro_insitu_pts_geolinks Map Service</gco:CharacterString>
+                <gco:CharacterString>nowCOAST obs_meteoceanhydro_insitu_pts_geolinks Connect Point</gco:CharacterString>
               </gmd:name>
               <gmd:description>
-                <gco:CharacterString>GetCapabilities endpoint for OGC Web Map Service for nowCOAST obs_meteoceanhydro_insitu_pts_geolinks Map Service</gco:CharacterString>
+                <gco:CharacterString>WMS GetCapabilities endpoint for nowCOAST obs_meteoceanhydro_insitu_pts_geolinks OGC Web Map Service</gco:CharacterString>
               </gmd:description>
               <gmd:function>
                 <gmd:CI_OnLineFunctionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download">download</gmd:CI_OnLineFunctionCode>
@@ -364,13 +428,13 @@ The user assumes the entire risk related to its use of information on NWS Web pa
             <gco:CharacterString>WMS</gco:CharacterString>
           </gmd:name>
           <gmd:version>
-            <gco:CharacterString>1.3.0</gco:CharacterString>
+            <gco:CharacterString/>
           </gmd:version>
         </gmd:MD_Format>
       </gmd:distributionFormat>
       <gmd:distributor>
         <gmd:MD_Distributor>
-          <gmd:distributorContact xlink:title="DOC/NOAA/NOS/OCS nowCOAST Team" xlink:href="https://www.ngdc.noaa.gov/docucomp/6441d46e-f370-40bb-81ce-276651e9c661">
+          <gmd:distributorContact>
             <gmd:CI_ResponsibleParty>
               <gmd:role>
                 <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="distributor">distributor</gmd:CI_RoleCode>
@@ -388,95 +452,17 @@ The user assumes the entire risk related to its use of information on NWS Web pa
       </gmd:distributor>
       <gmd:transferOptions>
         <gmd:MD_DigitalTransferOptions>
-          <gmd:onLine>
+          <!-- ##nc_template##: enter URL for ArcGIS Online/NOAA GeoPlatform entry for this map service, if any -->
+          <gmd:onLine xlink:title="NOAA GeoPlatform Entry">
             <gmd:CI_OnlineResource>
               <gmd:linkage>
-                <gmd:URL>https://nowcoast.noaa.gov/</gmd:URL>
+                <gmd:URL/>
               </gmd:linkage>
-              <gmd:protocol>
-                <gco:CharacterString>https</gco:CharacterString>
-              </gmd:protocol>
               <gmd:name>
-                <gco:CharacterString>nowCOAST Map Viewer Application</gco:CharacterString>
+                <gco:CharacterString/>
               </gmd:name>
               <gmd:description>
-                <gco:CharacterString>Link to nowCOAST map viewer application for interactive use of nowCOAST map services</gco:CharacterString>
-              </gmd:description>
-              <gmd:function>
-                <gmd:CI_OnLineFunctionCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="search">search</gmd:CI_OnLineFunctionCode>
-              </gmd:function>
-            </gmd:CI_OnlineResource>
-          </gmd:onLine>
-          <gmd:onLine>
-            <gmd:CI_OnlineResource>
-              <gmd:linkage>
-                <gmd:URL>https://nowcoast.noaa.gov/help/#!section=mapservices</gmd:URL>
-              </gmd:linkage>
-              <gmd:protocol>
-                <gco:CharacterString>https</gco:CharacterString>
-              </gmd:protocol>
-              <gmd:name>
-                <gco:CharacterString>nowCOAST Map Services Information Page</gco:CharacterString>
-              </gmd:name>
-              <gmd:description>
-                <gco:CharacterString>Link to nowCOAST Info Depot page describing map services</gco:CharacterString>
-              </gmd:description>
-              <gmd:function>
-                <gmd:CI_OnLineFunctionCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">information</gmd:CI_OnLineFunctionCode>
-              </gmd:function>
-            </gmd:CI_OnlineResource>
-          </gmd:onLine>
-          <gmd:onLine>
-            <gmd:CI_OnlineResource>
-              <gmd:linkage>
-                <gmd:URL>https://nowcoast.noaa.gov/help/#!section=layerinfo</gmd:URL>
-              </gmd:linkage>
-              <gmd:protocol>
-                <gco:CharacterString>https</gco:CharacterString>
-              </gmd:protocol>
-              <gmd:name>
-                <gco:CharacterString>nowCOAST LayerInfo Web Service Information Page</gco:CharacterString>
-              </gmd:name>
-              <gmd:description>
-                <gco:CharacterString>Link to nowCOAST LayerInfo help and information page</gco:CharacterString>
-              </gmd:description>
-              <gmd:function>
-                <gmd:CI_OnLineFunctionCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">information</gmd:CI_OnLineFunctionCode>
-              </gmd:function>
-            </gmd:CI_OnlineResource>
-          </gmd:onLine>
-          <gmd:onLine>
-            <gmd:CI_OnlineResource>
-              <gmd:linkage>
-                <gmd:URL>https://nowcoast.noaa.gov/help/#!section=transitioning</gmd:URL>
-              </gmd:linkage>
-              <gmd:protocol>
-                <gco:CharacterString>https</gco:CharacterString>
-              </gmd:protocol>
-              <gmd:name>
-                <gco:CharacterString>nowCOAST 5.0 Transition Guide for ArcGIS Map Services</gco:CharacterString>
-              </gmd:name>
-              <gmd:description>
-                <gco:CharacterString>Information page useful for users to transition to nowCOAST's ArcGIS map services</gco:CharacterString>
-              </gmd:description>
-              <gmd:function>
-                <gmd:CI_OnLineFunctionCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">information</gmd:CI_OnLineFunctionCode>
-              </gmd:function>
-            </gmd:CI_OnlineResource>
-          </gmd:onLine>
-          <gmd:onLine>
-            <gmd:CI_OnlineResource>
-              <gmd:linkage>
-              <gmd:URL>https://nowcoast.noaa.gov/help/#!section=updateschedule</gmd:URL>
-              </gmd:linkage>
-              <gmd:protocol>
-                <gco:CharacterString>https</gco:CharacterString>
-              </gmd:protocol>
-              <gmd:name>
-                <gco:CharacterString>Map Layer Update Schedule</gco:CharacterString>
-              </gmd:name>
-              <gmd:description>
-                <gco:CharacterString>Information page useful for users to plan for data updates.</gco:CharacterString>
+                <gco:CharacterString/>
               </gmd:description>
               <gmd:function>
                 <gmd:CI_OnLineFunctionCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">information</gmd:CI_OnLineFunctionCode>
@@ -486,7 +472,7 @@ The user assumes the entire risk related to its use of information on NWS Web pa
           <gmd:onLine>
             <gmd:CI_OnlineResource id="WMS">
               <gmd:linkage>
-              <gmd:URL>https://nowcoast.noaa.gov/arcgis/services/nowcoast/obs_meteoceanhydro_insitu_pts_geolinks/MapServer/WMSServer?request=GetCapabilities%26service=WMS</gmd:URL>
+                <gmd:URL>https://nowcoast.noaa.gov/arcgis/services/nowcoast/obs_meteoceanhydro_insitu_pts_geolinks/MapServer/WMSServer?request=GetCapabilities%26service=WMS</gmd:URL>
               </gmd:linkage>
               <gmd:protocol>
                 <gco:CharacterString>https</gco:CharacterString>
@@ -495,7 +481,7 @@ The user assumes the entire risk related to its use of information on NWS Web pa
                 <gco:CharacterString>Web Map Service (WMS) GetCapabilities</gco:CharacterString>
               </gmd:name>
               <gmd:description>
-                <gco:CharacterString>Capabilities file for the nowCOAST obs_meteoceanhydro_insitu_pts_geolinks WMS</gco:CharacterString>
+                <gco:CharacterString>Capabilities file for the nowCOAST obs_meteoceanhydro_insitu_pts_geolinks WMS server</gco:CharacterString>
               </gmd:description>
               <gmd:function>
                 <gmd:CI_OnLineFunctionCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download">download</gmd:CI_OnLineFunctionCode>
@@ -524,21 +510,20 @@ The user assumes the entire risk related to its use of information on NWS Web pa
       <gmd:lineage>
         <gmd:LI_Lineage>
           <gmd:statement>
-            <gco:CharacterString>The following resources include useful background information on the data contained in this service.  Detailed descriptions of the steps taken in acquiring, transforming, and storing the source data to create the service are beyond the scope of this metadata record.  If additional info on the processing steps involved in producing this service is required, please email the point of contact for the services: nowcoast.team@noaa.gov.</gco:CharacterString>
+            <gco:CharacterString/>
           </gmd:statement>
           <gmd:processStep>
             <gmd:LI_ProcessStep>
               <gmd:description>
                 <gco:CharacterString/>
               </gmd:description>
-              <gmd:processor xlink:title="DOC/NOAA/NOS/OCS nowCOAST Team" xlink:href="https://www.ngdc.noaa.gov/docucomp/6441d46e-f370-40bb-81ce-276651e9c661">
+              <gmd:processor>
               </gmd:processor>
             </gmd:LI_ProcessStep>
           </gmd:processStep>
           <gmd:source>
             <gmi:LE_Source>
-              <gmd:description>
-                </gmd:description>
+              <gmd:description/>
             </gmi:LE_Source>
           </gmd:source>
         </gmd:LI_Lineage>
@@ -550,11 +535,6 @@ The user assumes the entire risk related to its use of information on NWS Web pa
       <gmd:maintenanceAndUpdateFrequency>
         <gmd:MD_MaintenanceFrequencyCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_MaintenanceFrequencyCode" codeListValue="asNeeded"/>
       </gmd:maintenanceAndUpdateFrequency>
-      <gmd:maintenanceNote>
-          <gco:CharacterString>
-              This metadata was automatically generated from service REST metadata using custom Python software.
-          </gco:CharacterString>
-      </gmd:maintenanceNote>
     </gmd:MD_MaintenanceInformation>
   </gmd:metadataMaintenance>
 </gmi:MI_Metadata>

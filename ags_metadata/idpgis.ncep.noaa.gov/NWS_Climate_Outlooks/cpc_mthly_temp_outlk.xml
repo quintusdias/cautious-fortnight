@@ -14,7 +14,7 @@
   <gmd:contact>
   </gmd:contact>
   <gmd:dateStamp>
-    <gco:Date>2018-03-30</gco:Date>
+    <gco:Date>2019-11-02</gco:Date>
   </gmd:dateStamp>
   <gmd:metadataStandardName>
     <gco:CharacterString>2003/Cor.1:2006 (ISO 19115), 2007 (ISO/TS 19139)</gco:CharacterString>
@@ -54,7 +54,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2018-03-30</gco:Date>
+                <gco:Date>2019-11-02</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision">revision</gmd:CI_DateTypeCode>
@@ -101,10 +101,10 @@
             <gco:CharacterString>temperature</gco:CharacterString>
           </gmd:keyword>
           <gmd:keyword>
-            <gco:CharacterString> forecast</gco:CharacterString>
+            <gco:CharacterString>forecast</gco:CharacterString>
           </gmd:keyword>
           <gmd:keyword>
-            <gco:CharacterString> CPC</gco:CharacterString>
+            <gco:CharacterString>CPC</gco:CharacterString>
           </gmd:keyword>
           <gmd:type>
             <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme" codeSpace="ISOTC211/19115">theme</gmd:MD_KeywordTypeCode>
@@ -183,16 +183,16 @@
                 <gco:Boolean>1</gco:Boolean>
               </gmd:extentTypeCode>
               <gmd:westBoundLongitude>
-                <gco:Decimal>-178.21759836267384</gco:Decimal>
+                <gco:Decimal>-179.99999999989961</gco:Decimal>
               </gmd:westBoundLongitude>
               <gmd:eastBoundLongitude>
-                <gco:Decimal>-66.96927125836118</gco:Decimal>
+                <gco:Decimal>180.00000000010107</gco:Decimal>
               </gmd:eastBoundLongitude>
               <gmd:southBoundLatitude>
                 <gco:Decimal>18.92178634466495</gco:Decimal>
               </gmd:southBoundLatitude>
               <gmd:northBoundLatitude>
-                <gco:Decimal>71.40623539404919</gco:Decimal>
+                <gco:Decimal>76.34008789044475</gco:Decimal>
               </gmd:northBoundLatitude>
             </gmd:EX_GeographicBoundingBox>
           </gmd:geographicElement>

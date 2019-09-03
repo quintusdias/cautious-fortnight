@@ -10,6 +10,7 @@ import pkg_resources as pkg
 COORDINATE_SYSTEM_TO_EPSG = {
     'NAD_1983_StatePlane_Michigan_South_FIPS_2113_IntlFeet': 2253,
     'WGS_1984_Web_Mercator_Auxiliary_Sphere': 3857,
+    'WGS 84 / Pseudo-Mercator': 3857,
     # NCEP SPHERE should be 4053 in a perfect world?  Make it None until we
     # know for sure.
     'NCEP_SPHERE': None,

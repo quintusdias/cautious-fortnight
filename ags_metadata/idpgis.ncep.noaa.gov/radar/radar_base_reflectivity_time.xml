@@ -14,7 +14,7 @@
   <gmd:contact>
   </gmd:contact>
   <gmd:dateStamp>
-    <gco:Date>2018-03-30</gco:Date>
+    <gco:Date>2019-11-02</gco:Date>
   </gmd:dateStamp>
   <gmd:metadataStandardName>
     <gco:CharacterString>2003/Cor.1:2006 (ISO 19115), 2007 (ISO/TS 19139)</gco:CharacterString>
@@ -54,7 +54,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2018-03-30</gco:Date>
+                <gco:Date>2019-11-02</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision">revision</gmd:CI_DateTypeCode>
@@ -68,7 +68,7 @@
         </gmd:CI_Citation>
       </gmd:citation>
       <gmd:abstract>
-        <gco:CharacterString>This service is time-enabled, meaning clients can submit image requests including a time parameter specified in epoch time format (milliseconds since 00:00 January 1, 1970).The time extent of this service includes the past four hours up to the current time updated approximately every ten minutes. All times are specifed in UTC. If time parameters are omitted, the most recent image will be returned. </gco:CharacterString>
+        <gco:CharacterString>Time enabled Ridge 2 radar base reflectivity REST image service with WMS capabilities. Four hour moving window updating every 10 minutes with data for Conus, Alaska, The Caribbean, Guam, and Hawaii. </gco:CharacterString>
       </gmd:abstract>
       <gmd:purpose>
         <gco:CharacterString/>
@@ -87,7 +87,7 @@
       <gmd:graphicOverview>
         <gmd:MD_BrowseGraphic>
           <gmd:fileName>
-            <gco:CharacterString>https://idpgis.ncep.noaa.gov/arcgis/rest/services/radar/radar_base_reflectivity_time/ImageServer/exportImage?bbox=-1.959223037961615E7,1005534.1150000524,1.6698456861594811E7,1.1753184615338454E7&amp;f=image</gco:CharacterString>
+            <gco:CharacterString>https://idpgis.ncep.noaa.gov/arcgis/rest/services/radar/radar_base_reflectivity_time/ImageServer/exportImage?bbox=-1.9592224069476508E7,1005706.323830042,1.6698463171734452E7,1.1753356824168444E7&amp;f=image</gco:CharacterString>
           </gmd:fileName>
           <gmd:fileType>
             <gco:CharacterString>PNG</gco:CharacterString>
@@ -158,16 +158,16 @@
                 <gco:Boolean>1</gco:Boolean>
               </gmd:extentTypeCode>
               <gmd:westBoundLongitude>
-                <gco:Decimal>-176.0</gco:Decimal>
+                <gco:Decimal>-175.99994331505113</gco:Decimal>
               </gmd:westBoundLongitude>
               <gmd:eastBoundLongitude>
-                <gco:Decimal>150.00479019981114</gco:Decimal>
+                <gco:Decimal>150.00484688475998</gco:Decimal>
               </gmd:eastBoundLongitude>
               <gmd:southBoundLatitude>
-                <gco:Decimal>8.99567950330746</gco:Decimal>
+                <gco:Decimal>8.997207450697395</gco:Decimal>
               </gmd:southBoundLatitude>
               <gmd:northBoundLatitude>
-                <gco:Decimal>72.0</gco:Decimal>
+                <gco:Decimal>72.00047803642858</gco:Decimal>
               </gmd:northBoundLatitude>
             </gmd:EX_GeographicBoundingBox>
           </gmd:geographicElement>

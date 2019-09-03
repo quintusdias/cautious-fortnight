@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CT_CodelistCatalogue xmlns="http://www.isotc211.org/2005/gmx" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>
+        <!-- MM_StewCodelists-2016-08-04.xml -->
+        <gco:CharacterString>Data Stewardship Maturity Matrix Maturity Scales for Key Components</gco:CharacterString>
+    </name>
+    <scope>
+        <gco:CharacterString>Codelists for description of "datastewardship assessment results" ... compliant with ISO/TC 211 19115:2003 and 19139</gco:CharacterString>
+    </scope>
+    <!-- GMX -->
+    <fieldOfApplication>
+        <gco:CharacterString>GMX (and imported) namespace</gco:CharacterString>
+    </fieldOfApplication>
+    <versionNumber>
+        <gco:CharacterString>1.0</gco:CharacterString>
+    </versionNumber>
+    <versionDate>
+        <gco:Date>2017-01-06</gco:Date>
+    </versionDate>
+    <codelistItem>
+        <CodeListDictionary gml:id="Preservability">
+            <gml:description>The state of being preservable</gml:description>
+            <gml:identifier>Preservability</gml:identifier>
+            <codeEntry>
+                <CodeDefinition gml:id="Preservability_notAssessed">
+                    <gml:description>Assessment not performed. Level 0. </gml:description>
+                    <gml:identifier>notAssessed</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="Preservability_notAvailable">
+                    <gml:description>Data is not preserved. Level 0.</gml:description>
+                    <gml:identifier>notAvailable</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="Preservability_adHoc">
+                    <gml:name>Preservability Level 1</gml:name>
+                    <gml:description>Ad Hoc. Not Managed. Any storage location. Data only. Level 1. </gml:description>
+                    <gml:identifier>adHoc</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="Preservability_minimal">
+                    <gml:name>Preservability Level 2</gml:name>
+                    <gml:description>Minimal. Managed Limited. Non-designated repository. Redundancy . Limited archiving metadata. Level 2. </gml:description>
+                    <gml:identifier>minimal</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="Preservability_intermediate">
+                    <gml:name>Preservability Level 3</gml:name>
+                    <gml:description>Intermediate. Managed. Defined, partially implemented. Designated archive. Redundancy. Community-standard archiving metadata. Conforming to limited archiving standards. </gml:description>
+                    <gml:identifier>intermediate</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="Preservability_advanced">
+                    <gml:name>Preservability </gml:name>
+                    <gml:description>Advanced. Managed. Well-Defined, Fully Implemented. Level 3 +. Conforming to community archiving standards. </gml:description>
+                    <gml:identifier>advanced</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="Preservability_optimal">
+                    <gml:name>Preservability Level 5</gml:name>
+                    <gml:description>Optimal. Level 4 +. Measured , Controlled , Audit. Level 4 +. Archiving process performance controlled, measured, and audited. Future archiving standard changes planned.</gml:description>
+                    <gml:identifier>optimal</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+        </CodeListDictionary>
+    </codelistItem>
+    <codelistItem>
+        <CodeListDictionary gml:id="Accessibility">
+            <gml:description>The state of being searchable and accessible publicly</gml:description>
+            <gml:identifier>Accessibility</gml:identifier>
+            <codeEntry>
+                <CodeDefinition gml:id="Accessibility_notAssessed">
+                    <gml:description>Assessment not performed. Level 0. </gml:description>
+                    <gml:identifier>notAssessed</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="Accessibility_notAvailable">
+                    <gml:description>Data is not accessed. Level 0.</gml:description>
+                    <gml:identifier>notAvailable</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="Accessibility_adHoc">
+                    <gml:name>Accessibility Level 1</gml:name>
+                    <gml:description>Not publicly available Person-to-person</gml:description>
+                    <gml:identifier>adHoc</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="Accessibility_minimal">
+                    <gml:name>Accessibility Level 2</gml:name>
+                    <gml:description> Publicly available Direct file download (e.g., via anonymous FTP server) Collection/dataset level searchable online </gml:description>
+                    <gml:identifier>minimal</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="Accessibility_intermediate">
+                    <gml:name>Accessibility Level 3</gml:name>
+                    <gml:description> Level 2 + Non-standard data service Limited data server performance Granule/file level searchable Limited search metrics </gml:description>
+                    <gml:identifier>intermediate</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="Accessibility_advanced">
+                    <gml:name>Accessibility Level 4</gml:name>
+                    <gml:description> Level 3 + Community-standard data service Enhanced data server performance Conforming to community search metrics Dissemination report metrics defined and implemented internally </gml:description>
+                    <gml:identifier>advanced</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="Accessibility_optimal">
+                    <gml:name>Accessibility Level 5</gml:name>
+                    <gml:description> Level 4 + Dissemination reports available online Future technology and standard changes planned </gml:description>
+                    <gml:identifier>optimal</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+        </CodeListDictionary>
+    </codelistItem>
+    <codelistItem>
+        <CodeListDictionary gml:id="Usability">
+            <gml:description>The state of being easy to use.</gml:description>
+            <gml:identifier>Usability</gml:identifier>
+            <codeEntry>
+                <CodeDefinition gml:id="Usability_notAssessed">
+                    <gml:description>Assessment not performed. Level 0. </gml:description>
+                    <gml:identifier>notAssessed</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="Usability_notAvailable">
+                    <gml:description>Data is not used. Level 0.</gml:description>
+                    <gml:identifier>notAvailable</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="Usability_adHoc">
+                    <gml:name>Usability Level 1</gml:name>
+                    <gml:description> Extensive product-specific knowledge required No documentation online </gml:description>
+                    <gml:identifier>adHoc</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="Usability_minimal">
+                    <gml:name>Usability Level 2</gml:name>
+                    <gml:description> Non-standard data format Limited documentation (e.g., user’s guide) online </gml:description>
+                    <gml:identifier>minimal</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="Usability_intermediate">
+                    <gml:name>Usability Level 3</gml:name>
+                    <gml:description> Community standard-based interoperable format and metadata Documentation (e.g., source code, product algorithm document, processing or/and data flow diagram) online </gml:description>
+                    <gml:identifier>intermediate</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="Usability_advanced">
+                    <gml:name>Usability Level 4</gml:name>
+                    <gml:description> Level 3 + Basic capability (e.g., subsetting, aggregating) and data characterization (overall/global, e.g., climatology, error estimates) available online </gml:description>
+                    <gml:identifier>advanced</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="Usability_optimal">
+                    <gml:name>Usability Level 5</gml:name>
+                    <gml:description> Level 4 + Enhanced online capability (e.g., visualization, multiple data formats) Community metrics of data characterization (regional/cell) online External ranking </gml:description>
+                    <gml:identifier>optimal</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+        </CodeListDictionary>
+    </codelistItem>
+    <codelistItem>
+        <CodeListDictionary gml:id="ProductionSustainability">
+            <gml:description>The state of data production being sustainable and extendable.</gml:description>
+            <gml:identifier>ProductionSustainability</gml:identifier>
+            <codeEntry>
+                <CodeDefinition gml:id="ProductionSustainability_notAssessed">
+                    <gml:description>Assessment not performed. Level 0. </gml:description>
+                    <gml:identifier>notAssessed</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="ProductionSustainability_notAvailable">
+                    <gml:description>Data is not sustainable in production. Level 0.</gml:description>
+                    <gml:identifier>notAvailable</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="ProductionSustainability_adHoc">
+                    <gml:name>Production Sustainability Level 1</gml:name>
+                    <gml:description> Ad Hoc or Not applicable. No obligation or deliverable requirement. </gml:description>
+                    <gml:identifier>adHoc</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="ProductionSustainability_minimal">
+                    <gml:name>Production Sustainability Level 2</gml:name>
+                    <gml:description> Short-term Individual PI’s commitment (grant obligations). </gml:description>
+                    <gml:identifier>minimal</gml:identifier>` </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="ProductionSustainability_intermediate">
+                    <gml:name>Production Sustainability Level 3</gml:name>
+                    <gml:description> Medium-term Institutional commitment (contractual deliverables with specs and schedule defined). </gml:description>
+                    <gml:identifier>intermediate</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="ProductionSustainability_advanced">
+                    <gml:name>Production Sustainability Level 4</gml:name>
+                    <gml:description> Long-term Institutional commitment. Product improvement process in place. </gml:description>
+                    <gml:identifier>advanced</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="ProductionSustainability_optimal">
+                    <gml:name>Production Sustainability Level 5</gml:name>
+                    <gml:description> Level 4 + National or international commitment. Changes for technology planned. </gml:description>
+                    <gml:identifier>optimal</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+        </CodeListDictionary>
+    </codelistItem>
+    <codelistItem>
+        <CodeListDictionary gml:id="DataQualityAssurance">
+            <gml:description>The state of data quality being assured.</gml:description>
+            <gml:identifier>DataQualityAssurance</gml:identifier>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityAssurance_notAssessed">
+                    <gml:description>Assessment not performed. Level 0. </gml:description>
+                    <gml:identifier>notAssessed</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityAssurance_notAvailable">
+                    <gml:description>Data quality is not assured. Level 0.</gml:description>
+                    <gml:identifier>notAvailable</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityAssurance_adHoc">
+                    <gml:name>Data Quality Assurance Level 1</gml:name>
+                    <gml:description> Data quality assurance (DQA) procedure unknown or none. </gml:description>
+                    <gml:identifier>adHoc</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityAssurance_minimal">
+                    <gml:name>Data Quality Assurance Level 2</gml:name>
+                    <gml:description> Ad Hoc and random DQA procedure not defined and documented. </gml:description>
+                    <gml:identifier>minimal</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityAssurance_intermediate">
+                    <gml:name>Data Quality Assurance Level 3</gml:name>
+                    <gml:description>DQA procedure defined and documented and partially implemented.</gml:description>
+                    <gml:identifier>intermediate</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityAssurance_advanced">
+                    <gml:name>Data Quality Assurance Level 4</gml:name>
+                    <gml:description> DQA procedure well documented, fully implemented and available online with master reference data Limited data quality assurance metadata. </gml:description>
+                    <gml:identifier>advanced</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityAssurance_optimal">
+                    <gml:name>Data Quality Assurance Level 5</gml:name>
+                    <gml:description> Level 4 + DQA procedure monitored and reported Conforming to community quality metadata and standards External review. </gml:description>
+                    <gml:identifier>optimal</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+        </CodeListDictionary>
+    </codelistItem>
+    <codelistItem>
+        <CodeListDictionary gml:id="DataQualityControlMonitoring">
+            <gml:description>The state of data quality being controlled and monitored.</gml:description>
+            <gml:identifier>DataQualityControlMonitoring </gml:identifier>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityControlMonitoring_notAssessed">
+                    <gml:description>Assessment not performed. Level 0. </gml:description>
+                    <gml:identifier>notAssessed</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityControlMonitoring_notAvailable">
+                    <gml:description>Data quality control is not monitored. Level 0.</gml:description>
+                    <gml:identifier>notAvailable</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityControlMonitoring_adHoc">
+                    <gml:name>Data Quality Control Monitoring Level 1</gml:name>
+                    <gml:description> None or Sampling unknown or spotty Analysis unknown or random in time. </gml:description>
+                    <gml:identifier>adHoc</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityControlMonitoring_minimal">
+                    <gml:name>Data Quality Control Monitoring Level 2</gml:name>
+                    <gml:description>Sampling and analysis are regular in time and space Limited product-specific metrics defined and implemented </gml:description>
+                    <gml:identifier>minimal</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityControlMonitoring_intermediate">
+                    <gml:name>Data Quality Control Monitoring Level 3</gml:name>
+                    <gml:description>Level 2+ Sampling and analysis are frequent and systematic but not automatic Community metrics defined and partially implemented Procedure documented and available online </gml:description>
+                    <gml:identifier>intermediate</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityControlMonitoring_advanced">
+                    <gml:name>Data Quality Control Monitoring Level 4</gml:name>
+                    <gml:description> Level 3 + Anomaly detection procedure well-documented and fully implemented using community metrics, automatic, tracked and reported Limited quality monitoring metadata </gml:description>
+                    <gml:identifier>advanced</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityControlMonitoring_optimal">
+                    <gml:name>Data Quality Control Monitoring Level 5</gml:name>
+                    <gml:description> Level 4 + Cross-validation of temporal and spatial characteristics Physical consistency check Conforming to community quality metadata and standards Dynamic providers/users feedback in place </gml:description>
+                    <gml:identifier>optimal</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+        </CodeListDictionary>
+    </codelistItem>
+    <codelistItem>
+        <CodeListDictionary gml:id="DataQualityAssessment">
+            <gml:description>The state of data quality being assessed.</gml:description>
+            <gml:identifier>DataQualityAssessment</gml:identifier>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityAssessment_notAssessed">
+                    <gml:description>Assessment not performed. Level 0. </gml:description>
+                    <gml:identifier>notAssessed</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityAssessment_notAvailable">
+                    <gml:description>Data quality is not assessed. Level 0.</gml:description>
+                    <gml:identifier>notAvailable</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityAssessment_adHoc">
+                    <gml:name>Data Quality Assessment Level 1</gml:name>
+                    <gml:description> Algorithm/method/model theoretical basis assessed (methods and results online) </gml:description>
+                    <gml:identifier>adHoc</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityAssessment_minimal">
+                    <gml:name>Data Quality Assessment Level 2</gml:name>
+                    <gml:description>Level 1 + Research product assessed (methods and results online)</gml:description>
+                    <gml:identifier>minimal</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityAssessment_intermediate">
+                    <gml:name>Data Quality Assessment Level 3</gml:name>
+                    <gml:description> Level 2 + Operational product assessed (methods and results online) </gml:description>
+                    <gml:identifier>intermediate</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityAssessment_advanced">
+                    <gml:name>Data Quality Assessment Level 4</gml:name>
+                    <gml:description> Level 3 + Operational product assessed (methods and results online) </gml:description>
+                    <gml:identifier>advanced</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataQualityAssessment_optimal">
+                    <gml:name>Data Quality Assessment Level 5</gml:name>
+                    <gml:description> Level 4 + Operational product assessed (methods and results online) </gml:description>
+                    <gml:identifier>optimal</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+        </CodeListDictionary>
+    </codelistItem>
+    <codelistItem>
+        <CodeListDictionary gml:id="TransparencyTraceability">
+            <gml:description>The state of being transparent, trackable, and traceable.</gml:description>
+            <gml:identifier>TransparencyTraceability</gml:identifier>
+            <codeEntry>
+                <CodeDefinition gml:id="TransparencyTraceability_notAssessed">
+                    <gml:description>Assessment not performed. Level 0. </gml:description>
+                    <gml:identifier>notAssessed</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="TransparencyTraceability_notAvailable">
+                    <gml:description>Transparency and Traceability is not assessed. Level 0.</gml:description>
+                    <gml:identifier>notAvailable</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="TransparencyTraceability_adHoc">
+                    <gml:name>Transparency Traceability Level 1</gml:name>
+                    <gml:description>Limited product information available. Person-to-person.</gml:description>
+                    <gml:identifier>adHoc</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="TransparencyTraceability_minimal">
+                    <gml:name>Transparency Traceability Level 2</gml:name>
+                    <gml:description>Product information available in literature.</gml:description>
+                    <gml:identifier>minimal</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="TransparencyTraceability_intermediate">
+                    <gml:name>Transparency Traceability Level 3</gml:name>
+                    <gml:description> Algorithm Theoretical Basis Document (ATBD) and source code online Dataset configuration managed (CM) Unique Object Identifier (OID) assigned (dataset, documentation, source code) Data citation tracked (e.g., utilizing Digital Object Identifier (DOI) system). </gml:description>
+                    <gml:identifier>intermediate</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="TransparencyTraceability_advanced">
+                    <gml:name>Transparency Traceability Level 4</gml:name>
+                    <gml:description> Level 3 + Operational Algorithm Description (OAD) online, OID assigned, and under CM. </gml:description>
+                    <gml:identifier>advanced</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="TransparencyTraceability_optimal">
+                    <gml:name>Transparency Traceability Level 5</gml:name>
+                    <gml:description>Level 4 + System information online Complete data provenance online.</gml:description>
+                    <gml:identifier>optimal</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+        </CodeListDictionary>
+    </codelistItem>
+    <codelistItem>
+        <CodeListDictionary gml:id="DataIntegrity">
+            <gml:description>The state of data integrity being verifiable.</gml:description>
+            <gml:identifier>DataIntegrity</gml:identifier>
+            <codeEntry>
+                <CodeDefinition gml:id="DataIntegrity_notAssessed">
+                    <gml:description>Assessment not performed. Level 0. </gml:description>
+                    <gml:identifier>notAssessed</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataIntegrity_notAvailable">
+                    <gml:description>Data Integrity is not assessed. Level 0.</gml:description>
+                    <gml:identifier>notAvailable</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataIntegrity_adHoc">
+                    <gml:name>Data Integrity Level 1</gml:name>
+                    <gml:description> Unknown or no data ingest integrity check.</gml:description>
+                    <gml:identifier>adHoc</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataIntegrity_minimal">
+                    <gml:name>Data Integrity Level 2</gml:name>
+                    <gml:description> Data ingest integrity verifiable (e.g., checksum technology).</gml:description>
+                    <gml:identifier>minimal</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataIntegrity_intermediate">
+                    <gml:name>Data Integrity Level 3</gml:name>
+                    <gml:description> Level 2 + Data archive integrity verifiable.</gml:description>
+                    <gml:identifier>intermediate</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataIntegrity_advanced">
+                    <gml:name>Data Integrity Level 4</gml:name>
+                    <gml:description> Level 3 + Data access integrity verifiable Conforming to community data integrity technology standard.</gml:description>
+                    <gml:identifier>advanced</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+            <codeEntry>
+                <CodeDefinition gml:id="DataIntegrity_optimal">
+                    <gml:name>Data Integrity Level 5</gml:name>
+                    <gml:description> Level 4 + Data authenticity verifiable (e.g., data signature technology) Performance of data integrity check monitored and reported.</gml:description>
+                    <gml:identifier>optimal</gml:identifier>
+                </CodeDefinition>
+            </codeEntry>
+        </CodeListDictionary>
+    </codelistItem>
+</CT_CodelistCatalogue>

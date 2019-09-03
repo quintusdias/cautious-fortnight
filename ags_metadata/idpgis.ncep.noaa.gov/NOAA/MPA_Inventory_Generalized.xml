@@ -14,7 +14,7 @@
   <gmd:contact>
   </gmd:contact>
   <gmd:dateStamp>
-    <gco:Date>2018-03-30</gco:Date>
+    <gco:Date>2019-11-02</gco:Date>
   </gmd:dateStamp>
   <gmd:metadataStandardName>
     <gco:CharacterString>2003/Cor.1:2006 (ISO 19115), 2007 (ISO/TS 19139)</gco:CharacterString>
@@ -54,7 +54,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2018-03-30</gco:Date>
+                <gco:Date>2019-11-02</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision">revision</gmd:CI_DateTypeCode>
@@ -68,7 +68,7 @@
         </gmd:CI_Citation>
       </gmd:citation>
       <gmd:abstract>
-        <gco:CharacterString>The MPA Inventory is a comprehensive catalog that provides detailed information for existing marine protected areas in the United States. The inventory provides geospatial boundary information (in polygon format) and classification attributes that seek to define the conservation objectives, protection level, governance and related management criteria for all sites in the database. The comprehensive inventory of federal, state and territorial MPA sites provides governments and stakeholders with access to information to make better decisions about the current and future use of place-based conservation. The information also will be used to inform the development of the national system of marine protected areas as required by Executive Order 13158.</gco:CharacterString>
+        <gco:CharacterString>The MPA Inventory is a comprehensive catalog that provides detailed information for existing marine protected areas in the United States. The inventory provides geospatial boundary information (in polygon format) and classification attributes that seek to define the conservation objectives, protection level, governance and related management criteria for all sites in the database. The comprehensive inventory of federal, state and territorial MPA sites provides governments and stakeholders with access to information to make better decisions about the current and future use of place-based conservation. Data are updated annually and are available for download. Please see the MPA Inventory metadata for more details.</gco:CharacterString>
       </gmd:abstract>
       <gmd:purpose>
         <gco:CharacterString/>
@@ -97,37 +97,13 @@
       <gmd:descriptiveKeywords>
         <gmd:MD_Keywords>
           <gmd:keyword>
-            <gco:CharacterString>ngda</gco:CharacterString>
+            <gco:CharacterString>NOAA</gco:CharacterString>
           </gmd:keyword>
           <gmd:keyword>
-            <gco:CharacterString>oceans</gco:CharacterString>
+            <gco:CharacterString>NOS</gco:CharacterString>
           </gmd:keyword>
           <gmd:keyword>
-            <gco:CharacterString>United States</gco:CharacterString>
-          </gmd:keyword>
-          <gmd:keyword>
-            <gco:CharacterString>Ocean Conservation</gco:CharacterString>
-          </gmd:keyword>
-          <gmd:keyword>
-            <gco:CharacterString>Water - Oceans and Coasts</gco:CharacterString>
-          </gmd:keyword>
-          <gmd:keyword>
-            <gco:CharacterString>Marine Protected Areas</gco:CharacterString>
-          </gmd:keyword>
-          <gmd:keyword>
-            <gco:CharacterString>Marine Boundaries</gco:CharacterString>
-          </gmd:keyword>
-          <gmd:keyword>
-            <gco:CharacterString>North America</gco:CharacterString>
-          </gmd:keyword>
-          <gmd:keyword>
-            <gco:CharacterString>boundaries</gco:CharacterString>
-          </gmd:keyword>
-          <gmd:keyword>
-            <gco:CharacterString>location</gco:CharacterString>
-          </gmd:keyword>
-          <gmd:keyword>
-            <gco:CharacterString>Marine Conservation Areas</gco:CharacterString>
+            <gco:CharacterString>MPA</gco:CharacterString>
           </gmd:keyword>
           <gmd:type>
             <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme" codeSpace="ISOTC211/19115">theme</gmd:MD_KeywordTypeCode>
@@ -212,10 +188,10 @@
                 <gco:Decimal>-6.590156372096475</gco:Decimal>
               </gmd:eastBoundLongitude>
               <gmd:southBoundLatitude>
-                <gco:Decimal>-15.386142387921707</gco:Decimal>
+                <gco:Decimal>-15.386142387921703</gco:Decimal>
               </gmd:southBoundLatitude>
               <gmd:northBoundLatitude>
-                <gco:Decimal>74.70915957703929</gco:Decimal>
+                <gco:Decimal>74.70915957703926</gco:Decimal>
               </gmd:northBoundLatitude>
             </gmd:EX_GeographicBoundingBox>
           </gmd:geographicElement>

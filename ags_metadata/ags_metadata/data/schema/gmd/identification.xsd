@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xs:schema targetNamespace="http://www.isotc211.org/2005/gmd" elementFormDefault="qualified" version="0.1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gmd="http://www.isotc211.org/2005/gmd">
+<xs:schema targetNamespace="http://www.isotc211.org/2005/gmd" elementFormDefault="qualified" version="0.1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gts="http://www.isotc211.org/2005/gts">
 	<!-- ================================= Annotation ================================ -->
 	<xs:annotation>
 		<xs:documentation>This file was generated from ISO TC/211 UML class diagrams == 01-26-2005 12:40:05 ====== </xs:documentation>
 	</xs:annotation>
 	<!-- ================================== Imports ================================== -->
-	<xs:import namespace="http://www.isotc211.org/2005/gco" schemaLocation="http://schemas.opengis.net/iso/19139/20060504/gco/gco.xsd"/>
+	<xs:import namespace="http://www.isotc211.org/2005/gts" schemaLocation="../gts/gts.xsd"/>
+	<xs:import namespace="http://www.isotc211.org/2005/gco" schemaLocation="../gco/gco.xsd"/>
 	<xs:include schemaLocation="../gmd/constraints.xsd"/>
 	<xs:include schemaLocation="../gmd/distribution.xsd"/>
 	<xs:include schemaLocation="../gmd/maintenance.xsd"/>
+	
 	<!-- ########################################################################### -->
+	<!-- Feb 15, 2013, anna.milan@noaa.gov - added: 
+		<xs:element name="temporalResolution" type="gts:TM_PeriodDuration_PropertyType" minOccurs="0" maxOccurs="unbounded"> <xs:annotation> <xs:documentation>resolution of the resource with respect to time</xs:documentation> </xs:annotation> </xs:element>
+	-->
+	<!-- Feb 25, 2013, anna.milan@noaa.gov - added: <xs:element name="levelOfDetail" type="gco:CharacterString_PropertyType"/> to MD_Resolution_Type-->
 	<!-- ########################################################################### -->
 	<!-- ================================== Classes ================================= -->
 	<xs:complexType name="AbstractMD_Identification_Type" abstract="true">
@@ -78,6 +84,11 @@
 				<xs:sequence>
 					<xs:element name="spatialRepresentationType" type="gmd:MD_SpatialRepresentationTypeCode_PropertyType" minOccurs="0" maxOccurs="unbounded"/>
 					<xs:element name="spatialResolution" type="gmd:MD_Resolution_PropertyType" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="temporalResolution" type="gts:TM_PeriodDuration_PropertyType" minOccurs="0" maxOccurs="unbounded">
+						<xs:annotation>
+							<xs:documentation>resolution of the resource with respect to time</xs:documentation>
+						</xs:annotation>
+					</xs:element>
 					<xs:element name="language" type="gco:CharacterString_PropertyType" maxOccurs="unbounded"/>
 					<xs:element name="characterSet" type="gmd:MD_CharacterSetCode_PropertyType" minOccurs="0" maxOccurs="unbounded"/>
 					<xs:element name="topicCategory" type="gmd:MD_TopicCategoryCode_PropertyType" minOccurs="0" maxOccurs="unbounded"/>
@@ -234,9 +245,10 @@
 	</xs:complexType>
 	<!-- =========================================================================== -->
 	<xs:complexType name="MD_Resolution_Type">
-		<xs:choice>
+		<xs:choice>			
 			<xs:element name="equivalentScale" type="gmd:MD_RepresentativeFraction_PropertyType"/>
 			<xs:element name="distance" type="gco:Distance_PropertyType"/>
+			<xs:element name="levelOfDetail" type="gco:CharacterString_PropertyType"/>
 		</xs:choice>
 	</xs:complexType>
 	<!-- ........................................................................ -->
