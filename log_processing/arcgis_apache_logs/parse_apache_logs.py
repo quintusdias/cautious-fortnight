@@ -26,8 +26,6 @@ class ApacheLogParser(object):
         The apache log file (can be stdin).
     logger : object
         Log any pertinent events.
-    regex : object
-        Regular expression for parsing entries from the apache log files.
     project : str
         Either nowcoast or idpgis
     """
@@ -49,44 +47,6 @@ class ApacheLogParser(object):
             self.root = pathlib.Path(document_root)
 
         self.setup_logger()
-
-        pattern = r'''
-            # (?P<ip_address>((\d+.\d+.\d+.\d+)|((\w*?:){6}(\w*?:)?(\w+)?)))
-            (?P<ip_address>.*?)
-            \s
-            # Client identity, always -?
-            -
-            \s
-            # Remote user, always -?
-            -
-            \s
-            # Time of request.  The timezone is always UTC, so don't bother
-            # parsing it.
-            \[(?P<timestamp>\d{2}/\w{3}/\d{4}:\d{2}:\d{2}:\d{2})\s.....\]
-            \s
-            # The request
-            "(?P<request_op>(GET|DELETE|HEAD|OPTIONS|POST|PROPFIND|PUT))
-            \s
-            (?P<path>.*?)
-            \s
-            HTTP\/1.1"
-            \s
-            # Status code
-            (?P<status_code>\d+)
-            \s
-            # payload size
-            (?P<nbytes>\d+)
-            \s
-            # referer
-            "(?P<referer>.*?)"
-            \s
-            # user agent
-            "(?P<user_agent>.*?)"
-            \s
-            # something else that seems to always be "-"
-            "-"
-            '''
-        self.regex = re.compile(pattern, re.VERBOSE)
 
         kwargs = {'logger': self.logger, 'document_root': document_root}
         self.ip_address = IPAddressProcessor(self.project, **kwargs)
@@ -178,9 +138,47 @@ class ApacheLogParser(object):
         if self.infile is None:
             return
 
+        pattern = r'''
+            # (?P<ip_address>((\d+.\d+.\d+.\d+)|((\w*?:){6}(\w*?:)?(\w+)?)))
+            (?P<ip_address>.*?)
+            \s
+            # Client identity, always -?
+            -
+            \s
+            # Remote user, always -?
+            -
+            \s
+            # Time of request.  The timezone is always UTC, so don't bother
+            # parsing it.
+            \[(?P<timestamp>\d{2}/\w{3}/\d{4}:\d{2}:\d{2}:\d{2})\s.....\]
+            \s
+            # The request
+            "(?P<request_op>(GET|DELETE|HEAD|OPTIONS|POST|PROPFIND|PUT))
+            \s
+            (?P<path>.*?)
+            \s
+            HTTP\/1.1"
+            \s
+            # Status code
+            (?P<status_code>\d+)
+            \s
+            # payload size
+            (?P<nbytes>\d+)
+            \s
+            # referer
+            "(?P<referer>.*?)"
+            \s
+            # user agent
+            "(?P<user_agent>.*?)"
+            \s
+            # something else that seems to always be "-"
+            "-"
+            '''
+        regex = re.compile(pattern, re.VERBOSE)
+
         records = []
         for line in self.infile:
-            m = self.regex.match(line)
+            m = regex.match(line)
             if m is None:
                 msg = (
                     f"This line from the apache log files was not matched.\n"
