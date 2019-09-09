@@ -418,16 +418,16 @@ class SummaryProcessor(CommonProcessor):
         # hits.
         df['hits'] = df['hits']
         df = df[['date', 'hits', 'errors', 'mapdraws']]
-        df = df.set_index('date')
+        df = df.set_index('date').resample('D').sum()
 
-        # Turn the data from hits/hour to hits/second
-        df['hits'] /= 3600
-        df['errors'] /= 3600
-        df['mapdraws'] /= 3600
+        # Turn the data from hits/day to hits/second
+        df['hits'] /= 86400
+        df['errors'] /= 86400
+        df['mapdraws'] /= 86400
 
         text = (
-            "Here are hourly averages of the hits, errors, and mapdraws "
-            "over longer timescales."
+            "Here are daily averages of the hits, errors, and mapdraws "
+            "over the full timescale upon which data is available."
         )
 
         kwargs = {
