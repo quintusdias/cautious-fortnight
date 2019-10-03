@@ -142,7 +142,8 @@ class CommonProcessor(object):
 
     def write_html_and_image_output(self, df, html_doc, title=None,
                                     filename=None, yaxis_formatter=None,
-                                    folder=None, restrict_handles=True, text=None):
+                                    folder=None, restrict_handles=True,
+                                    text=None):
 
         fig = plt.gcf()
         ax = plt.gca()
@@ -161,7 +162,8 @@ class CommonProcessor(object):
             handles, labels = ax.get_legend_handles_labels()
             handles = handles[:7]
             labels = labels[:7]
-            ax.legend(handles, labels, loc='center left', bbox_to_anchor=(1, 0.5))
+            ax.legend(handles, labels,
+                      loc='center left', bbox_to_anchor=(1, 0.5))
 
         path = self.root / filename
         plt.savefig(path)

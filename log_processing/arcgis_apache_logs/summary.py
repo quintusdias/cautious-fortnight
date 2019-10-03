@@ -162,8 +162,7 @@ class SummaryProcessor(CommonProcessor):
 
         df.drop('hits', axis='columns', inplace=True)
 
-        h1 = df.plot(ax=ax)
-
+        df.plot(ax=ax)
 
         sql = """
               SELECT date,
@@ -186,9 +185,8 @@ class SummaryProcessor(CommonProcessor):
 
         # Get the rolling mean.
         dfr = df['hits'].rolling(15).aggregate([np.mean, np.max, np.min])
-        h = plot.bar(dfr.index.values, dfr['amax'] - dfr['amin'], bottom=dfr['amin'], edgecolor='none')
-
-        #ax.fill_between(dfr.index.values, dfr['amin'], dfr['amax'], gid='fill', zorder=1)
+        df.plot.bar(dfr.index.values, dfr['amax'] - dfr['amin'],
+                    bottom=dfr['amin'], edgecolor='none')
 
     def process_raw_records(self, raw_df):
 
@@ -293,19 +291,20 @@ class SummaryProcessor(CommonProcessor):
         """
         """
         fig, ax = plt.subplots(figsize=(15, 7))
-        
+
         df = self.df.copy().tail(n=72)
         df = df.set_index('date')
         df = df.resample('T').pad()
-        
+
         # Turn the data from hits/hour to hits/second
         df['mapdraws'] /= 3600
-        
+
         # green
-        df['mapdraws'].plot(ax=ax, legend=None, gid='mapdraws', color='#2ca02c')
-        
-        # Ok, have the mapdraws and the axis in place.  Now add the hits and error
-        # information from burst_staging.
+        df['mapdraws'].plot(ax=ax, legend=None, gid='mapdraws',
+                            color='#2ca02c')
+
+        # Ok, have the mapdraws and the axis in place.  Now add the hits and
+        # error information from burst_staging.
         sql = """
               SELECT date,
                      SUM(hits) as hits,
@@ -316,32 +315,34 @@ class SummaryProcessor(CommonProcessor):
               """
         df = pd.read_sql(sql, self.conn)
         df['date'] = pd.to_datetime(df['date'], unit='s')
-        
+
         # This are by the minute, so restrict to last day = 1440 minutes.
         df = df.tail(n=1440 * 3)
-        
+
         df = df.set_index('date')
-        
+
         # Get average rate per second.
         df['hits'] /= 60
         df['errors'] /= 60
-        
+
         # Get the rolling mean of hits and errors.
-        dfr = df[['hits', 'errors']].rolling(15).aggregate([np.mean, np.max, np.min])
+        dfr = (df[['hits', 'errors']].rolling(15)
+                                     .aggregate([np.mean, np.max, np.min]))
         max_burst = dfr['hits']['amax'].tail(n=1440).max()
-        
+
         # Line plots for hits and errors.
         dfr['hits']['mean'].plot(ax=ax, gid='hits', color='black')
         # orange
         dfr['errors']['mean'].plot(ax=ax, gid='errors', color='#ff7f03')
-        
-        # Fill the area between the rolling min and max for hits.  This gives an
-        # indication of the short term range.
-        time = (dfr.index - pd.datetime(1970,1,1)).total_seconds() / 60
+
+        # Fill the area between the rolling min and max for hits.  This gives
+        # an indication of the short term range.
+        time = (dfr.index - pd.datetime(1970, 1, 1)).total_seconds() / 60
         # facecolor = [0.29803922, 0.44705882, 0.69019608, 1.]
-        bounds_artist = ax.fill_between(time, dfr['hits']['amax'], dfr['hits']['amin'],
-                                        gid='hits range', zorder=1, edgecolor=None,
-                                        facecolor='#1f77b4')
+        bounds_artist = ax.fill_between(time, dfr['hits']['amax'],
+                                        dfr['hits']['amin'],
+                                        gid='hits range', zorder=1,
+                                        edgecolor=None, facecolor='#1f77b4')
 
         xlim = ax.get_xlim()
 
@@ -350,9 +351,7 @@ class SummaryProcessor(CommonProcessor):
               SELECT MAX(date) AS date FROM user_agent_logs
               """
         df = pd.read_sql(sql, self.conn)
-        max_date = df.loc[0]['date']
-        starting_date = max_date - 86400 * 3
-        
+
         sql = """
               SELECT a.date, SUM(a.hits) as hits
               FROM user_agent_logs a
@@ -376,7 +375,7 @@ class SummaryProcessor(CommonProcessor):
         # purple and brown, #9467bd, #8c564b
 
         ax.set_xlim(xlim)
-        
+
         handles = [
             bounds_artist,
             ax.lines[1],

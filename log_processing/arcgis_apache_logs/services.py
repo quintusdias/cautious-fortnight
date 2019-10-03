@@ -166,6 +166,8 @@ class ServicesProcessor(CommonProcessor):
 
         # Have to have the same column names as the database.
         df = self.replace_folders_and_services_with_ids(df)
+        if len(df) == 0:
+            return
 
         df = self.merge_with_database(df, 'service_logs')
 

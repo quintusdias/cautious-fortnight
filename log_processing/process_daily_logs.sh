@@ -18,9 +18,9 @@ do
     # Process files just recently downloaded
     files_to_process=$(find "$root" -mmin -60 -name "*.gz" | sort -t "-" -k 3,3n -k4,4 -k5,5n)
     
-    for file in $files_to_process
+    for logfile in $files_to_process
     do
-    	zcat $file | parse-arcgis-apache-logs $project --infile -
+    	parse-arcgis-apache-logs $project --infile $logfile
     done
 
     produce-arcgis-apache-graphics $project

@@ -1,4 +1,5 @@
 # standard library imports
+import gzip
 import logging
 import pathlib
 import re
@@ -135,6 +136,9 @@ class ApacheLogParser(object):
         self.user_agent.preprocess_database()
 
     def parse_input(self):
+        """
+        Process the entire log file.
+        """
         if self.infile is None:
             return
 
@@ -177,7 +181,8 @@ class ApacheLogParser(object):
         regex = re.compile(pattern, re.VERBOSE)
 
         records = []
-        for line in self.infile:
+
+        for line in gzip.open(self.infile, mode='rt', errors='replace'):
             m = regex.match(line)
             if m is None:
                 msg = (

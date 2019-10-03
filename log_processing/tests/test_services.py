@@ -1,7 +1,6 @@
 # Standard libraary imports
 import datetime as dt
 import importlib.resources as ir
-import io
 from unittest.mock import patch
 
 # 3rd party library imports
@@ -45,36 +44,34 @@ class TestSuite(TestCore):
         next run.
         """
         # Put ten records into the database.
-        text = ir.read_text('tests.data', 'ten.dat')
-        s = io.StringIO(text)
+        with ir.path('tests.data', 'ten.dat.gz') as logfile:
+            p1 = ApacheLogParser('idpgis', logfile)
+            self.initialize_known_services_table(p1.services)
+            p1.parse_input()
 
-        p1 = ApacheLogParser('idpgis', s)
-        self.initialize_known_services_table(p1.services)
-        p1.parse_input()
+            df = pd.read_sql('SELECT * FROM service_logs', p1.services.conn)
+            num_service_records = len(df)
 
-        df = pd.read_sql('SELECT * FROM service_logs', p1.services.conn)
-        num_service_records = len(df)
+            # Update the service log records.
+            df.loc[0, 'date'] = (
+                dt.datetime.now()
+                - dt.timedelta(days=p1.services.data_retention_days)
+                - dt.timedelta(hours=1)
+            ).timestamp()
+            df.loc[1:, 'date'] = (
+                dt.datetime.now()
+                - dt.timedelta(days=p1.services.data_retention_days)
+                + dt.timedelta(hours=1)
+            ).timestamp()
 
-        # Update the service log records.
-        df.loc[0, 'date'] = (
-            dt.datetime.now()
-            - dt.timedelta(days=p1.services.data_retention_days)
-            - dt.timedelta(hours=1)
-        ).timestamp()
-        df.loc[1:, 'date'] = (
-            dt.datetime.now()
-            - dt.timedelta(days=p1.services.data_retention_days)
-            + dt.timedelta(hours=1)
-        ).timestamp()
+            df.to_sql('service_logs', p1.services.conn,
+                      if_exists='replace', index=False)
+            p1.services.conn.commit()
 
-        df.to_sql('service_logs', p1.services.conn,
-                  if_exists='replace', index=False)
-        p1.services.conn.commit()
+            # This is the 2nd time around.  The one log record should have been
+            # deleted.
+            p2 = ApacheLogParser('idpgis')
+            p2.services.preprocess_database()
 
-        # This is the 2nd time around.  The one log record should have been
-        # deleted.
-        p2 = ApacheLogParser('idpgis')
-        p2.services.preprocess_database()
-
-        df = pd.read_sql('SELECT * FROM service_logs', p2.services.conn)
-        self.assertEqual(len(df), num_service_records - 1)
+            df = pd.read_sql('SELECT * FROM service_logs', p2.services.conn)
+            self.assertEqual(len(df), num_service_records - 1)
