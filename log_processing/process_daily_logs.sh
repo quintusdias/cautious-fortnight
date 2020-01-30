@@ -32,6 +32,7 @@ do
         rm $HOME/data/logs/akamai/$project/incoming/*.*.*-*-"$datestr"*.gz
     done	
     
-    rsync -avz ~/Documents/arcgis_apache_logs/*.{html,png} jevans@cerebrus:/var/www/html/gis
-
 done
+
+rsync -avz ~/Documents/arcgis_apache_logs/*.{html,png} jevans@cerebrus:/var/www/html/gis
+
