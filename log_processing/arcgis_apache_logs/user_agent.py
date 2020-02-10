@@ -38,12 +38,12 @@ class UserAgentProcessor(CommonProcessor):
     time_series_sql : str
         SQL to collect a coherent timeseries of folder/service information.
     """
-    def __init__(self, project, **kwargs):
+    def __init__(self, **kwargs):
         """
         Parameters
         ----------
         """
-        super().__init__(project, **kwargs)
+        super().__init__(**kwargs)
 
         self.time_series_sql = """
             SELECT a.date, SUM(a.hits) as hits, SUM(a.errors) as errors,

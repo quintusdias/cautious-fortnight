@@ -39,38 +39,21 @@ class CommonProcessor(object):
         Path to database
     frequency : str
         How to resample the dataframe of apache log records.
-    project : str
+    schema : str
         Either nowcoast or idpgis
     records : list
         Raw records collected, one for each apache log entry.
     """
-    def __init__(self, project, document_root=None, logger=None):
+    def __init__(self, logger=None, engine=None, schema=None):
 
-        self.project = project
+        self.schema = schema
 
         if logger is not None:
             self.logger = logger
         else:
             self.logger = logging.getLogger(__name__)
 
-        if document_root is None:
-            self.root = pathlib.Path.home() \
-                        / 'Documents' \
-                        / 'arcgis_apache_logs'
-        else:
-            self.root = pathlib.Path(document_root)
-
-        if not self.root.exists():
-            self.root.mkdir(parents=True, exist_ok=True)
-
-        self.database = self.root / f'arcgis_apache_{self.project}.db'
-        self.conn = sqlite3.connect(self.database)
-        self.cursor = self.conn.cursor()
-
-        # Force foreign key support.
-        self.conn.execute("PRAGMA foreign_keys = 1")
-
-        self.verify_database_setup()
+        self.conn = engine
 
         self.MAX_RAW_RECORDS = 100000000
 
@@ -238,16 +221,15 @@ class CommonProcessor(object):
         The current set of records may overlap with existing records in the
         database, so we must merge them.
         """
-        start = df_current.iloc[0].date
-
         # Get everything from the database after this time.
         sql = f"""
-               SELECT *
-               FROM {table}
-               WHERE date >= ?
-               ORDER BY date
+               select *
+               from {self.schema}.{table}
+               where date >= %(date)s 
+               order BY date
                """
-        df_database = pd.read_sql(sql, self.conn, params=(start,))
+        params = {'date': pd.Timestamp(df_current.iloc[0].date)}
+        df_database = pd.read_sql(sql, self.conn, params=params)
         if df_database.shape[0] == 0:
             # Nothing to merge.
             return df_current

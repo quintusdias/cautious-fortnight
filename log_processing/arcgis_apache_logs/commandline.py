@@ -14,17 +14,9 @@ def parse_arcgis_apache_logs():
 
     parser.add_argument('project', choices=['idpgis', 'nowcoast'])
     parser.add_argument('--infile')
-
-    help = (
-        "Write the documents in this directory.  Default is "
-        "$HOME/Documents/arcgis_apache_logs"
-    )
-    parser.add_argument('--document-root', nargs='?', help=help)
-
     args = parser.parse_args()
 
-    log_processor = ApacheLogParser(args.project, infile=args.infile,
-                                    document_root=args.document_root)
+    log_processor = ApacheLogParser(args.project, infile=args.infile)
     log_processor.parse_input()
 
 
@@ -40,6 +32,21 @@ def produce_arcgis_apache_graphics():
 
     p = ApacheLogParser(args.project, infile=None)
     p.process_graphics()
+
+
+def initialize_ag_pg_database():
+    """
+    Entry point for initializing the postgresql database.
+    """
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('project', choices=['idpgis', 'nowcoast'])
+
+    args = parser.parse_args()
+
+    processor = ApacheLogParser(args.project)
+    processor.initialize_ag_pg_database()
 
 
 def init_db():

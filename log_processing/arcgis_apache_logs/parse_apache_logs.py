@@ -7,7 +7,9 @@ import re
 # 3rd party library imports
 import lxml.etree
 import pandas as pd
+import psycopg2
 import requests
+import sqlalchemy
 
 # local imports
 from .ip_address import IPAddressProcessor
@@ -30,7 +32,7 @@ class ApacheLogParser(object):
     project : str
         Either nowcoast or idpgis
     """
-    def __init__(self, project, infile=None, document_root=None):
+    def __init__(self, project, infile=None):
         """
         Parameters
         ----------
@@ -40,22 +42,27 @@ class ApacheLogParser(object):
         self.project = project
         self.infile = infile
 
-        if document_root is None:
-            self.root = pathlib.Path.home() \
-                        / 'Documents' \
-                        / 'arcgis_apache_logs'
-        else:
-            self.root = pathlib.Path(document_root)
+        self.schema = project
+
+        self.conn = psycopg2.connect(dbname='arcgis_logs')
+        self.cursor = self.conn.cursor()
+
+        uri = 'postgres+psycopg2:///arcgis_logs'
+        self.engine = sqlalchemy.create_engine(uri)
 
         self.setup_logger()
 
-        kwargs = {'logger': self.logger, 'document_root': document_root}
-        self.ip_address = IPAddressProcessor(self.project, **kwargs)
-        self.referer = RefererProcessor(self.project, **kwargs)
-        self.services = ServicesProcessor(self.project, **kwargs)
-        self.summarizer = SummaryProcessor(self.project, **kwargs)
-        self.user_agent = UserAgentProcessor(self.project, **kwargs)
+        kwargs = {'logger': self.logger, 'schema': self.schema, 'engine': self.engine}
+        self.ip_address = IPAddressProcessor(**kwargs)
+        self.referer = RefererProcessor(**kwargs)
+        self.services = ServicesProcessor(**kwargs)
+        self.summarizer = SummaryProcessor(**kwargs)
+        self.user_agent = UserAgentProcessor(**kwargs)
 
+    def __del__(self):
+        self.conn.commit()
+
+    def graphics_setup(self):
         # Setup a skeleton output document.
         self.doc = lxml.etree.Element('html')
         head = lxml.etree.SubElement(self.doc, 'head')
@@ -64,6 +71,193 @@ class ApacheLogParser(object):
         body = lxml.etree.SubElement(self.doc, 'body')
         ul = lxml.etree.SubElement(body, 'ul')
         ul.attrib['class'] = 'tableofcontents'
+
+    def initialize_ag_pg_database(self):
+        """
+        Examine the project web site and populate the services database with
+        existing services.
+        """
+        self.create_pg_database()
+
+        self.update_ags_services()
+        self.services.conn.commit()
+
+    def create_pg_database(self):
+        """
+        Create the postgresql database.
+        """
+        sql = f"""
+        DROP SCHEMA {self.schema} CASCADE
+        """
+        self.cursor.execute(sql)
+
+        sql = f"""
+        CREATE SCHEMA {self.schema}
+        """
+        self.cursor.execute(sql)
+
+        self.cursor.execute(f"set search_path to {self.schema}")
+
+        self.create_service_lut()
+        self.create_service_logs()
+
+        self.create_ip_address_lut()
+        self.create_ip_address_logs()
+
+        self.create_referer_lut()
+        self.create_referer_logs()
+
+        self.create_user_agent_lut()
+        self.create_user_agent_logs()
+
+        self.conn.commit()
+
+    def create_user_agent_lut(self):
+
+        sql = """
+        create table user_agent_lut (
+            id     serial primary key,
+            name   text
+        )
+        """
+        self.cursor.execute(sql)
+
+    def create_referer_lut(self):
+
+        sql = """
+        create table referer_lut (
+            id     serial primary key,
+            name   text
+        )
+        """
+        self.cursor.execute(sql)
+
+    def create_ip_address_lut(self):
+
+        sql = """
+        create table ip_address_lut (
+            id           serial primary key,
+            ip_address   text
+        )
+        """
+        self.cursor.execute(sql)
+
+    def create_user_agent_logs(self):
+
+        sql = """
+        create table user_agent_logs (
+            id               bigint,
+            date             timestamp,
+            hits             bigint,
+            errors           bigint,
+            nbytes           bigint,
+            unique           (id, date),
+            foreign key (id) references user_agent_lut (id)
+                             on delete cascade
+        )
+        """
+        self.cursor.execute(sql)
+
+        comment = (
+            "comment on table referer_logs is "
+            "'A referer cannot have a summarizing set of statistics at "
+            "the same time.'"
+        )
+        self.cursor.execute(comment)
+
+    def create_referer_logs(self):
+
+        sql = """
+        create table referer_logs (
+            id               bigint,
+            date             timestamp,
+            hits             bigint,
+            errors           bigint,
+            nbytes           bigint,
+            unique           (id, date),
+            foreign key (id) references referer_lut (id)
+                             on delete cascade
+        )
+        """
+        self.cursor.execute(sql)
+
+        comment = (
+            "comment on table referer_logs is "
+            "'A referer cannot have a summarizing set of statistics at "
+            "the same time.'"
+        )
+        self.cursor.execute(comment)
+
+    def create_ip_address_logs(self):
+
+        sql = """
+        create table ip_address_logs (
+            id               bigint,
+            date             timestamp,
+            hits             bigint,
+            errors           bigint,
+            nbytes           bigint,
+            unique           (id, date),
+            foreign key (id) references ip_address_lut (id)
+                             on delete cascade
+        )
+        """
+        self.cursor.execute(sql)
+
+        comment = (
+            "comment on table ip_address_logs is "
+            "'An IP address cannot have a summarizing set of statistics at "
+            "the same time.'"
+        )
+        self.cursor.execute(comment)
+
+    def create_service_lut(self):
+
+        sql = """
+        create table service_lut (
+            id           serial primary key,
+            folder       text,
+            service      text,
+            service_type text
+        )
+        """
+        self.cursor.execute(sql)
+
+        comment = (
+            "comment on table service_lut is "
+            "'This table should not vary unless there is a new release "
+            "at NCEP'"
+        )
+        self.cursor.execute(comment)
+
+    def create_service_logs(self):
+
+        sql = """
+        create table service_logs (
+            id               bigint primary key,
+            date             timestamp,
+            hits             bigint,
+            errors           bigint,
+            nbytes           bigint,
+            export_mapdraws  bigint,
+            wms_mapdraws     bigint,
+            foreign key (id) references service_lut (id)
+                             on delete cascade
+        )
+        """
+        self.cursor.execute(sql)
+
+        comment = (
+            "comment on table service_logs is "
+            "'Aggregated summary statistics'"
+        )
+        self.cursor.execute(comment)
+
+        comment = (
+            "comment on column service_logs.hits is "
+            "'Number of hits aggregated over a set time period (one hour?)'"
+        )
+        self.cursor.execute(comment)
 
     def initialize_database(self):
         """
@@ -75,6 +269,14 @@ class ApacheLogParser(object):
         df.to_sql('known_services', self.services.conn,
                   index=False, if_exists='append')
         self.services.conn.commit()
+
+    def update_ags_services(self):
+        """
+        Update the services lookup table with any new services.
+        """
+        df = self.retrieve_services()
+        with self.engine.begin() as conn:
+            df.to_sql('services_lut', conn, index=False, if_exists='append')
 
     def retrieve_services(self):
         """

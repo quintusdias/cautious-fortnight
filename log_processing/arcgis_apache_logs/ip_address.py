@@ -18,83 +18,24 @@ class IPAddressProcessor(CommonProcessor):
         SQL to collect a coherent timeseries of folder/service information.
     """
 
-    def __init__(self, project, **kwargs):
+    def __init__(self, **kwargs):
         """
         Parameters
         ----------
         """
-        super().__init__(project, **kwargs)
+        super().__init__(**kwargs)
 
-        self.time_series_sql = """
+        self.time_series_sql = f"""
             SELECT a.date, SUM(a.hits) as hits, SUM(a.errors) as errors,
                    SUM(a.nbytes) as nbytes, b.ip_address
-            FROM ip_address_logs a
-            INNER JOIN known_ip_addresses b
+            FROM {self.schema}.ip_address_logs a
+            INNER JOIN {self.schema}.ip_address_lut b
             ON a.id = b.id
             GROUP BY a.date, b.ip_address
             ORDER BY a.date
             """
 
         self.data_retention_days = 7
-
-    def verify_database_setup(self):
-        """
-        Verify that all the database tables are setup properly for managing
-        IP addresses.
-        """
-        sql = """
-              SELECT name
-              FROM sqlite_master
-              WHERE
-                  type='table'
-                  AND name NOT LIKE 'sqlite_%'
-                  AND name LIKE '%ip_address%'
-              """
-        df = pd.read_sql(sql, self.conn)
-        if len(df) == 2:
-            # We're good.
-            return
-
-        cursor = self.conn.cursor()
-
-        # Create the known IP addresses table.  The IP addresses must be
-        # unique.
-        sql = """
-              CREATE TABLE known_ip_addresses (
-                  id integer PRIMARY KEY,
-                  ip_address text,
-                  name text
-              )
-              """
-        cursor.execute(sql)
-        sql = """
-              CREATE UNIQUE INDEX idx_ip_address
-              ON known_ip_addresses(ip_address)
-              """
-        cursor.execute(sql)
-
-        # Create the IP address logs table.
-        sql = """
-              CREATE TABLE ip_address_logs (
-                  date integer,
-                  id integer,
-                  hits integer,
-                  errors integer,
-                  nbytes integer,
-                  CONSTRAINT fk_known_ip_address_id
-                      FOREIGN KEY (id)
-                      REFERENCES known_ip_addresses(id)
-                      ON DELETE CASCADE
-              )
-              """
-        cursor.execute(sql)
-
-        # Unfortunately the index cannot be unique here.
-        sql = """
-              CREATE INDEX idx_ip_address_logs_date
-              ON ip_address_logs(date)
-              """
-        cursor.execute(sql)
 
     def process_raw_records(self, df):
         """
@@ -109,17 +50,12 @@ class IPAddressProcessor(CommonProcessor):
         groupers = [pd.Grouper(freq=self.frequency), 'ip_address']
         df = df.set_index('date').groupby(groupers).sum().reset_index()
 
-        # Remake the date into a single column, a timestamp
-        df['date'] = df['date'].astype(np.int64) // 1e9
-
         df = self.replace_ip_addresses_with_ids(df)
 
         df = self.merge_with_database(df, 'ip_address_logs')
 
         df.to_sql('ip_address_logs', self.conn,
                   if_exists='append', index=False)
-
-        self.conn.commit()
 
         self.records = []
 
@@ -129,8 +65,8 @@ class IPAddressProcessor(CommonProcessor):
         log an ID standing for the IP address.
         """
 
-        sql = """
-              SELECT id, ip_address from known_ip_addresses
+        sql = f"""
+              SELECT id, ip_address from {self.schema}.ip_address_lut
               """
         known_ips = pd.read_sql(sql, self.conn)
 
@@ -143,11 +79,11 @@ class IPAddressProcessor(CommonProcessor):
         if len(unknown_ips) > 0:
             new_ips_df = pd.Series(unknown_ips, name='ip_address').to_frame()
 
-            new_ips_df.to_sql('known_ip_addresses', self.conn,
+            new_ips_df.to_sql(f'{self.schema}.ip_address_lut', self.conn,
                               if_exists='append', index=False)
 
-            sql = """
-                  SELECT id, ip_address from known_ip_addresses
+            sql = f"""
+                  SELECT id, ip_address from {self.schema}.ip_address_lut
                   """
             known_ips = pd.read_sql(sql, self.conn)
 
