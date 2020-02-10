@@ -80,7 +80,7 @@ class ApacheLogParser(object):
         self.create_pg_database()
 
         self.update_ags_services()
-        self.services.conn.commit()
+        self.conn.commit()
 
     def create_pg_database(self):
         """
@@ -110,6 +110,8 @@ class ApacheLogParser(object):
         self.create_user_agent_lut()
         self.create_user_agent_logs()
 
+        self.create_summary()
+
         self.conn.commit()
 
     def create_user_agent_lut(self):
@@ -138,6 +140,19 @@ class ApacheLogParser(object):
         create table ip_address_lut (
             id           serial primary key,
             ip_address   text
+        )
+        """
+        self.cursor.execute(sql)
+
+    def create_summary(self):
+
+        sql = """
+        create table summary (
+            date             timestamp,
+            hits             bigint,
+            errors           bigint,
+            nbytes           bigint,
+            mapdraws         bigint
         )
         """
         self.cursor.execute(sql)
