@@ -54,7 +54,7 @@ class ServicesProcessor(CommonProcessor):
                    '''
         self.regex = re.compile(pattern, re.VERBOSE | re.IGNORECASE)
 
-        self.time_series_sql = """
+        self.time_series_sql = f"""
             SELECT
                 a.date,
                 SUM(a.hits) as hits,
@@ -63,7 +63,7 @@ class ServicesProcessor(CommonProcessor):
                 SUM(a.export_mapdraws) as export_mapdraws,
                 SUM(a.wms_mapdraws) as wms_mapdraws,
                 b.folder, b.service, b.service_type
-            FROM service_logs a
+            FROM {self.schema}.service_logs a
             INNER JOIN known_services b
             ON a.id = b.id
             GROUP BY a.date, b.folder, b.service, b.service_type
@@ -72,65 +72,6 @@ class ServicesProcessor(CommonProcessor):
         self.records = []
 
         self.data_retention_days = 30
-
-    def verify_database_setup(self):
-        """
-        Verify that all the database tables are setup properly for managing
-        the services.
-        """
-        sql = """
-              SELECT name
-              FROM sqlite_master
-              WHERE
-                  type='table'
-                  AND name NOT LIKE 'sqlite_%'
-                  AND name LIKE '%service%'
-              """
-        df = pd.read_sql(sql, self.conn)
-        if len(df) == 2:
-            # We're good.
-            return
-
-        cursor = self.conn.cursor()
-
-        # Create the known services and logs tables.
-        sql = """
-              CREATE TABLE known_services (
-                  id integer PRIMARY KEY,
-                  folder text,
-                  service text,
-                  service_type text
-              )
-              """
-        cursor.execute(sql)
-        sql = """
-              CREATE UNIQUE INDEX idx_services
-              ON known_services(folder, service, service_type)
-              """
-        cursor.execute(sql)
-
-        sql = """
-              CREATE TABLE service_logs (
-                  date integer,
-                  id integer,
-                  hits integer,
-                  errors integer,
-                  nbytes integer,
-                  export_mapdraws integer,
-                  wms_mapdraws integer,
-                  CONSTRAINT fk_known_services_id
-                      FOREIGN KEY (id)
-                      REFERENCES known_services(id)
-                      ON DELETE CASCADE
-              )
-              """
-        cursor.execute(sql)
-
-        sql = """
-              CREATE UNIQUE INDEX idx_services_logs_date
-              ON service_logs(date, id)
-              """
-        cursor.execute(sql)
 
     def process_raw_records(self, df):
         """
@@ -179,8 +120,8 @@ class ServicesProcessor(CommonProcessor):
 
     def replace_folders_and_services_with_ids(self, df_orig):
 
-        sql = """
-              SELECT * from known_services
+        sql = f"""
+              SELECT * from {self.schema}.service_lut
               """
         known_services = pd.read_sql(sql, self.conn)
 
@@ -343,8 +284,8 @@ class ServicesProcessor(CommonProcessor):
 
         Delete anything older than 30 days.
         """
-        sql = """
-              DELETE FROM service_logs WHERE date < ?
+        sql = f"""
+              DELETE FROM {self.schema}.service_logs WHERE date < ?
               """
         datenum = (
             dt.datetime.now() - dt.timedelta(days=self.data_retention_days)

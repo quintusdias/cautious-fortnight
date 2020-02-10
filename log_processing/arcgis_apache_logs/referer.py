@@ -48,10 +48,10 @@ class RefererProcessor(CommonProcessor):
         """
         super().__init__(**kwargs)
 
-        self.time_series_sql = """
+        self.time_series_sql = f"""
             SELECT a.date, SUM(a.hits) as hits, SUM(a.errors) as errors,
                    SUM(a.nbytes) as nbytes, b.name as referer
-            FROM referer_logs a
+            FROM {self.schema}.referer_logs a
             INNER JOIN known_referers b
             ON a.id = b.id
             GROUP BY a.date, referer
@@ -59,63 +59,6 @@ class RefererProcessor(CommonProcessor):
             """
 
         self.data_retention_days = 7
-
-    def verify_database_setup(self):
-        """
-        Verify that all the database tables are setup properly for managing
-        the referers.
-        """
-
-        cursor = self.conn.cursor()
-
-        # Do the referer tables exist?
-        sql = """
-              SELECT name
-              FROM sqlite_master
-              WHERE
-                  type='table'
-                  AND name NOT LIKE 'sqlite_%'
-              """
-        df = pd.read_sql(sql, self.conn)
-
-        if 'known_referers' not in df.name.values:
-
-            sql = """
-                  CREATE TABLE known_referers (
-                      id integer PRIMARY KEY,
-                      name text
-                  )
-                  """
-            cursor.execute(sql)
-            sql = """
-                  CREATE UNIQUE INDEX idx_referer
-                  ON known_referers(name)
-                  """
-            cursor.execute(sql)
-
-        if 'referer_logs' not in df.name.values:
-
-            sql = """
-                  CREATE TABLE referer_logs (
-                      date integer,
-                      id integer,
-                      hits integer,
-                      errors integer,
-                      nbytes integer,
-                      CONSTRAINT fk_known_referers_id
-                          FOREIGN KEY (id)
-                          REFERENCES known_referers(id)
-                          ON DELETE CASCADE
-                  )
-                  """
-            cursor.execute(sql)
-
-            # Unfortunately the index cannot be unique here.
-            sql = """
-                  CREATE UNIQUE INDEX idx_referer_logs_date
-                  ON referer_logs(date, id)
-                  """
-            cursor.execute(sql)
 
     def process_raw_records(self, df):
         """
@@ -150,9 +93,8 @@ class RefererProcessor(CommonProcessor):
 
         df_ref = self.merge_with_database(df_ref, 'referer_logs')
 
-        df_ref.to_sql('referer_logs', self.conn,
-                      if_exists='append', index=False)
-        self.conn.commit()
+        table = f"{self.schema}.referer_logs"
+        df_ref.to_sql(table, self.conn, if_exists='append', index=False)
 
         # Reset for the next round of records.
         self.records = []
@@ -162,8 +104,8 @@ class RefererProcessor(CommonProcessor):
         Don't log the actual referer names to the database, log the ID instead.
         """
 
-        sql = """
-              SELECT * from known_referers
+        sql = f"""
+              SELECT * from {self.schema}.referer_lut
               """
         known_referers = pd.read_sql(sql, self.conn)
 

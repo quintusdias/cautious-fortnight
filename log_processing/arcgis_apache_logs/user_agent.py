@@ -134,9 +134,8 @@ class UserAgentProcessor(CommonProcessor):
 
         df = self.merge_with_database(df, 'user_agent_logs')
 
-        df.to_sql('user_agent_logs', self.conn,
+        df.to_sql(f'{self.schema}.user_agent_logs', self.conn,
                   if_exists='append', index=False)
-        self.conn.commit()
 
         # Reset for the next round of records.
         self.records = []
@@ -147,8 +146,8 @@ class UserAgentProcessor(CommonProcessor):
         instead.
         """
 
-        sql = """
-              SELECT * from known_user_agents
+        sql = f"""
+              SELECT * from {self.schema}.user_agent_lut
               """
         known_user_agents = pd.read_sql(sql, self.conn)
 
