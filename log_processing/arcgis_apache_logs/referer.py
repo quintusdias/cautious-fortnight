@@ -116,11 +116,11 @@ class RefererProcessor(CommonProcessor):
         if len(unknown_referers) > 0:
             new_df = pd.Series(unknown_referers, name='name').to_frame()
 
-            new_df.to_sql('known_referers', self.conn, schema=self.schema,
+            new_df.to_sql('referer_lut', self.conn, schema=self.schema,
                           if_exists='append', index=False)
 
             sql = f"""
-                  SELECT * from {self.schema}.known_referers
+                  SELECT * from {self.schema}.referer_lut
                   """
             known_referers = pd.read_sql(sql, self.conn)
             df = pd.merge(df_orig, known_referers,

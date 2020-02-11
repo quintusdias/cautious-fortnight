@@ -53,7 +53,6 @@ class SummaryProcessor(CommonProcessor):
         # Do a daily rebuild of the database, just to try to keep things in
         # order.  It's not too expensive.
         self.conn.execute('VACUUM')
-        return
 
         # Drop any records from the burst staging table that are older than
         # 7 days.
