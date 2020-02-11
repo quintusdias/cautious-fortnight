@@ -46,79 +46,6 @@ class SummaryProcessor(CommonProcessor):
             ORDER BY date
             """
 
-    def verify_database_setup(self):
-        """
-        Verify that all the database tables are setup properly for managing
-        the summary.
-        """
-
-        cursor = self.conn.cursor()
-
-        # Do the summary tables exist?
-        sql = """
-              SELECT name
-              FROM sqlite_master
-              WHERE
-                  type='table'
-                  AND name NOT LIKE 'sqlite_%'
-              """
-        df = pd.read_sql(sql, self.conn)
-
-        if 'summary' not in df.name.values:
-
-            sql = """
-                  CREATE TABLE summary (
-                      date integer,
-                      hits integer,
-                      mapdraws integer,
-                      errors integer,
-                      nbytes integer
-                  )
-                  """
-            cursor.execute(sql)
-
-            sql = """
-                  CREATE UNIQUE INDEX idx_summary_date
-                  ON summary(date)
-                  """
-            cursor.execute(sql)
-
-        if "burst_summary" not in df.name.values:
-
-            sql = """
-                  CREATE TABLE burst_summary (
-                      date integer,
-                      hits integer,
-                      errors integer,
-                      nbytes integer
-                  )
-                  """
-            cursor.execute(sql)
-
-            sql = """
-                  CREATE UNIQUE INDEX idx_burst_summary_date
-                  ON summary(date)
-                  """
-            cursor.execute(sql)
-
-        if "burst_staging" not in df.name.values:
-
-            sql = """
-                  CREATE TABLE burst_staging (
-                      date integer,
-                      hits integer,
-                      errors integer,
-                      nbytes integer
-                  )
-                  """
-            cursor.execute(sql)
-
-            sql = """
-                  CREATE INDEX idx_burst_staging_date
-                  ON summary(date)
-                  """
-            cursor.execute(sql)
-
     def preprocess_database(self):
         """
         Do any cleaning necessary before processing any new records.
@@ -198,8 +125,8 @@ class SummaryProcessor(CommonProcessor):
                 .resample('T')
                 .sum()
                 .reset_index())
-        df['date'] = df['date'].astype(np.int64) // 1e9
-        df.to_sql('burst_staging', self.conn, if_exists='append', index=False)
+        df.to_sql('burst_staging', self.conn, schema=self.schema,
+                  if_exists='append', index=False)
 
         # Do the hourly summary
         df = raw_df[columns].copy()
@@ -210,30 +137,27 @@ class SummaryProcessor(CommonProcessor):
                 .sum()
                 .reset_index())
 
-        # Remake the date into a single column, a timestamp
-        df['date'] = df['date'].astype(np.int64) // 1e9
-
         df = self.merge_with_database(df, 'summary')
 
         # Now merge with the map draw information from the services table.
-        starting_date = df.loc[0]['date']
-        sql = """
+        starting_date = pd.Timestamp(df.loc[0]['date'])
+        sql = f"""
               SELECT date,
                      SUM(export_mapdraws) as export_mapdraws,
                      SUM(wms_mapdraws) as wms_mapdraws
-              FROM service_logs
-              WHERE date >= ?
+              FROM {self.schema}.service_logs
+              WHERE date >= %(date)s
               GROUP BY date
               """
-        df_svc = pd.read_sql(sql, self.conn, params=(starting_date,))
+        df_svc = pd.read_sql(sql, self.conn, params={'date': starting_date})
         df = pd.merge(df, df_svc, on='date', how='left')
         df = df.fillna(value=0)
 
         df['mapdraws'] = df['export_mapdraws'] + df['wms_mapdraws']
         df = df.drop(['export_mapdraws', 'wms_mapdraws'], axis='columns')
 
-        df.to_sql('summary', self.conn, if_exists='append', index=False)
-        self.conn.commit()
+        df.to_sql('summary', self.conn, schema=self.schema,
+                  if_exists='append', index=False)
 
     def process_graphics(self, html_doc):
 
@@ -305,11 +229,11 @@ class SummaryProcessor(CommonProcessor):
 
         # Ok, have the mapdraws and the axis in place.  Now add the hits and
         # error information from burst_staging.
-        sql = """
+        sql = f"""
               SELECT date,
                      SUM(hits) as hits,
                      SUM(errors) as errors
-              FROM burst_staging
+              FROM {self.schema}.burst_staging
               GROUP BY date
               ORDER BY date
               """

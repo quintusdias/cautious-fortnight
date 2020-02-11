@@ -55,7 +55,7 @@ class IPAddressProcessor(CommonProcessor):
         df = self.merge_with_database(df, 'ip_address_logs')
 
         df.to_sql('ip_address_logs', self.conn,
-                  if_exists='append', index=False)
+                  schema=self.schema, if_exists='append', index=False)
 
         self.records = []
 
@@ -79,7 +79,7 @@ class IPAddressProcessor(CommonProcessor):
         if len(unknown_ips) > 0:
             new_ips_df = pd.Series(unknown_ips, name='ip_address').to_frame()
 
-            new_ips_df.to_sql(f'{self.schema}.ip_address_lut', self.conn,
+            new_ips_df.to_sql('ip_address_lut', self.conn, schema=self.schema,
                               if_exists='append', index=False)
 
             sql = f"""

@@ -112,7 +112,8 @@ class ServicesProcessor(CommonProcessor):
 
         df = self.merge_with_database(df, 'service_logs')
 
-        df.to_sql('service_logs', self.conn, if_exists='append', index=False)
+        df.to_sql('service_logs', self.conn, schema=self.schema,
+                  if_exists='append', index=False)
         self.conn.commit()
 
         # Reset

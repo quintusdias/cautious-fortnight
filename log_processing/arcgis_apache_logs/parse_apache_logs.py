@@ -46,6 +46,7 @@ class ApacheLogParser(object):
 
         self.conn = psycopg2.connect(dbname='arcgis_logs')
         self.cursor = self.conn.cursor()
+        self.cursor.execute(f"set search_path to {self.schema}")
 
         uri = 'postgres+psycopg2:///arcgis_logs'
         self.engine = sqlalchemy.create_engine(uri)
@@ -228,7 +229,7 @@ class ApacheLogParser(object):
 
     def create_service_lut(self):
 
-        sql = """
+        sql = f"""
         create table service_lut (
             id           serial primary key,
             folder       text,
@@ -247,7 +248,7 @@ class ApacheLogParser(object):
 
     def create_service_logs(self):
 
-        sql = """
+        sql = f"""
         create table service_logs (
             id               bigint primary key,
             date             timestamp,
@@ -281,7 +282,7 @@ class ApacheLogParser(object):
         """
         df = self.retrieve_services()
 
-        df.to_sql('known_services', self.services.conn,
+        df.to_sql('known_services', self.services.conn, schema=self.schema,
                   index=False, if_exists='append')
         self.services.conn.commit()
 
@@ -291,7 +292,8 @@ class ApacheLogParser(object):
         """
         df = self.retrieve_services()
         with self.engine.begin() as conn:
-            df.to_sql('services_lut', conn, index=False, if_exists='append')
+            df.to_sql('service_lut', conn,
+                      schema=self.schema, index=False, if_exists='append')
 
     def retrieve_services(self):
         """

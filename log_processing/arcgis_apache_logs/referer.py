@@ -85,16 +85,13 @@ class RefererProcessor(CommonProcessor):
         groupers = [pd.Grouper(freq=self.frequency), 'referer']
         df_ref = df.set_index('date').groupby(groupers).sum().reset_index()
 
-        # Remake the date into a single column, a timestamp
-        df_ref['date'] = df_ref['date'].astype(np.int64) // 1e9
-
         # Have to have the same column names as the database.
         df_ref = self.replace_referers_with_ids(df_ref)
 
         df_ref = self.merge_with_database(df_ref, 'referer_logs')
 
-        table = f"{self.schema}.referer_logs"
-        df_ref.to_sql(table, self.conn, if_exists='append', index=False)
+        df_ref.to_sql('referer_logs', self.conn, schema=self.schema,
+                      if_exists='append', index=False)
 
         # Reset for the next round of records.
         self.records = []
@@ -119,11 +116,11 @@ class RefererProcessor(CommonProcessor):
         if len(unknown_referers) > 0:
             new_df = pd.Series(unknown_referers, name='name').to_frame()
 
-            new_df.to_sql('known_referers', self.conn,
+            new_df.to_sql('known_referers', self.conn, schema=self.schema,
                           if_exists='append', index=False)
 
-            sql = """
-                  SELECT * from known_referers
+            sql = f"""
+                  SELECT * from {self.schema}.known_referers
                   """
             known_referers = pd.read_sql(sql, self.conn)
             df = pd.merge(df_orig, known_referers,

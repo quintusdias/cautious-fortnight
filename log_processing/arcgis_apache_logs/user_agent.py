@@ -126,15 +126,12 @@ class UserAgentProcessor(CommonProcessor):
         groupers = [pd.Grouper(freq=self.frequency), 'user_agent']
         df = df.set_index('date').groupby(groupers).sum().reset_index()
 
-        # Remake the date into a single column, a timestamp
-        df['date'] = df['date'].astype(np.int64) // 1e9
-
         # Have to have the same column names as the database.
         df = self.replace_user_agents_with_ids(df)
 
         df = self.merge_with_database(df, 'user_agent_logs')
 
-        df.to_sql(f'{self.schema}.user_agent_logs', self.conn,
+        df.to_sql('user_agent_logs', self.conn, schema=self.schema,
                   if_exists='append', index=False)
 
         # Reset for the next round of records.
@@ -161,11 +158,11 @@ class UserAgentProcessor(CommonProcessor):
         if len(unknown_user_agents) > 0:
             new_df = pd.Series(unknown_user_agents, name='name').to_frame()
 
-            new_df.to_sql('known_user_agents', self.conn,
+            new_df.to_sql('known_user_agents', self.conn, schema=self.schema,
                           if_exists='append', index=False)
 
-            sql = """
-                  SELECT * from known_user_agents
+            sql = f"""
+                  SELECT * from {self.schema}.known_user_agents
                   """
             known_user_agents = pd.read_sql(sql, self.conn)
             df = pd.merge(df_orig, known_user_agents,
