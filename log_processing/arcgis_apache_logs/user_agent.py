@@ -62,56 +62,7 @@ class UserAgentProcessor(CommonProcessor):
         Verify that all the database tables are setup properly for managing
         the user_agents.
         """
-
-        cursor = self.conn.cursor()
-
-        # Do the user_agent tables exist?
-        sql = """
-              SELECT name
-              FROM sqlite_master
-              WHERE
-                  type='table'
-                  AND name NOT LIKE 'sqlite_%'
-              """
-        df = pd.read_sql(sql, self.conn)
-
-        if 'known_user_agents' not in df.name.values:
-
-            sql = """
-                  CREATE TABLE known_user_agents (
-                      id integer PRIMARY KEY,
-                      name text
-                  )
-                  """
-            cursor.execute(sql)
-            sql = """
-                  CREATE UNIQUE INDEX idx_user_agent
-                  ON known_user_agents(name)
-                  """
-            cursor.execute(sql)
-
-        if 'user_agent_logs' not in df.name.values:
-
-            sql = """
-                  CREATE TABLE user_agent_logs (
-                      date integer,
-                      id integer,
-                      hits integer,
-                      errors integer,
-                      nbytes integer,
-                      CONSTRAINT fk_user_agents_id
-                          FOREIGN KEY (id)
-                          REFERENCES known_user_agents(id)
-                          ON DELETE CASCADE
-                  )
-                  """
-            cursor.execute(sql)
-
-            sql = """
-                  CREATE UNIQUE INDEX idx_user_agent_logs_date
-                  ON user_agent_logs(date, id)
-                  """
-            cursor.execute(sql)
+        pass
 
     def process_raw_records(self, df):
         """
@@ -119,6 +70,8 @@ class UserAgentProcessor(CommonProcessor):
         processing.  Turn what we have into a dataframe and aggregate it
         to the appropriate granularity.
         """
+        self.logger.info(f"user agents:  processing {len(df)} raw records")
+
         columns = ['date', 'user_agent', 'hits', 'errors', 'nbytes']
         df = df[columns].copy()
 
@@ -131,18 +84,19 @@ class UserAgentProcessor(CommonProcessor):
 
         df = self.merge_with_database(df, 'user_agent_logs')
 
-        df.to_sql('user_agent_logs', self.conn, schema=self.schema,
+        df.to_sql('user_agent_logs', self.engine, schema=self.schema,
                   if_exists='append', index=False)
 
         # Reset for the next round of records.
         self.records = []
+
+        self.logger.info("user agents:  done processing raw records")
 
     def replace_user_agents_with_ids(self, df_orig):
         """
         Don't log the actual user_agent names to the database, log the ID
         instead.
         """
-
         sql = f"""
               SELECT * from {self.schema}.user_agent_lut
               """
@@ -158,11 +112,13 @@ class UserAgentProcessor(CommonProcessor):
         if len(unknown_user_agents) > 0:
             new_df = pd.Series(unknown_user_agents, name='name').to_frame()
 
-            new_df.to_sql('known_user_agents', self.conn, schema=self.schema,
+            self.logger.debug(f"Writing {len(df)} new user agents...")
+            new_df.to_sql('user_agent_lut', self.engine, schema=self.schema,
                           if_exists='append', index=False)
+            self.logger.debug(f"Done writing new user agents...")
 
             sql = f"""
-                  SELECT * from {self.schema}.known_user_agents
+                  SELECT * from {self.schema}.user_agent_lut
                   """
             known_user_agents = pd.read_sql(sql, self.conn)
             df = pd.merge(df_orig, known_user_agents,

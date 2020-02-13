@@ -5,6 +5,7 @@ import datetime as dt
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import psycopg2.extras
 
 # Local imports
 from .common import CommonProcessor
@@ -43,6 +44,7 @@ class IPAddressProcessor(CommonProcessor):
         processing.  Turn what we have into a dataframe and aggregate it
         to the appropriate granularity.
         """
+        self.logger.info(f'IP addresses:  processing {len(df)} records...')
         columns = ['date', 'ip_address', 'hits', 'errors', 'nbytes']
         df = df[columns].copy()
 
@@ -54,10 +56,20 @@ class IPAddressProcessor(CommonProcessor):
 
         df = self.merge_with_database(df, 'ip_address_logs')
 
-        df.to_sql('ip_address_logs', self.conn,
-                  schema=self.schema, if_exists='append', index=False)
+        breakpoint()
+        column_list = ', '.join(df.columns)
+        sql = f"""
+        insert into ip_address_logs ({column_list}) values %s
+        """
+        rows = [row.to_dict() for _, row in df.iterrows()]
+        template = ', '.join([f'%({col})s' for col in df.columns])
+        template = f"({template})"
+        psycopg2.extras.execute_values(self.cursor, sql, rows, template)
+        # df.to_sql('ip_address_logs', self.engine,
+        #           schema=self.schema, if_exists='append', index=False)
 
         self.records = []
+        self.logger.info('IP addresses:  done processing records...')
 
     def replace_ip_addresses_with_ids(self, df_orig):
         """
@@ -79,7 +91,7 @@ class IPAddressProcessor(CommonProcessor):
         if len(unknown_ips) > 0:
             new_ips_df = pd.Series(unknown_ips, name='ip_address').to_frame()
 
-            new_ips_df.to_sql('ip_address_lut', self.conn, schema=self.schema,
+            new_ips_df.to_sql('ip_address_lut', self.engine, schema=self.schema,
                               if_exists='append', index=False)
 
             sql = f"""

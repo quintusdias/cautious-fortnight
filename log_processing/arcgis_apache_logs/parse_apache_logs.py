@@ -53,7 +53,13 @@ class ApacheLogParser(object):
 
         self.setup_logger()
 
-        kwargs = {'logger': self.logger, 'schema': self.schema, 'engine': self.engine}
+        kwargs = {
+            'logger': self.logger,
+            'schema': self.schema,
+            'engine': self.engine,
+            'conn': self.conn,
+            'cursor': self.cursor,
+        }
         self.ip_address = IPAddressProcessor(**kwargs)
         self.referer = RefererProcessor(**kwargs)
         self.services = ServicesProcessor(**kwargs)
@@ -90,14 +96,18 @@ class ApacheLogParser(object):
         sql = f"""
         DROP SCHEMA {self.schema} CASCADE
         """
+        self.logger.info(sql)
         self.cursor.execute(sql)
 
         sql = f"""
         CREATE SCHEMA {self.schema}
         """
+        self.logger.info(sql)
         self.cursor.execute(sql)
 
-        self.cursor.execute(f"set search_path to {self.schema}")
+        cmd = f"set search_path to {self.schema}"
+        self.logger.info(sql)
+        self.cursor.execute(cmd)
 
         self.create_service_lut()
         self.create_service_logs()
@@ -112,6 +122,8 @@ class ApacheLogParser(object):
         self.create_user_agent_logs()
 
         self.create_summary()
+        self.create_burst_summary()
+        self.create_burst_staging()
 
         self.conn.commit()
 
@@ -123,6 +135,7 @@ class ApacheLogParser(object):
             name   text
         )
         """
+        self.logger.info(sql)
         self.cursor.execute(sql)
 
     def create_referer_lut(self):
@@ -133,6 +146,7 @@ class ApacheLogParser(object):
             name   text
         )
         """
+        self.logger.info(sql)
         self.cursor.execute(sql)
 
     def create_ip_address_lut(self):
@@ -143,6 +157,33 @@ class ApacheLogParser(object):
             ip_address   text
         )
         """
+        self.logger.info(sql)
+        self.cursor.execute(sql)
+
+    def create_burst_staging(self):
+
+        sql = """
+        create table burst_staging (
+            date             timestamp,
+            hits             bigint,
+            errors           bigint,
+            nbytes           bigint
+        )
+        """
+        self.logger.info(sql)
+        self.cursor.execute(sql)
+
+    def create_burst_summary(self):
+
+        sql = """
+        create table burst_summary (
+            date             timestamp,
+            hits             bigint,
+            errors           bigint,
+            nbytes           bigint
+        )
+        """
+        self.logger.info(sql)
         self.cursor.execute(sql)
 
     def create_summary(self):
@@ -156,6 +197,7 @@ class ApacheLogParser(object):
             mapdraws         bigint
         )
         """
+        self.logger.info(sql)
         self.cursor.execute(sql)
 
     def create_user_agent_logs(self):
@@ -172,6 +214,7 @@ class ApacheLogParser(object):
                              on delete cascade
         )
         """
+        self.logger.info(sql)
         self.cursor.execute(sql)
 
         comment = (
@@ -195,6 +238,7 @@ class ApacheLogParser(object):
                              on delete cascade
         )
         """
+        self.logger.info(sql)
         self.cursor.execute(sql)
 
         comment = (
@@ -218,6 +262,7 @@ class ApacheLogParser(object):
                              on delete cascade
         )
         """
+        self.logger.info(sql)
         self.cursor.execute(sql)
 
         comment = (
@@ -237,6 +282,7 @@ class ApacheLogParser(object):
             service_type text
         )
         """
+        self.logger.info(sql)
         self.cursor.execute(sql)
 
         comment = (
@@ -250,17 +296,19 @@ class ApacheLogParser(object):
 
         sql = f"""
         create table service_logs (
-            id               bigint primary key,
+            id               bigint,
             date             timestamp,
             hits             bigint,
             errors           bigint,
             nbytes           bigint,
             export_mapdraws  bigint,
             wms_mapdraws     bigint,
+            unique           (id, date),
             foreign key (id) references service_lut (id)
                              on delete cascade
         )
         """
+        self.logger.info(sql)
         self.cursor.execute(sql)
 
         comment = (
@@ -282,7 +330,7 @@ class ApacheLogParser(object):
         """
         df = self.retrieve_services()
 
-        df.to_sql('known_services', self.services.conn, schema=self.schema,
+        df.to_sql('known_services', self.services.engine, schema=self.schema,
                   index=False, if_exists='append')
         self.services.conn.commit()
 
@@ -358,6 +406,7 @@ class ApacheLogParser(object):
         """
         Process the entire log file.
         """
+        self.logger.info('And so it begins...')
         if self.infile is None:
             return
 
@@ -442,6 +491,8 @@ class ApacheLogParser(object):
         self.services.process_raw_records(df)
         self.user_agent.process_raw_records(df)
         self.summarizer.process_raw_records(df)
+
+        self.logger.info('And so it ends...')
 
     def process_graphics(self):
 

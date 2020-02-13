@@ -66,6 +66,7 @@ class RefererProcessor(CommonProcessor):
         processing.  Turn what we have into a dataframe and aggregate it
         to the appropriate granularity.
         """
+        self.logger.info(f'Referers:  processing {len(df)} records...')
         columns = ['date', 'referer', 'hits', 'errors', 'nbytes']
         df = df[columns].copy()
 
@@ -90,11 +91,13 @@ class RefererProcessor(CommonProcessor):
 
         df_ref = self.merge_with_database(df_ref, 'referer_logs')
 
-        df_ref.to_sql('referer_logs', self.conn, schema=self.schema,
+        df_ref.to_sql('referer_logs', self.engine, schema=self.schema,
                       if_exists='append', index=False)
 
         # Reset for the next round of records.
         self.records = []
+
+        self.logger.info('Referers:  done processing records...')
 
     def replace_referers_with_ids(self, df_orig):
         """
@@ -116,7 +119,7 @@ class RefererProcessor(CommonProcessor):
         if len(unknown_referers) > 0:
             new_df = pd.Series(unknown_referers, name='name').to_frame()
 
-            new_df.to_sql('referer_lut', self.conn, schema=self.schema,
+            new_df.to_sql('referer_lut', self.engine, schema=self.schema,
                           if_exists='append', index=False)
 
             sql = f"""

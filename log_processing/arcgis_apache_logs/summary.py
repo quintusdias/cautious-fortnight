@@ -52,16 +52,16 @@ class SummaryProcessor(CommonProcessor):
         """
         # Do a daily rebuild of the database, just to try to keep things in
         # order.  It's not too expensive.
-        self.conn.execute('VACUUM')
+        # self.conn.execute('VACUUM')
 
         # Drop any records from the burst staging table that are older than
         # 7 days.
         sql = """
               DELETE FROM burst_staging
-              WHERE date < ?
+              WHERE date < %(date)s
               """
-        datenum = (dt.datetime.now() - dt.timedelta(days=7)).timestamp()
-        self.cursor.execute(sql, (datenum,))
+        date = dt.datetime.now() - dt.timedelta(days=7)
+        self.cursor.execute(sql, {'date': date})
 
         self.conn.commit()
 
@@ -116,6 +116,7 @@ class SummaryProcessor(CommonProcessor):
 
     def process_raw_records(self, raw_df):
 
+        self.logger.info(f'Summary:  processing {len(raw_df)} records...')
         columns = ['date', 'hits', 'errors', 'nbytes']
         df = raw_df[columns].copy()
 
@@ -124,7 +125,7 @@ class SummaryProcessor(CommonProcessor):
                 .resample('T')
                 .sum()
                 .reset_index())
-        df.to_sql('burst_staging', self.conn, schema=self.schema,
+        df.to_sql('burst_staging', self.engine, schema=self.schema,
                   if_exists='append', index=False)
 
         # Do the hourly summary
@@ -155,8 +156,10 @@ class SummaryProcessor(CommonProcessor):
         df['mapdraws'] = df['export_mapdraws'] + df['wms_mapdraws']
         df = df.drop(['export_mapdraws', 'wms_mapdraws'], axis='columns')
 
-        df.to_sql('summary', self.conn, schema=self.schema,
+        df.to_sql('summary', self.engine, schema=self.schema,
                   if_exists='append', index=False)
+
+        self.logger.info('Summary:  done processing records...')
 
     def process_graphics(self, html_doc):
 

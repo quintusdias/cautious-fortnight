@@ -1,7 +1,6 @@
 # Standard library imports
 import logging
 import pathlib
-import sqlite3
 
 # 3rd party library imports
 from lxml import etree
@@ -44,7 +43,8 @@ class CommonProcessor(object):
     records : list
         Raw records collected, one for each apache log entry.
     """
-    def __init__(self, logger=None, engine=None, schema=None):
+    def __init__(self, logger=None, engine=None, schema=None,
+                 conn=None, cursor=None):
 
         self.schema = schema
 
@@ -53,7 +53,9 @@ class CommonProcessor(object):
         else:
             self.logger = logging.getLogger(__name__)
 
-        self.conn = engine
+        self.conn = conn
+        self.cursor = cursor
+        self.engine = engine
 
         self.MAX_RAW_RECORDS = 100000000
 
@@ -238,9 +240,9 @@ class CommonProcessor(object):
         sql = f"""
                DELETE
                FROM {table}
-               WHERE date >= ?
+               WHERE date >= %(date)s
                """
-        self.cursor.execute(sql, (start,))
+        self.cursor.execute(sql, params)
 
         # Aggregate the two dataframes together.
         if table == 'summary':

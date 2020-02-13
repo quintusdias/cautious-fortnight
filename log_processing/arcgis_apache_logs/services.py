@@ -79,6 +79,7 @@ class ServicesProcessor(CommonProcessor):
         processing.  Turn what we have into a dataframe and aggregate it
         to the appropriate granularity.
         """
+        self.logger.info(f'services:  processing {len(df)} raw records...')
         columns = ['date', 'path', 'hits', 'errors', 'nbytes']
         df = df[columns].copy()
 
@@ -102,9 +103,6 @@ class ServicesProcessor(CommonProcessor):
         ]
         df = df.set_index('date').groupby(groupers).sum().reset_index()
 
-        # Remake the date into a single column, a timestamp
-        df['date'] = df['date'].astype(np.int64) // 1e9
-
         # Have to have the same column names as the database.
         df = self.replace_folders_and_services_with_ids(df)
         if len(df) == 0:
@@ -112,12 +110,14 @@ class ServicesProcessor(CommonProcessor):
 
         df = self.merge_with_database(df, 'service_logs')
 
-        df.to_sql('service_logs', self.conn, schema=self.schema,
+        df.to_sql('service_logs', self.engine, schema=self.schema,
                   if_exists='append', index=False)
         self.conn.commit()
 
         # Reset
         self.records = []
+
+        self.logger.info('services:  processing raw records...')
 
     def replace_folders_and_services_with_ids(self, df_orig):
 
@@ -286,12 +286,10 @@ class ServicesProcessor(CommonProcessor):
         Delete anything older than 30 days.
         """
         sql = f"""
-              DELETE FROM {self.schema}.service_logs WHERE date < ?
+              DELETE FROM {self.schema}.service_logs WHERE date < %(date)s
               """
-        datenum = (
-            dt.datetime.now() - dt.timedelta(days=self.data_retention_days)
-        ).timestamp()
+        date = dt.datetime.now() - dt.timedelta(days=self.data_retention_days)
 
         cursor = self.conn.cursor()
-        cursor.execute(sql, (datenum,))
+        cursor.execute(sql, {'date': date})
         self.conn.commit()
