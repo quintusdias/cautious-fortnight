@@ -56,17 +56,7 @@ class IPAddressProcessor(CommonProcessor):
 
         df = self.merge_with_database(df, 'ip_address_logs')
 
-        breakpoint()
-        column_list = ', '.join(df.columns)
-        sql = f"""
-        insert into ip_address_logs ({column_list}) values %s
-        """
-        rows = [row.to_dict() for _, row in df.iterrows()]
-        template = ', '.join([f'%({col})s' for col in df.columns])
-        template = f"({template})"
-        psycopg2.extras.execute_values(self.cursor, sql, rows, template)
-        # df.to_sql('ip_address_logs', self.engine,
-        #           schema=self.schema, if_exists='append', index=False)
+        self.to_table(df, 'ip_address_logs')
 
         self.records = []
         self.logger.info('IP addresses:  done processing records...')

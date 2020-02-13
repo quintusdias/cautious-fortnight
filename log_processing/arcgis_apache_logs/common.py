@@ -254,3 +254,15 @@ class CommonProcessor(object):
                 .sum()
                 .reset_index())
         return df
+
+    def to_table(self, df, table):
+
+        column_list = ', '.join(df.columns)
+        sql = f"""
+        insert into {table} ({column_list}) values %s
+        """
+        rows = [row.to_dict() for _, row in df.iterrows()]
+        template = ', '.join([f'%({col})s' for col in df.columns])
+        template = f"({template})"
+        psycopg2.extras.execute_values(self.cursor, sql, rows, template)
+
