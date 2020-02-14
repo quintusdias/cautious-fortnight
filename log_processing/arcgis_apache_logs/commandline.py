@@ -34,7 +34,7 @@ def produce_arcgis_apache_graphics():
     p.process_graphics()
 
 
-def initialize_ag_pg_database():
+def initialize_ag_ap_pg_database():
     """
     Entry point for initializing the postgresql database.
     """
@@ -46,7 +46,22 @@ def initialize_ag_pg_database():
     args = parser.parse_args()
 
     processor = ApacheLogParser(args.project)
-    processor.initialize_ag_pg_database()
+    processor.initialize_ag_ap_pg_database()
+
+
+def update_ag_ap_pg_database():
+    """
+    Entry point for updating the postgresql database.
+    """
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('project', choices=['idpgis', 'nowcoast'])
+
+    args = parser.parse_args()
+
+    processor = ApacheLogParser(args.project)
+    processor.update_ag_ap_pg_services()
 
 
 def init_db():

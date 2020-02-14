@@ -20,13 +20,13 @@ do
     
     for logfile in $files_to_process
     do
-    	parse-arcgis-apache-logs $project --infile $logfile
+    	parse-ag-ap-pg-logs $project --infile $logfile
     done
 
-    produce-arcgis-apache-graphics $project
+    produce-ag-ap-pg-graphics $project
 
     # Delete any files that are too old
-    for datenum in $(seq 10 15)
+    for datenum in $(seq 20 25)
     do
         datestr=$(date +%Y%m%d --date="-""$datenum"" days")
         rm $HOME/data/logs/akamai/$project/incoming/*.*.*-*-"$datestr"*.gz
@@ -34,5 +34,5 @@ do
     
 done
 
-#rsync -avz ~/Documents/arcgis_apache_logs/*.{html,png} jevans@cerebrus:/var/www/html/gis
+rsync -avz ~/Documents/arcgis_apache_logs/*.{html,png} jevans@cerebrus:/var/www/html/gis
 

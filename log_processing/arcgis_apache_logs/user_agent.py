@@ -49,7 +49,7 @@ class UserAgentProcessor(CommonProcessor):
             SELECT a.date, SUM(a.hits) as hits, SUM(a.errors) as errors,
                    SUM(a.nbytes) as nbytes, b.name as user_agent
             FROM user_agent_logs a
-            INNER JOIN known_user_agents b
+            INNER JOIN user_agent_lut b
             ON a.id = b.id
             GROUP BY a.date, user_agent
             ORDER BY a.date
@@ -84,8 +84,7 @@ class UserAgentProcessor(CommonProcessor):
 
         df = self.merge_with_database(df, 'user_agent_logs')
 
-        df.to_sql('user_agent_logs', self.engine, schema=self.schema,
-                  if_exists='append', index=False)
+        self.to_table(df, 'user_agent_logs')
 
         # Reset for the next round of records.
         self.records = []
@@ -98,7 +97,7 @@ class UserAgentProcessor(CommonProcessor):
         instead.
         """
         sql = f"""
-              SELECT * from {self.schema}.user_agent_lut
+              SELECT * from user_agent_lut
               """
         known_user_agents = pd.read_sql(sql, self.conn)
 
@@ -113,12 +112,11 @@ class UserAgentProcessor(CommonProcessor):
             new_df = pd.Series(unknown_user_agents, name='name').to_frame()
 
             self.logger.debug(f"Writing {len(df)} new user agents...")
-            new_df.to_sql('user_agent_lut', self.engine, schema=self.schema,
-                          if_exists='append', index=False)
+            self.to_table(new_df, 'user_agent_lut')
             self.logger.debug(f"Done writing new user agents...")
 
             sql = f"""
-                  SELECT * from {self.schema}.user_agent_lut
+                  SELECT * from user_agent_lut
                   """
             known_user_agents = pd.read_sql(sql, self.conn)
             df = pd.merge(df_orig, known_user_agents,
@@ -138,29 +136,10 @@ class UserAgentProcessor(CommonProcessor):
             # If it's not Monday, do nothing.
             return
 
-        # Ok, it's Monday, drop the IP address tables, they will be recreated.
         cursor = self.conn.cursor()
 
         sql = """
-              DROP INDEX idx_user_agent_logs_date
-              """
-        self.logger.info(sql)
-        cursor.execute(sql)
-
-        sql = """
-              DROP TABLE user_agent_logs
-              """
-        self.logger.info(sql)
-        cursor.execute(sql)
-
-        sql = """
-              DROP INDEX idx_user_agent
-              """
-        self.logger.info(sql)
-        cursor.execute(sql)
-
-        sql = """
-              DROP TABLE known_user_agents
+              delete from user_agent_logs
               """
         self.logger.info(sql)
         cursor.execute(sql)

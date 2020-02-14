@@ -6,6 +6,7 @@ import pathlib
 from lxml import etree
 import matplotlib.pyplot as plt
 import pandas as pd
+import psycopg2
 
 
 def millions_fcn(x, pos):
@@ -43,10 +44,12 @@ class CommonProcessor(object):
     records : list
         Raw records collected, one for each apache log entry.
     """
-    def __init__(self, logger=None, engine=None, schema=None,
-                 conn=None, cursor=None):
+    def __init__(self, logger=None, schema=None, conn=None, cursor=None):
 
         self.schema = schema
+        self.project = schema
+
+        self.root = pathlib.Path.home() / 'Documents' / 'arcgis_apache_logs'
 
         if logger is not None:
             self.logger = logger
@@ -55,7 +58,6 @@ class CommonProcessor(object):
 
         self.conn = conn
         self.cursor = cursor
-        self.engine = engine
 
         self.MAX_RAW_RECORDS = 100000000
 
@@ -226,7 +228,7 @@ class CommonProcessor(object):
         # Get everything from the database after this time.
         sql = f"""
                select *
-               from {self.schema}.{table}
+               from {table}
                where date >= %(date)s 
                order BY date
                """

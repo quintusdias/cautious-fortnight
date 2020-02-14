@@ -5,11 +5,11 @@ from setuptools import setup
 
 cmdline = 'arcgis_apache_logs.commandline'
 console_scripts = [
-    f'initialize-arcgis-apache-database={cmdline}:init_db',
-    f'initialize-ag-pg-database={cmdline}:initialize_ag_pg_database',
-    f'parse-arcgis-apache-logs={cmdline}:parse_arcgis_apache_logs',
+    f'initialize-ag-ap-pg-database={cmdline}:initialize_ag_ap_pg_database',
+    f'update-ag-ap-pg-database={cmdline}:update_ag_ap_pg_database',
+    f'parse-ag-ap-pg-logs={cmdline}:parse_arcgis_apache_logs',
     f'prune-arcgis-apache-database={cmdline}:prune_arcgis_apache_database',
-    f'produce-arcgis-apache-graphics={cmdline}:produce_arcgis_apache_graphics',
+    f'produce-ag-ap-pg-graphics={cmdline}:produce_arcgis_apache_graphics',
 ],
 
 kwargs = {

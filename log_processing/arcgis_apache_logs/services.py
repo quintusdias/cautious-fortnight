@@ -56,22 +56,24 @@ class ServicesProcessor(CommonProcessor):
 
         self.time_series_sql = f"""
             SELECT
-                a.date,
-                SUM(a.hits) as hits,
-                SUM(a.errors) as errors,
-                SUM(a.nbytes) as nbytes,
-                SUM(a.export_mapdraws) as export_mapdraws,
-                SUM(a.wms_mapdraws) as wms_mapdraws,
-                b.folder, b.service, b.service_type
-            FROM {self.schema}.service_logs a
-            INNER JOIN known_services b
-            ON a.id = b.id
-            GROUP BY a.date, b.folder, b.service, b.service_type
-            ORDER BY a.date
+                logs.date,
+                SUM(logs.hits) as hits,
+                SUM(logs.errors) as errors,
+                SUM(logs.nbytes) as nbytes,
+                SUM(logs.export_mapdraws) as export_mapdraws,
+                SUM(logs.wms_mapdraws) as wms_mapdraws,
+                f.folder, s_lut.service,
+                st_lut.name as service_type
+            FROM service_logs logs
+                 INNER JOIN service_lut s_lut ON logs.id = s_lut.id
+                 INNER JOIN folder_lut f on f.id = s_lut.folder_id
+                 INNER JOIN service_type_lut st_lut on s_lut.service_type_id = st_lut.id
+            GROUP BY logs.date, f.folder, s_lut.service, st_lut.name
+            ORDER BY logs.date
             """
         self.records = []
 
-        self.data_retention_days = 30
+        self.data_retention_days = 180
 
     def process_raw_records(self, df):
         """
@@ -110,8 +112,7 @@ class ServicesProcessor(CommonProcessor):
 
         df = self.merge_with_database(df, 'service_logs')
 
-        df.to_sql('service_logs', self.engine, schema=self.schema,
-                  if_exists='append', index=False)
+        self.to_table(df, 'service_logs')
         self.conn.commit()
 
         # Reset
@@ -122,7 +123,10 @@ class ServicesProcessor(CommonProcessor):
     def replace_folders_and_services_with_ids(self, df_orig):
 
         sql = f"""
-              SELECT * from {self.schema}.service_lut
+              select s_lut.id id, s_lut.service service, f.folder, st_lut.name service_type
+              from service_lut s_lut
+                   inner join folder_lut f on s_lut.folder_id = f.id
+                   inner join service_type_lut st_lut on s_lut.service_type_id = st_lut.id
               """
         known_services = pd.read_sql(sql, self.conn)
 
@@ -283,10 +287,10 @@ class ServicesProcessor(CommonProcessor):
         """
         Do any cleaning necessary before processing any new records.
 
-        Delete anything older than 30 days.
+        Delete anything older than a certain number of days.
         """
         sql = f"""
-              DELETE FROM {self.schema}.service_logs WHERE date < %(date)s
+              DELETE FROM service_logs WHERE date < %(date)s
               """
         date = dt.datetime.now() - dt.timedelta(days=self.data_retention_days)
 

@@ -57,10 +57,10 @@ class SummaryProcessor(CommonProcessor):
         # Drop any records from the burst staging table that are older than
         # 7 days.
         sql = """
-              DELETE FROM burst_staging
+              DELETE FROM burst
               WHERE date < %(date)s
               """
-        date = dt.datetime.now() - dt.timedelta(days=7)
+        date = dt.datetime.now() - dt.timedelta(days=14)
         self.cursor.execute(sql, {'date': date})
 
         self.conn.commit()
@@ -95,7 +95,7 @@ class SummaryProcessor(CommonProcessor):
                      SUM(hits) as hits,
                      SUM(errors) as errors,
                      SUM(nbytes) as nbytes
-              FROM burst_staging
+              FROM burst
               GROUP BY date
               ORDER BY date
               """
@@ -125,8 +125,7 @@ class SummaryProcessor(CommonProcessor):
                 .resample('T')
                 .sum()
                 .reset_index())
-        df.to_sql('burst_staging', self.engine, schema=self.schema,
-                  if_exists='append', index=False)
+        self.to_table(df, 'burst')
 
         # Do the hourly summary
         df = raw_df[columns].copy()
@@ -145,7 +144,7 @@ class SummaryProcessor(CommonProcessor):
               SELECT date,
                      SUM(export_mapdraws) as export_mapdraws,
                      SUM(wms_mapdraws) as wms_mapdraws
-              FROM {self.schema}.service_logs
+              FROM service_logs
               WHERE date >= %(date)s
               GROUP BY date
               """
@@ -156,8 +155,7 @@ class SummaryProcessor(CommonProcessor):
         df['mapdraws'] = df['export_mapdraws'] + df['wms_mapdraws']
         df = df.drop(['export_mapdraws', 'wms_mapdraws'], axis='columns')
 
-        df.to_sql('summary', self.engine, schema=self.schema,
-                  if_exists='append', index=False)
+        self.to_table(df, 'summary')
 
         self.logger.info('Summary:  done processing records...')
 
@@ -230,12 +228,12 @@ class SummaryProcessor(CommonProcessor):
                             color='#2ca02c')
 
         # Ok, have the mapdraws and the axis in place.  Now add the hits and
-        # error information from burst_staging.
+        # error information from burst table.
         sql = f"""
               SELECT date,
                      SUM(hits) as hits,
                      SUM(errors) as errors
-              FROM {self.schema}.burst_staging
+              FROM burst
               GROUP BY date
               ORDER BY date
               """
@@ -263,7 +261,8 @@ class SummaryProcessor(CommonProcessor):
 
         # Fill the area between the rolling min and max for hits.  This gives
         # an indication of the short term range.
-        time = (dfr.index - pd.datetime(1970, 1, 1)).total_seconds() / 60
+        time = (dfr.index - dt.datetime(1970, 1, 1)).total_seconds() / 60
+
         # facecolor = [0.29803922, 0.44705882, 0.69019608, 1.]
         bounds_artist = ax.fill_between(time, dfr['hits']['amax'],
                                         dfr['hits']['amin'],
@@ -281,7 +280,7 @@ class SummaryProcessor(CommonProcessor):
         sql = """
               SELECT a.date, SUM(a.hits) as hits
               FROM user_agent_logs a
-              INNER JOIN known_user_agents b
+              INNER JOIN user_agent_lut b
               ON a.id = b.id
               WHERE b.name LIKE 'GeoEvent%'
               GROUP BY a.date

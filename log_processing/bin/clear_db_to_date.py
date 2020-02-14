@@ -7,32 +7,34 @@
 import argparse
 import datetime as dt
 import pathlib
-import sqlite3
+
+import psycopg2
 
 
-def run(project, root):
+def run(project):
 
-    dbfile = pathlib.Path(root) / f"arcgis_apache_{project}.db"
-    conn = sqlite3.connect(dbfile)
+    conn = psycopg2.connect(dbname='arcgis_logs')
     cursor = conn.cursor()
 
-    date = dt.datetime(2019, 9, 19, 20, 0, 0).timestamp()
+    cursor.execute('set search_path to idpgis')
+
+    date = dt.datetime(2020, 2, 20, 0, 0, 0)
     print(date)
 
     sql = """
           DELETE FROM {table}
-          WHERE date >= ?
+          WHERE date >= %(date)s
           """
     for table in [
         'summary', 'ip_address_logs', 'service_logs', 'referer_logs',
-        'user_agent_logs', 'burst_staging'
+        'user_agent_logs', 'burst'
     ]:
         print(table)
         # df = pd.read_sql(sql2, conn, params=(date,))
 
         print(sql)
-        rs = cursor.execute(sql.format(table=table), (date,))
-        print(f"{table}:  deleted {rs.rowcount}")
+        cursor.execute(sql.format(table=table), {'date': date})
+        print(f"{table}:  deleted {cursor.rowcount}")
 
     conn.commit()
 
@@ -41,8 +43,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('project', choices=['idpgis', 'nowcoast'])
-    parser.add_argument('root', help='SQLITE database file parent dir')
 
     args = parser.parse_args()
 
-    run(args.project, args.root)
+    run(args.project)

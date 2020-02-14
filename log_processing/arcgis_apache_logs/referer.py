@@ -51,8 +51,7 @@ class RefererProcessor(CommonProcessor):
         self.time_series_sql = f"""
             SELECT a.date, SUM(a.hits) as hits, SUM(a.errors) as errors,
                    SUM(a.nbytes) as nbytes, b.name as referer
-            FROM {self.schema}.referer_logs a
-            INNER JOIN known_referers b
+            FROM referer_logs a INNER JOIN referer_lut b
             ON a.id = b.id
             GROUP BY a.date, referer
             ORDER BY a.date
@@ -91,8 +90,7 @@ class RefererProcessor(CommonProcessor):
 
         df_ref = self.merge_with_database(df_ref, 'referer_logs')
 
-        df_ref.to_sql('referer_logs', self.engine, schema=self.schema,
-                      if_exists='append', index=False)
+        self.to_table(df_ref, 'referer_logs')
 
         # Reset for the next round of records.
         self.records = []
@@ -105,7 +103,7 @@ class RefererProcessor(CommonProcessor):
         """
 
         sql = f"""
-              SELECT * from {self.schema}.referer_lut
+              SELECT * from referer_lut
               """
         known_referers = pd.read_sql(sql, self.conn)
 
@@ -119,11 +117,10 @@ class RefererProcessor(CommonProcessor):
         if len(unknown_referers) > 0:
             new_df = pd.Series(unknown_referers, name='name').to_frame()
 
-            new_df.to_sql('referer_lut', self.engine, schema=self.schema,
-                          if_exists='append', index=False)
+            self.to_table(new_df, 'referer_lut')
 
             sql = f"""
-                  SELECT * from {self.schema}.referer_lut
+                  SELECT * from referer_lut
                   """
             known_referers = pd.read_sql(sql, self.conn)
             df = pd.merge(df_orig, known_referers,
@@ -147,28 +144,11 @@ class RefererProcessor(CommonProcessor):
         cursor = self.conn.cursor()
 
         sql = """
-              DROP INDEX idx_referer_logs_date
+              delete from referer_logs
               """
         self.logger.info(sql)
         cursor.execute(sql)
 
-        sql = """
-              DROP TABLE referer_logs
-              """
-        self.logger.info(sql)
-        cursor.execute(sql)
-
-        sql = """
-              DROP INDEX idx_referer
-              """
-        self.logger.info(sql)
-        cursor.execute(sql)
-
-        sql = """
-              DROP TABLE known_referers
-              """
-        self.logger.info(sql)
-        cursor.execute(sql)
         self.conn.commit()
 
     def process_graphics(self, html_doc):

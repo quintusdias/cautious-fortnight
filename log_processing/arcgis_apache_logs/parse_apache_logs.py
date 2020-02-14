@@ -42,21 +42,19 @@ class ApacheLogParser(object):
         self.project = project
         self.infile = infile
 
+        self.root = pathlib.Path.home() / 'Documents' / 'arcgis_apache_logs'
+
         self.schema = project
 
         self.conn = psycopg2.connect(dbname='arcgis_logs')
         self.cursor = self.conn.cursor()
         self.cursor.execute(f"set search_path to {self.schema}")
 
-        uri = 'postgres+psycopg2:///arcgis_logs'
-        self.engine = sqlalchemy.create_engine(uri)
-
         self.setup_logger()
 
         kwargs = {
             'logger': self.logger,
             'schema': self.schema,
-            'engine': self.engine,
             'conn': self.conn,
             'cursor': self.cursor,
         }
@@ -65,6 +63,8 @@ class ApacheLogParser(object):
         self.services = ServicesProcessor(**kwargs)
         self.summarizer = SummaryProcessor(**kwargs)
         self.user_agent = UserAgentProcessor(**kwargs)
+
+        self.graphics_setup()
 
     def __del__(self):
         self.conn.commit()
@@ -79,14 +79,14 @@ class ApacheLogParser(object):
         ul = lxml.etree.SubElement(body, 'ul')
         ul.attrib['class'] = 'tableofcontents'
 
-    def initialize_ag_pg_database(self):
+    def initialize_ag_ap_pg_database(self):
         """
         Examine the project web site and populate the services database with
         existing services.
         """
         self.create_pg_database()
 
-        self.update_ags_services()
+        self.update_ag_ap_pg_services()
         self.conn.commit()
 
     def create_pg_database(self):
@@ -109,6 +109,8 @@ class ApacheLogParser(object):
         self.logger.info(sql)
         self.cursor.execute(cmd)
 
+        self.create_folder_lut()
+        self.create_service_type_lut()
         self.create_service_lut()
         self.create_service_logs()
 
@@ -122,8 +124,7 @@ class ApacheLogParser(object):
         self.create_user_agent_logs()
 
         self.create_summary()
-        self.create_burst_summary()
-        self.create_burst_staging()
+        self.create_burst()
 
         self.conn.commit()
 
@@ -160,10 +161,10 @@ class ApacheLogParser(object):
         self.logger.info(sql)
         self.cursor.execute(sql)
 
-    def create_burst_staging(self):
+    def create_burst(self):
 
         sql = """
-        create table burst_staging (
+        create table burst (
             date             timestamp,
             hits             bigint,
             errors           bigint,
@@ -173,15 +174,8 @@ class ApacheLogParser(object):
         self.logger.info(sql)
         self.cursor.execute(sql)
 
-    def create_burst_summary(self):
-
         sql = """
-        create table burst_summary (
-            date             timestamp,
-            hits             bigint,
-            errors           bigint,
-            nbytes           bigint
-        )
+        create index on burst(date);
         """
         self.logger.info(sql)
         self.cursor.execute(sql)
@@ -272,15 +266,72 @@ class ApacheLogParser(object):
         )
         self.cursor.execute(comment)
 
+    def create_folder_lut(self):
+
+        sql = f"""
+        create table folder_lut (
+            id           serial primary key,
+            folder       text,
+            constraint   folder_exists_constraint unique (folder)
+        )
+        """
+        self.logger.info(sql)
+        self.cursor.execute(sql)
+
+        comment = (
+            "comment on table folder_lut is "
+            "'This table should not vary unless there is a new release "
+            "at NCEP, and usually not even then...'"
+        )
+        self.cursor.execute(comment)
+
+    def create_service_type_lut(self):
+
+        sql = f"""
+        create table service_type_lut (
+            id           serial primary key,
+            name         text
+        )
+        """
+        self.logger.info(sql)
+        self.cursor.execute(sql)
+
+        comment = (
+            "comment on table service_type_lut is "
+            "'This table should not vary unless there is a new release "
+            "at NCEP', and even then..."
+        )
+        self.cursor.execute(comment)
+
     def create_service_lut(self):
 
         sql = f"""
         create table service_lut (
-            id           serial primary key,
-            folder       text,
-            service      text,
-            service_type text
+            id              serial primary key,
+            service         text,
+            folder_id       integer,
+            service_type_id integer,
         )
+        """
+        self.logger.info(sql)
+        self.cursor.execute(sql)
+
+        # services must be unique
+        sql = """
+        alter table service_lut
+        add constraint service_exists
+        unique(folder_id, service, service_type_id)
+        """
+        self.logger.info(sql)
+        self.cursor.execute(sql)
+
+        # folders have to already be known
+        sql = """
+        alter table service_lut
+        add constraint service_lut_folder_id_fkey
+        foreign key(folder_id)
+        references folder_lut(id)
+        on delete cascade
         """
         self.logger.info(sql)
         self.cursor.execute(sql)
@@ -323,25 +374,25 @@ class ApacheLogParser(object):
         )
         self.cursor.execute(comment)
 
-    def initialize_database(self):
-        """
-        Examine the project web site and populate the services database with
-        existing services.
-        """
-        df = self.retrieve_services()
-
-        df.to_sql('known_services', self.services.engine, schema=self.schema,
-                  index=False, if_exists='append')
-        self.services.conn.commit()
-
-    def update_ags_services(self):
+    def update_ag_ap_pg_services(self):
         """
         Update the services lookup table with any new services.
+        Use an UPSERT so that existing rows are left alone.
         """
+        self.logger.info("Retrieving services...")
         df = self.retrieve_services()
-        with self.engine.begin() as conn:
-            df.to_sql('service_lut', conn,
-                      schema=self.schema, index=False, if_exists='append')
+
+        sql = f"""
+        insert into service_lut (folder, service, service_type)
+        values (%(folder)s, %(service)s, %(service_type)s)
+        on conflict on constraint service_exists_constraint do nothing
+        """
+        for _, row in df.iterrows():
+            self.cursor.execute(sql, row.to_dict())
+            if self.cursor.rowcount == 1:
+                svc = f"{row['folder']}/{row['service']}/{row['service_type']}"
+                self.logger.info(f"Upserting {svc}")
+            pass
 
     def retrieve_services(self):
         """
@@ -379,7 +430,7 @@ class ApacheLogParser(object):
 
     def setup_logger(self):
 
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger('AGS Apache PG')
         self.logger.setLevel(logging.INFO)
 
         ch = logging.StreamHandler()

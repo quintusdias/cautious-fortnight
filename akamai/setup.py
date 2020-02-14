@@ -17,8 +17,6 @@ kwargs = {
     },
     'packages': ['nco_akamai'],
     'install_requires': [
-        'apache_log_parser',
-        'openpyxl>=2.4.0',
         'pandas',
         'tables>=3.3.0',
     ],
