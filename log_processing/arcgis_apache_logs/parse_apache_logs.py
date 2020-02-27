@@ -290,7 +290,8 @@ class ApacheLogParser(object):
         sql = f"""
         create table service_type_lut (
             id           serial primary key,
-            name         text
+            name         text,
+            constraint   service_type_exists_constraint unique (name)
         )
         """
         self.logger.info(sql)
@@ -374,6 +375,36 @@ class ApacheLogParser(object):
         )
         self.cursor.execute(comment)
 
+    def upsert_new_folders(self, df):
+
+        folders = df['folder'].unique()
+
+        sql = f"""
+        insert into folder_lut (folder)
+        values (%(folder)s)
+        on conflict on constraint folder_exists_constraint do nothing
+        """
+        for folder in folders:
+            self.cursor.execute(sql, {'folder', folder})
+            if self.cursor.rowcount == 1:
+                self.logger.info(f"Upserted {folder}")
+                new_folders.append(folder)
+
+    def upsert_new_service_types(self, df):
+
+        service_types = df['service_type'].unique()
+
+        sql = f"""
+        insert into service_type_lut (name)
+        values (%(service_type)s)
+        on conflict on constraint service_exists_constraint do nothing
+        """
+        for service_type in service_types:
+            self.cursor.execute(sql, {'service_type', service_type})
+            if self.cursor.rowcount == 1:
+                self.logger.info(f"Upserted {service_type}")
+                new_service_types.append(folder)
+
     def update_ag_ap_pg_services(self):
         """
         Update the services lookup table with any new services.
@@ -381,6 +412,11 @@ class ApacheLogParser(object):
         """
         self.logger.info("Retrieving services...")
         df = self.retrieve_services()
+
+        self.upsert_new_folders(df)
+        self.upsert_new_service_types(df)
+
+        # update the dataframe with folder and service type IDs
 
         sql = f"""
         insert into service_lut (folder, service, service_type)
@@ -391,8 +427,7 @@ class ApacheLogParser(object):
             self.cursor.execute(sql, row.to_dict())
             if self.cursor.rowcount == 1:
                 svc = f"{row['folder']}/{row['service']}/{row['service_type']}"
-                self.logger.info(f"Upserting {svc}")
-            pass
+                self.logger.info(f"Upserted {svc}")
 
     def retrieve_services(self):
         """
