@@ -1,0 +1,14 @@
+name: iso19115metadata
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - gdal
+  - ipython
+  - lxml
+  - proj
+  - pyproj
+  - python
+  - pyyaml
+  - requests
+  - setuptools

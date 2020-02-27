@@ -1,7 +1,16 @@
 # Installation
+Change directories into `gis-monitoring/ags_metadata`.
+
+Create the anaconda environment with
 
 ```shell
-python setup.py install --user
+conda env create -f environment.yml
+```
+
+Install the command line scripts with
+
+```shell
+python setup.py develop
 ```
 
 This will install 3 command line scripts, but you only need to concern yourself with `rest2iso`.
@@ -32,11 +41,12 @@ optional arguments:
                         documents and their HTML counterparts.
 ```
 
-If you are in the `gis-monitoring/ags_metadata` directory, then try it with
+You can run the metadata generation for, say, nowCOAST from the UNIX shell with
 
 ```shell
-rest2iso --output=tmp config/nowcoast.yml
+rest2iso config/nowcoast.yml
 ```
 
-This will write metadata documents (and human-readable HTML counterparts)
-to the `tmp` subdirectory of the current directory.
+This will create a directory `nowcoast.noaa.gov` in the your current directory
+and write the XML metadata documents (and human-readable HTML counterparts)
+to that directory.
