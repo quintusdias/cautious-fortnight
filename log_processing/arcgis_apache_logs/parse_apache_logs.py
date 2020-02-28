@@ -382,13 +382,12 @@ class ApacheLogParser(object):
         sql = f"""
         insert into folder_lut (folder)
         values (%(folder)s)
-        on conflict on constraint folder_exists_constraint do nothing
+        on conflict on constraint folder_exists do nothing
         """
         for folder in folders:
-            self.cursor.execute(sql, {'folder', folder})
+            self.cursor.execute(sql, {'folder': folder})
             if self.cursor.rowcount == 1:
                 self.logger.info(f"Upserted {folder}")
-                new_folders.append(folder)
 
     def upsert_new_service_types(self, df):
 
@@ -397,10 +396,10 @@ class ApacheLogParser(object):
         sql = f"""
         insert into service_type_lut (name)
         values (%(service_type)s)
-        on conflict on constraint service_exists_constraint do nothing
+        on conflict on constraint service_type_exists do nothing
         """
         for service_type in service_types:
-            self.cursor.execute(sql, {'service_type', service_type})
+            self.cursor.execute(sql, {'service_type': service_type})
             if self.cursor.rowcount == 1:
                 self.logger.info(f"Upserted {service_type}")
                 new_service_types.append(folder)
@@ -417,16 +416,30 @@ class ApacheLogParser(object):
         self.upsert_new_service_types(df)
 
         # update the dataframe with folder and service type IDs
+        df_folders = pd.read_sql("select * from folder_lut", self.conn)
+        df = pd.merge(df, df_folders,
+                      how='inner', left_on='folder', right_on='folder')
 
+        df = df[['id', 'service', 'service_type']]
+        df.columns = ['folder_id', 'service', 'service_type']
+
+        df_svc_type = pd.read_sql("select * from service_type_lut", self.conn)
+        df = pd.merge(df, df_svc_type,
+                      how='inner', left_on='service_type', right_on='name')
+
+        df = df[['folder_id', 'service', 'id']]
+        df.columns = ['folder_id', 'service', 'service_type_id']
+
+        # And finally, insert any new services.
         sql = f"""
-        insert into service_lut (folder, service, service_type)
-        values (%(folder)s, %(service)s, %(service_type)s)
-        on conflict on constraint service_exists_constraint do nothing
+        insert into service_lut (folder_id, service, service_type_id)
+        values (%(folder_id)s, %(service)s, %(service_type_id)s)
+        on conflict on constraint service_exists do nothing
         """
-        for _, row in df.iterrows():
-            self.cursor.execute(sql, row.to_dict())
+        for _, r in df.iterrows():
+            self.cursor.execute(sql, r.to_dict())
             if self.cursor.rowcount == 1:
-                svc = f"{row['folder']}/{row['service']}/{row['service_type']}"
+                svc = f"{r['folder_id']}/{r['service']}/{r['service_type_id']}"
                 self.logger.info(f"Upserted {svc}")
 
     def retrieve_services(self):
