@@ -1,5 +1,6 @@
 # Standard library imports
 import datetime as dt
+import importlib.resources as ir
 import re
 
 # 3rd party libraries
@@ -10,6 +11,7 @@ import pandas as pd
 
 # Local imports
 from .common import CommonProcessor
+from . import sql
 
 
 class ServicesProcessor(CommonProcessor):
@@ -159,8 +161,12 @@ class ServicesProcessor(CommonProcessor):
         html_doc : lxml.etree.ElementTree
             HTML document for the logs.
         """
-        self.get_timeseries()
-        self.create_services_table(html_doc)
+        self.logger.info('services:  starting graphics...')
+
+        query = ir.read_text(sql, 'services_summary.sql')
+        df = pd.read_sql(query, self.conn, index_col='rank')
+
+        self.create_services_table(df, html_doc)
 
         # Link in a folder list.
         toc = html_doc.xpath('body/ul[@class="tableofcontents"]')[0]
@@ -172,114 +178,101 @@ class ServicesProcessor(CommonProcessor):
 
         self.summarize_transactions(html_doc)
 
+        self.logger.info('services:  finished with graphics...')
+
     def summarize_transactions(self, html_doc):
         """
         Create a PNG showing the services over the last few days.
+
+        hits are true hits, i.e. hits minus errors
         """
-        folders = self.df_today.folder.unique()
+        query = ir.read_text(sql, 'services_transactions_over_days.sql')
+        df = pd.read_sql(query, self.conn)
 
-        for folder in folders:
-
-            # Now restrict the hourly data over the last few days to those
-            # referers.  Then restrict to valid hits.  And rename valid_hits to
-            # hits.
-            df = self.df[self.df.folder == folder].copy()
-
-            df['hits'] = df['hits'] - df['errors']
-            df = df[['date', 'service', 'service_type', 'hits']]
+        for folder, df_grp in df.groupby('folder'):
 
             # If there are services with overlapping names, e.g. CO_OPS
             # mapserver and featureservers, combine the service and
             # service_type columns.  Otherwise drop the service_type column.
-            dfg = df.groupby(['service', 'service_type']).count()
+            dfg = df_grp.groupby(['service', 'service_type']).count()
             if not np.all(np.diff(dfg.index.codes[0]) > 0):
                 # Overlapping names, so collapse the service and service_type
                 # columns.
-                df['service'] = df['service'] + '/' + df['service_type']
-            df = df[['date', 'service', 'hits']]
+                df_grp.loc[:, 'service'] = df_grp['service'] + '/' + df_grp['service_type']
+            df_grp = df_grp[['date', 'service', 'hits']]
 
-            df = df.pivot(index='date', columns='service', values='hits')
+            df_grp = df_grp.pivot(index='date', columns='service', values='hits')
 
             # Order them by max value.
-            s = df.max().sort_values(ascending=False)
-            df = df[s.index]
+            s = df_grp.max().sort_values(ascending=False)
+            df_grp = df_grp[s.index]
 
-            service_max = df.max()
+            service_max = df_grp.max()
 
             # Drop any services where the total hits too low.
-            df = df.drop(service_max[service_max <= 1].index.values, axis=1)
-            if df.shape[1] == 0:
+            df_grp = df_grp.drop(service_max[service_max <= 1].index.values, axis=1)
+            if df_grp.shape[1] == 0:
                 continue
 
-            if df.max().max() > 3600:
+            if df_grp.max().max() > 3600:
                 # Rescale to from hits/hour to hits/second
-                df /= 3600
+                df_grp /= 3600
                 title = f'{folder} folder:  Hits per second'
             else:
                 title = f'{folder} folder:  Hits per hour'
 
             fig, ax = plt.subplots(figsize=(15, 7))
-            df.plot(ax=ax)
+            df_grp.plot(ax=ax)
 
             kwargs = {
                 'title': title,
                 'filename': f'{folder}_hits.png',
                 'folder': folder,
             }
-            self.write_html_and_image_output(df, html_doc, **kwargs)
+            self.write_html_and_image_output(df_grp, html_doc, **kwargs)
 
-    def create_services_table(self, html_doc):
+    def create_services_table(self, df, html_doc):
         """
-        Calculate
-
-              I) percentage of hits for each service
-             II) percentage of errors for each service
-
-        Just for the latest day, though.
+        Massage the dataframe a bit before creating an HTML table.
         """
-        df = self.df_today.copy().groupby(['service', 'service_type']).sum()
-
-        total_hits = df['hits'].sum()
-        total_bytes = df['nbytes'].sum()
-        total_errors = df['errors'].sum()
-        df['mapdraws'] = df['export_mapdraws'] + df['wms_mapdraws']
-
-        df = df[['hits', 'nbytes', 'errors', 'mapdraws']].copy()
-        df['hits %'] = df['hits'] / total_hits * 100
-        df['mapdraw %'] = df['mapdraws'] / df['hits'] * 100
-        df['GBytes'] = df['nbytes'] / (1024 ** 3)  # GBytes
-        df['GBytes %'] = df['nbytes'] / total_bytes * 100
-
-        df['errors: % of all hits'] = df['errors'] / total_hits * 100
-        df['errors: % of all errors'] = df['errors'] / total_errors * 100
-
-        # Reorder the columns
-        reordered_cols = [
-            'hits',
-            'hits %',
-            'mapdraw %',
-            'GBytes',
-            'GBytes %',
-            'errors',
-            'errors: % of all hits',
-            'errors: % of all errors',
-        ]
-        df = df[reordered_cols]
-
-        df = df.sort_values(by='hits', ascending=False)
+        # Rename some columns.
+        # It's awkward to deal with upper case, mixed case, or spaces in column
+        # names in postgresql.
+        mapper = {
+            'gbytes': 'GBytes',
+            'gbytes %': 'GBytes %',
+            'day_pct_delta': 'Daily Change %',
+            'week_pct_delta': 'Weekly Change %',
+        }
+        df = df.rename(mapper, axis='columns')
 
         yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
 
-        ptext = (
-            "\"hits %\" is the ratio of service hits to the total number of "
-            "hits, so this column should add to 100.  \"mapdraw %\" is the "
-            "ratio of service mapdraws to the service hits."
-        )
+        list_items = [
+            (
+                "\"hits %\" is the ratio of service hits to the total number "
+                "of hits, so this column should add to 100."
+            ),
+            (
+                "\"Daily Change %\" is the percentage change in number of "
+                "hits since yesterday."
+            ),
+            (
+                "\"Weekly Change %\" is the percentage change in number of "
+                "hits in the last seven days from the previous span of seven "
+                "days."
+            ),
+            (
+                "\"mapdraw %\" is the ratio of service mapdraws to the "
+                "service hits."
+            ),                    
+
+        ]
         kwargs = {
             'aname': 'servicetable',
             'atext': 'Services Table',
             'h1text': f'Services by Hits: {yesterday}',
-            'ptext': ptext,
+            'list_items': list_items,
         }
         self.create_html_table(df, html_doc, **kwargs)
 

@@ -139,6 +139,15 @@ class ApacheLogParser(object):
         self.logger.info(sql)
         self.cursor.execute(sql)
 
+        # don't repeat user agents
+        sql = """
+        alter table user_agent_lut
+        add constraint user_agent_exists
+        unique(name)
+        """
+        self.logger.info(sql)
+        self.cursor.execute(sql)
+
     def create_referer_lut(self):
 
         sql = """
@@ -155,7 +164,8 @@ class ApacheLogParser(object):
         sql = """
         create table ip_address_lut (
             id           serial primary key,
-            ip_address   text
+            ip_address   inet,
+            constraint   ip_address_exists unique (ip_address)
         )
         """
         self.logger.info(sql)

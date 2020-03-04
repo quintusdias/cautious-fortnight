@@ -64,19 +64,20 @@ class IPAddressProcessor(CommonProcessor):
     def replace_ip_addresses_with_ids(self, df_orig):
         """
         The IP addresses themselves are not to be logged.  Rather, we wish to
-        log an ID standing for the IP address.
+        log the IDs standing in for the IP address.
         """
+        self.logger.info('about to update the IP address LUT...')
 
         sql = f"""
               SELECT id, ip_address from ip_address_lut
               """
         known_ips = pd.read_sql(sql, self.conn)
 
-        # Get the referer IDs
+        # match known IP addresses with the current dataset
         df = pd.merge(df_orig, known_ips, how='left', on='ip_address')
 
-        # How many IP addresses have NaN for IDs?  This must populate the known
-        # IP address table before going further.
+        # How many IP addresses have NaN for IDs?  This must populate the IP
+        # address lookup table before going further.
         unknown_ips = df['ip_address'][df['id'].isnull()].unique()
         if len(unknown_ips) > 0:
             new_ips_df = pd.Series(unknown_ips, name='ip_address').to_frame()
@@ -91,6 +92,7 @@ class IPAddressProcessor(CommonProcessor):
             df = pd.merge(df_orig, known_ips, how='left', on='ip_address')
 
         df = df.drop(['ip_address'], axis='columns')
+        self.logger.info('finished updating the IP address LUT...')
         return df
 
     def process_graphics(self, html_doc):

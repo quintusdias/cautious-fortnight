@@ -16,16 +16,6 @@ from .common import CommonProcessor
 sns.set()
 
 
-def millions_fcn(x, pos):
-    """
-    Parameters
-    ----------
-    x : value
-    pos : position
-    """
-    return f'{(x/1e6):.2f}M'
-
-
 class RefererProcessor(CommonProcessor):
     """
     Attributes

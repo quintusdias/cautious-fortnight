@@ -9,26 +9,6 @@ import pandas as pd
 import psycopg2
 
 
-def millions_fcn(x, pos):
-    """
-    Parameters
-    ----------
-    x : value
-    pos : position
-    """
-    return f'{(x/1e6):.2f}M'
-
-
-def thousands_fcn(x, pos):
-    """
-    Parameters
-    ----------
-    x : value
-    pos : position
-    """
-    return f'{(x/1e3):.3f}K'
-
-
 class CommonProcessor(object):
     """
     Attributes
@@ -190,17 +170,18 @@ class CommonProcessor(object):
         etree.SubElement(div, 'hr')
 
     def create_html_table(self, df, html_doc, atext=None, aname=None,
-                          h1text=None, ptext=None):
+                          h1text=None, ptext=None, list_items=None):
         """
         Create a <TABLE> from the dataframe.
         """
 
         table, css = self.extract_html_table_from_dataframe(df)
 
-        # extract the CSS and place into our own document.
+        # extract the CSS
         style = html_doc.xpath('head/style')[0]
         style.text = style.text + '\n' + css
 
+        # Start constructing the <DIV> for our table
         body = html_doc.xpath('body')[0]
         div = etree.SubElement(body, 'div')
         etree.SubElement(div, 'hr')
@@ -208,9 +189,18 @@ class CommonProcessor(object):
         h1 = etree.SubElement(div, 'h1')
         h1.text = h1text
 
+        # Populate a <P> with explanatory text if so ordered.
         if ptext is not None:
             p = etree.SubElement(div, 'p')
             p.text = ptext
+
+        # Populate a <UL> if so ordered.
+        if list_items is not None:
+            p = etree.SubElement(div, 'p')
+            ul = etree.SubElement(p, 'ul')
+            for list_item in list_items:
+                li = etree.SubElement(ul, 'li')
+                li.text = list_item
 
         # Add to the table of contents.
         toc = html_doc.xpath('body/ul[@class="tableofcontents"]')[0]
@@ -261,7 +251,9 @@ class CommonProcessor(object):
 
         column_list = ', '.join(df.columns)
         sql = f"""
-        insert into {table} ({column_list}) values %s
+        insert into {table}
+        ({column_list})
+        values %s
         """
         rows = [row.to_dict() for _, row in df.iterrows()]
         template = ', '.join([f'%({col})s' for col in df.columns])
