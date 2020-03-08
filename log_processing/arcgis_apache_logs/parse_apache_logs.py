@@ -153,7 +153,8 @@ class ApacheLogParser(object):
         sql = """
         create table referer_lut (
             id     serial primary key,
-            name   text
+            name   text,
+            constraint   referer_exists unique (name)
         )
         """
         self.logger.info(sql)

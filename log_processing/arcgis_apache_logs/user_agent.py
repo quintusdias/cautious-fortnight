@@ -7,6 +7,7 @@ import datetime as dt
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import psycopg2
 import seaborn as sns
 
 # Local imports
@@ -81,39 +82,36 @@ class UserAgentProcessor(CommonProcessor):
 
         self.logger.info("user agents:  done processing raw records")
 
-    def replace_user_agents_with_ids(self, df_orig):
+    def replace_user_agents_with_ids(self, df):
         """
         Don't log the actual user_agent names to the database, log the ID
         instead.
         """
-        sql = f"""
-              SELECT * from user_agent_lut
-              """
-        known_user_agents = pd.read_sql(sql, self.conn)
+        self.logger.info('about to update the user agent LUT...')
 
-        # Get the user_agent IDs
-        df = pd.merge(df_orig, known_user_agents,
+        # Try upserting all the current referers.  If a user agent is already
+        # known, then do nothing.
+        sql = f"""
+        insert into user_agent_lut (name) values %s
+        on conflict on constraint user_agent_exists do nothing
+        """
+        rows = [row.to_dict() for _, row in df.iterrows()]
+        template = "(%(user_agent)s)"
+        psycopg2.extras.execute_values(self.cursor, sql, rows, template)
+
+        # Get the all the IDs associated with the referers.  Fold then back
+        # into our data frame, then drop the referers because we don't need
+        # them anymore.
+        sql = f"""
+               SELECT id, name from user_agent_lut
+               """
+        known_referers = pd.read_sql(sql, self.conn)
+
+        df = pd.merge(df, known_referers,
                       how='left', left_on='user_agent', right_on='name')
 
-        # How many user_agents have NaN for IDs?  This must populate the known
-        # user_agents table before going further.
-        unknown_user_agents = df['user_agent'][df['id'].isnull()].unique()
-        if len(unknown_user_agents) > 0:
-            new_df = pd.Series(unknown_user_agents, name='name').to_frame()
-
-            self.logger.debug(f"Writing {len(df)} new user agents...")
-            self.to_table(new_df, 'user_agent_lut')
-            self.logger.debug(f"Done writing new user agents...")
-
-            sql = f"""
-                  SELECT * from user_agent_lut
-                  """
-            known_user_agents = pd.read_sql(sql, self.conn)
-            df = pd.merge(df_orig, known_user_agents,
-                          how='left', left_on='user_agent', right_on='name')
-
-        df.drop(['user_agent', 'name'], axis='columns', inplace=True)
-
+        df = df.drop(['user_agent', 'name'], axis='columns')
+        self.logger.info('finished updating the user agent LUT...')
         return df
 
     def preprocess_database(self):

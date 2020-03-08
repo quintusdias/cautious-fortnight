@@ -61,35 +61,31 @@ class IPAddressProcessor(CommonProcessor):
         self.records = []
         self.logger.info('IP addresses:  done processing records...')
 
-    def replace_ip_addresses_with_ids(self, df_orig):
+    def replace_ip_addresses_with_ids(self, current_df):
         """
         The IP addresses themselves are not to be logged.  Rather, we wish to
         log the IDs standing in for the IP address.
         """
         self.logger.info('about to update the IP address LUT...')
 
+        # Try upserting all the current IP addresses.  If an IP address is
+        # already known, then do nothing.
         sql = f"""
-              SELECT id, ip_address from ip_address_lut
-              """
+        insert into ip_address_lut (ip_address) values %s
+        on conflict on constraint ip_address_exists do nothing
+        """
+        rows = [row.to_dict() for _, row in current_df.iterrows()]
+        template = "(%(ip_address)s)"
+        psycopg2.extras.execute_values(self.cursor, sql, rows, template)
+
+        # Get the all the IDs associated with the IPs.  Fold then back into
+        # our data frame, then drop the IPs because we don't need them anymore.
+        sql = f"""
+               SELECT id, ip_address from ip_address_lut
+               """
         known_ips = pd.read_sql(sql, self.conn)
 
-        # match known IP addresses with the current dataset
-        df = pd.merge(df_orig, known_ips, how='left', on='ip_address')
-
-        # How many IP addresses have NaN for IDs?  This must populate the IP
-        # address lookup table before going further.
-        unknown_ips = df['ip_address'][df['id'].isnull()].unique()
-        if len(unknown_ips) > 0:
-            new_ips_df = pd.Series(unknown_ips, name='ip_address').to_frame()
-
-            self.to_table(new_ips_df, 'ip_address_lut')
-
-            sql = f"""
-                  SELECT id, ip_address from ip_address_lut
-                  """
-            known_ips = pd.read_sql(sql, self.conn)
-
-            df = pd.merge(df_orig, known_ips, how='left', on='ip_address')
+        df = pd.merge(current_df, known_ips, how='left', on='ip_address')
 
         df = df.drop(['ip_address'], axis='columns')
         self.logger.info('finished updating the IP address LUT...')

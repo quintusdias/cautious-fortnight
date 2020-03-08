@@ -8,6 +8,7 @@ import urllib.parse
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import psycopg2
 import seaborn as sns
 
 # Local imports
@@ -87,37 +88,35 @@ class RefererProcessor(CommonProcessor):
 
         self.logger.info('Referers:  done processing records...')
 
-    def replace_referers_with_ids(self, df_orig):
+    def replace_referers_with_ids(self, df):
         """
         Don't log the actual referer names to the database, log the ID instead.
         """
+        self.logger.info('about to update the referer LUT...')
 
+        # Try upserting all the current referers.  If a referer is already
+        # known, then do nothing.
         sql = f"""
-              SELECT * from referer_lut
-              """
+        insert into referer_lut (name) values %s
+        on conflict on constraint referer_exists do nothing
+        """
+        rows = [row.to_dict() for _, row in df.iterrows()]
+        template = "(%(referer)s)"
+        psycopg2.extras.execute_values(self.cursor, sql, rows, template)
+
+        # Get the all the IDs associated with the referers.  Fold then back
+        # into our data frame, then drop the referers because we don't need
+        # them anymore.
+        sql = f"""
+               SELECT id, name from referer_lut
+               """
         known_referers = pd.read_sql(sql, self.conn)
 
-        # Get the referer IDs
-        df = pd.merge(df_orig, known_referers,
+        df = pd.merge(df, known_referers,
                       how='left', left_on='referer', right_on='name')
 
-        # How many referers have NaN for IDs?  This must populate the known
-        # referers table before going further.
-        unknown_referers = df['referer'][df['id'].isnull()].unique()
-        if len(unknown_referers) > 0:
-            new_df = pd.Series(unknown_referers, name='name').to_frame()
-
-            self.to_table(new_df, 'referer_lut')
-
-            sql = f"""
-                  SELECT * from referer_lut
-                  """
-            known_referers = pd.read_sql(sql, self.conn)
-            df = pd.merge(df_orig, known_referers,
-                          how='left', left_on='referer', right_on='name')
-
-        df.drop(['referer', 'name'], axis='columns', inplace=True)
-
+        df = df.drop(['referer', 'name'], axis='columns')
+        self.logger.info('finished updating the referer LUT...')
         return df
 
     def preprocess_database(self):
