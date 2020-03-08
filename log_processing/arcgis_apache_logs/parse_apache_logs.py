@@ -32,7 +32,7 @@ class ApacheLogParser(object):
     project : str
         Either nowcoast or idpgis
     """
-    def __init__(self, project, infile=None):
+    def __init__(self, project, dbname='arcgis_logs', infile=None):
         """
         Parameters
         ----------
@@ -46,7 +46,7 @@ class ApacheLogParser(object):
 
         self.schema = project
 
-        self.conn = psycopg2.connect(dbname='arcgis_logs')
+        self.conn = psycopg2.connect(dbname=dbname)
         self.cursor = self.conn.cursor()
         self.cursor.execute(f"set search_path to {self.schema}")
 
@@ -282,7 +282,7 @@ class ApacheLogParser(object):
         create table folder_lut (
             id           serial primary key,
             folder       text,
-            constraint   folder_exists_constraint unique (folder)
+            constraint   folder_exists unique (folder)
         )
         """
         self.logger.info(sql)
@@ -301,7 +301,7 @@ class ApacheLogParser(object):
         create table service_type_lut (
             id           serial primary key,
             name         text,
-            constraint   service_type_exists_constraint unique (name)
+            constraint   service_type_exists unique (name)
         )
         """
         self.logger.info(sql)
@@ -310,7 +310,7 @@ class ApacheLogParser(object):
         comment = (
             "comment on table service_type_lut is "
             "'This table should not vary unless there is a new release "
-            "at NCEP', and even then..."
+            "at NCEP, and even then...'"
         )
         self.cursor.execute(comment)
 
@@ -321,7 +321,7 @@ class ApacheLogParser(object):
             id              serial primary key,
             service         text,
             folder_id       integer,
-            service_type_id integer,
+            service_type_id integer
         )
         """
         self.logger.info(sql)
@@ -412,7 +412,6 @@ class ApacheLogParser(object):
             self.cursor.execute(sql, {'service_type': service_type})
             if self.cursor.rowcount == 1:
                 self.logger.info(f"Upserted {service_type}")
-                new_service_types.append(folder)
 
     def update_ag_ap_pg_services(self):
         """

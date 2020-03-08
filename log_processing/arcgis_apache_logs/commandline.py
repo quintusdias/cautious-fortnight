@@ -14,9 +14,14 @@ def parse_arcgis_apache_logs():
 
     parser.add_argument('project', choices=['idpgis', 'nowcoast'])
     parser.add_argument('--infile')
+
+    help = "Database name"
+    parser.add_argument('--dbname', default='arcgis_logs', help=help)
+
     args = parser.parse_args()
 
-    log_processor = ApacheLogParser(args.project, infile=args.infile)
+    log_processor = ApacheLogParser(args.project, infile=args.infile,
+                                    dbname=args.dbname)
     log_processor.parse_input()
 
 
@@ -43,9 +48,12 @@ def initialize_ag_ap_pg_database():
 
     parser.add_argument('project', choices=['idpgis', 'nowcoast'])
 
+    help = "Database name"
+    parser.add_argument('--dbname', default='arcgis_logs', help=help)
+
     args = parser.parse_args()
 
-    processor = ApacheLogParser(args.project)
+    processor = ApacheLogParser(args.project, dbname=args.dbname)
     processor.initialize_ag_ap_pg_database()
 
 
@@ -58,29 +66,13 @@ def update_ag_ap_pg_database():
 
     parser.add_argument('project', choices=['idpgis', 'nowcoast'])
 
+    help = "Database name"
+    parser.add_argument('--dbname', default='arcgis_logs', help=help)
+
     args = parser.parse_args()
 
-    processor = ApacheLogParser(args.project)
+    processor = ApacheLogParser(args.project, dbname=args.dbname)
     processor.update_ag_ap_pg_services()
-
-
-def init_db():
-    """
-    Entry point for initializing the database.
-    """
-
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument('project', choices=['idpgis', 'nowcoast'])
-
-    help = "Initialize the database in this directory."
-    parser.add_argument('--document-root', nargs='?', help=help)
-
-    args = parser.parse_args()
-
-    processor = ApacheLogParser(args.project, document_root=args.document_root,
-                                infile=None)
-    processor.initialize_database()
 
 
 def prune_arcgis_apache_database():
@@ -91,7 +83,11 @@ def prune_arcgis_apache_database():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('project', choices=['idpgis', 'nowcoast'])
+
+    help = "Database name"
+    parser.add_argument('--dbname', default='arcgis_logs', help=help)
+
     args = parser.parse_args()
 
-    processor = ApacheLogParser(args.project, infile=None)
+    processor = ApacheLogParser(args.project, dbname=args.dbname)
     processor.preprocess_database()
