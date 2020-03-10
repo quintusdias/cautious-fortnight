@@ -1,5 +1,11 @@
+-- This saves one full table scan.
+with maxdate_cte as (
+    select max(date) as maxdate
+    from service_logs
+),
+
 -- Aggregate the service hits by 1-day intervals
-with day_cte as (
+day_cte as (
     select
 	id as service_id,
 	extract(epoch from date) / 86400 as daynum,
@@ -8,7 +14,7 @@ with day_cte as (
         nbytes,
         errors
     FROM service_logs
-    where date >= (select max(date) from service_logs) - interval '14 days'
+    where date >= (select maxdate from maxdate_cte) - interval '14 days'
 ), 
 -- normalize the day number into the range [0, 1]
 normalize_day_cte as (
@@ -85,7 +91,7 @@ week_cte as (
 	extract(epoch from date) / 86400 / 7 as week,
 	hits as hits
     FROM service_logs
-    where date >= (select max(date) from service_logs) - interval '14 days'
+    where date >= (select maxdate from maxdate_cte) - interval '14 days'
 ), 
 -- normalize the week number into the range [0, 1]
 normalize_weeks_cte as (
