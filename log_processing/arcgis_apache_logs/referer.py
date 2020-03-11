@@ -90,7 +90,7 @@ class RefererProcessor(CommonProcessor):
 
     def replace_referers_with_ids(self, df):
         """
-        Don't log the actual referer names to the database, log the ID instead.
+        Record any new referers and get IDs for them.
         """
         self.logger.info('about to update the referer LUT...')
 
@@ -100,13 +100,14 @@ class RefererProcessor(CommonProcessor):
         insert into referer_lut (name) values %s
         on conflict on constraint referer_exists do nothing
         """
-        rows = [row.to_dict() for _, row in df.iterrows()]
-        template = "(%(referer)s)"
-        psycopg2.extras.execute_values(self.cursor, sql, rows, template)
+
+        args = ((x,) for x in df.referer.unique())
+
+        psycopg2.extras.execute_values(self.cursor, sql, args, page_size=1000)
 
         # Get the all the IDs associated with the referers.  Fold then back
-        # into our data frame, then drop the referers because we don't need
-        # them anymore.
+        # into our data frame, then drop the referer names because we don't
+        # need them anymore.
         sql = f"""
                SELECT id, name from referer_lut
                """

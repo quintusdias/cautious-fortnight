@@ -84,8 +84,7 @@ class UserAgentProcessor(CommonProcessor):
 
     def replace_user_agents_with_ids(self, df):
         """
-        Don't log the actual user_agent names to the database, log the ID
-        instead.
+        Record any new user agents and get IDs for them.
         """
         self.logger.info('about to update the user agent LUT...')
 
@@ -95,9 +94,8 @@ class UserAgentProcessor(CommonProcessor):
         insert into user_agent_lut (name) values %s
         on conflict on constraint user_agent_exists do nothing
         """
-        rows = [row.to_dict() for _, row in df.iterrows()]
-        template = "(%(user_agent)s)"
-        psycopg2.extras.execute_values(self.cursor, sql, rows, template)
+        args = ((x,) for x in df.user_agent.unique())
+        psycopg2.extras.execute_values(self.cursor, sql, args, page_size=1000)
 
         # Get the all the IDs associated with the referers.  Fold then back
         # into our data frame, then drop the referers because we don't need

@@ -61,7 +61,7 @@ class IPAddressProcessor(CommonProcessor):
         self.records = []
         self.logger.info('IP addresses:  done processing records...')
 
-    def replace_ip_addresses_with_ids(self, current_df):
+    def replace_ip_addresses_with_ids(self, df):
         """
         The IP addresses themselves are not to be logged.  Rather, we wish to
         log the IDs standing in for the IP address.
@@ -74,9 +74,8 @@ class IPAddressProcessor(CommonProcessor):
         insert into ip_address_lut (ip_address) values %s
         on conflict on constraint ip_address_exists do nothing
         """
-        rows = [row.to_dict() for _, row in current_df.iterrows()]
-        template = "(%(ip_address)s)"
-        psycopg2.extras.execute_values(self.cursor, sql, rows, template)
+        args = ((x,) for x in df.ip_address.unique())
+        psycopg2.extras.execute_values(self.cursor, sql, args, page_size=1000)
 
         # Get the all the IDs associated with the IPs.  Fold then back into
         # our data frame, then drop the IPs because we don't need them anymore.
@@ -85,7 +84,7 @@ class IPAddressProcessor(CommonProcessor):
                """
         known_ips = pd.read_sql(sql, self.conn)
 
-        df = pd.merge(current_df, known_ips, how='left', on='ip_address')
+        df = pd.merge(df, known_ips, how='left', on='ip_address')
 
         df = df.drop(['ip_address'], axis='columns')
         self.logger.info('finished updating the IP address LUT...')
