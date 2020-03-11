@@ -320,6 +320,7 @@ class ApacheLogParser(object):
         sql = f"""
         create table service_lut (
             id              serial primary key,
+            active          boolean default true,
             service         text,
             folder_id       integer,
             service_type_id integer
@@ -352,6 +353,12 @@ class ApacheLogParser(object):
             "comment on table service_lut is "
             "'This table should not vary unless there is a new release "
             "at NCEP'"
+        )
+        self.cursor.execute(comment)
+
+        comment = (
+            "comment on column service_lut.active is "
+            "'False if a service has been retired.'"
         )
         self.cursor.execute(comment)
 
@@ -414,20 +421,73 @@ class ApacheLogParser(object):
             if self.cursor.rowcount == 1:
                 self.logger.info(f"Upserted {service_type}")
 
-    def update_ag_ap_pg_services(self):
+    def retrieve_services_from_database(self):
         """
-        Update the services lookup table with any new services.
-        Use an UPSERT so that existing rows are left alone.
+        What are the existing services that we already have in the database?
         """
-        self.logger.info("Retrieving services...")
-        df = self.retrieve_services()
 
-        self.upsert_new_folders(df)
-        self.upsert_new_service_types(df)
+        sql = """
+        SELECT
+            f.folder,
+            f.id as folder_id,
+            s.service, 
+            s.id as service_id,
+            service_type_lut.name as service_type,
+            service_type_lut.id
+        from folder_lut f
+            inner join service_lut s on f.id = s.folder_id
+            inner join service_type_lut on service_type_lut.id = s.service_type_id
+        """
+        return pd.read_sql(sql, self.conn)
+
+    def check_ag_ap_pg_services(self):
+        """
+        Check the services lookup table against any new services.
+        DO NOT do any UPSERTS.
+        """
+        self.logger.info("Retrieving services from NCO...")
+        nco_df = self.retrieve_services_from_nco()
+
+        self.logger.info("Retrieving services from database...")
+        db_df = self.retrieve_services_from_database()
+
+        new_services, retired_services = self.get_changes(nco_df, db_df)
+
+        if len(new_services) > 0:
+            print(f'these services are new:  {new_services}')
+        else:
+            print('there are no new services')
+
+        if len(retired_diff) > 0:
+            print(f'these services seem to have been retired:')
+            for t in retired_diff:
+                print(f"\t{t[0]}/{t[1]}/{t[2]}")
+        else:
+            print('no services have been dropped')
+
+    def get_changes(self, nco_df, db_df):
+        """
+        Determine what's new, what needs to be retired.
+        """
+        # any new folders?
+        nco_services = set((r.folder, r.service, r.service_type)
+                           for _, r in nco_df.iterrows())
+        db_services = set((r.folder, r.service, r.service_type)
+                          for _, r in db_df.iterrows())
+
+        new_diff = nco_services.difference(db_services)
+        old_diff = db_services.difference(nco_services)
+
+        return new_diff, old_diff
+
+    def create_any_new_services(self, nco_df):
+
+        self.upsert_new_folders(nco_df)
+        self.upsert_new_service_types(nco_df)
 
         # update the dataframe with folder and service type IDs
         df_folders = pd.read_sql("select * from folder_lut", self.conn)
-        df = pd.merge(df, df_folders,
+        df = pd.merge(nco_df, df_folders,
                       how='inner', left_on='folder', right_on='folder')
 
         df = df[['id', 'service', 'service_type']]
@@ -452,7 +512,44 @@ class ApacheLogParser(object):
                 svc = f"{r['folder_id']}/{r['service']}/{r['service_type_id']}"
                 self.logger.info(f"Upserted {svc}")
 
-    def retrieve_services(self):
+    def update_ag_ap_pg_services(self):
+        """
+        Update the services lookup table with any new services.
+        Use an UPSERT so that existing rows are left alone.
+        """
+        self.logger.info("Retrieving services from NCO...")
+        nco_df = self.retrieve_services_from_nco()
+
+        self.create_any_new_services(nco_df)
+
+        self.logger.info("Retrieving services from database...")
+        db_df = self.retrieve_services_from_database()
+
+        _, retired_services = self.get_changes(nco_df, db_df)
+
+        sql = """
+        update service_lut
+        set active = false
+        where id = %(id)s
+        """
+        for folder, service, service_type in retired_services:
+            query = (
+                'folder == @folder '
+                'and service == @service '
+                'and service_type == @service_type'
+            )
+            row = db_df.query(query)
+            service_id = int(row.iloc[0]['service_id'])
+
+            msg = (
+                f"deactivating {row.iloc[0]['folder']}"
+                f"/{row.iloc[0]['service']}"
+                f"/{row.iloc[0]['service_type']}"
+            )
+            self.logger.info(msg)
+            self.cursor.execute(sql, {'id': service_id})
+
+    def retrieve_services_from_nco(self):
         """
         Examine the project web site and retrieve a list of the services.
         """

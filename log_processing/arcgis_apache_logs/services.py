@@ -70,6 +70,7 @@ class ServicesProcessor(CommonProcessor):
                  INNER JOIN service_lut s_lut ON logs.id = s_lut.id
                  INNER JOIN folder_lut f on f.id = s_lut.folder_id
                  INNER JOIN service_type_lut st_lut on s_lut.service_type_id = st_lut.id
+            WHERE service_lut.active
             GROUP BY logs.date, f.folder, s_lut.service, st_lut.name
             ORDER BY logs.date
             """

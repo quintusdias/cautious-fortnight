@@ -57,6 +57,25 @@ def initialize_ag_ap_pg_database():
     processor.initialize_ag_ap_pg_database()
 
 
+def check_ag_ap_pg_services():
+    """
+    Entry point for checking the database against existing services without
+    updating.
+    """
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('project', choices=['idpgis', 'nowcoast'])
+
+    help = "Database name"
+    parser.add_argument('--dbname', default='arcgis_logs', help=help)
+
+    args = parser.parse_args()
+
+    processor = ApacheLogParser(args.project, dbname=args.dbname)
+    processor.check_ag_ap_pg_services()
+
+
 def update_ag_ap_pg_database():
     """
     Entry point for updating the postgresql database.
