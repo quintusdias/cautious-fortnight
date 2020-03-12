@@ -50,17 +50,12 @@ class SummaryProcessor(CommonProcessor):
         """
         Do any cleaning necessary before processing any new records.
         """
-        # Do a daily rebuild of the database, just to try to keep things in
-        # order.  It's not too expensive.
-        # self.conn.execute('VACUUM')
-
         # Drop any records from the burst staging table that are older than
-        # 7 days.
+        # a certain number of days.
         sql = """
               DELETE FROM burst
-              WHERE date < %(date)s
+              WHERE date < current_date - interval '14 days'
               """
-        date = dt.datetime.now() - dt.timedelta(days=14)
         self.cursor.execute(sql, {'date': date})
 
         self.conn.commit()

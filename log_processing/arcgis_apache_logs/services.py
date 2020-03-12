@@ -280,14 +280,5 @@ class ServicesProcessor(CommonProcessor):
     def preprocess_database(self):
         """
         Do any cleaning necessary before processing any new records.
-
-        Delete anything older than a certain number of days.
         """
-        sql = f"""
-              DELETE FROM service_logs WHERE date < %(date)s
-              """
-        date = dt.datetime.now() - dt.timedelta(days=self.data_retention_days)
-
-        cursor = self.conn.cursor()
-        cursor.execute(sql, {'date': date})
-        self.conn.commit()
+        pass
