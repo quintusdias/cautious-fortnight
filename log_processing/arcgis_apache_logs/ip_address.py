@@ -1,5 +1,6 @@
 # Standard library imports
 import datetime as dt
+import importlib.resources as ir
 
 # 3rd party library imports
 import matplotlib.pyplot as plt
@@ -9,6 +10,7 @@ import psycopg2.extras
 
 # Local imports
 from .common import CommonProcessor
+from . import sql
 
 
 class IPAddressProcessor(CommonProcessor):
@@ -213,21 +215,14 @@ class IPAddressProcessor(CommonProcessor):
 
     def preprocess_database(self):
         """
-        Do any cleaning necessary before processing any new records.
-
-        If it's Monday, just drop the tables.
+        Delete any IP addresses with no recent activity.
         """
-        cursor = self.conn.cursor()
 
         if dt.date.today().weekday() != 0:
-            # If it's not Monday, do nothing.
             return
 
-        # Ok, it's Monday, drop the IP address tables
-        sql = """
-              delete from ip_address_logs
-              """
-        self.logger.info(sql)
-        cursor.execute(sql)
+        query = ir.read_text(sql, 'prune_ip_addresses.sql')
+        self.logger.info(query)
+        self.cursor.execute(query)
 
         self.conn.commit()

@@ -602,10 +602,10 @@ class ApacheLogParser(object):
         Do any cleaning necessary before processing any new records.
         """
 
-        self.summarizer.preprocess_database()
+        # self.summarizer.preprocess_database()
         self.ip_address.preprocess_database()
         self.referer.preprocess_database()
-        self.services.preprocess_database()
+        # self.services.preprocess_database()
         self.user_agent.preprocess_database()
 
     def parse_input(self):

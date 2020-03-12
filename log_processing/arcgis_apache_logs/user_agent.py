@@ -1,7 +1,6 @@
-#!/usr/bin/env python
-
 # Standard library imports
 import datetime as dt
+import importlib.resources as ir
 
 # 3rd party library imports
 import matplotlib.pyplot as plt
@@ -12,6 +11,7 @@ import seaborn as sns
 
 # Local imports
 from .common import CommonProcessor
+from . import sql
 
 sns.set()
 
@@ -114,21 +114,14 @@ class UserAgentProcessor(CommonProcessor):
 
     def preprocess_database(self):
         """
-        Do any cleaning necessary before processing any new records.
-
-        Delete anything older than 7 days.
+        Clean out the user agent tables on mondays.
         """
         if dt.date.today().weekday() != 0:
-            # If it's not Monday, do nothing.
             return
 
-        cursor = self.conn.cursor()
-
-        sql = """
-              delete from user_agent_logs
-              """
-        self.logger.info(sql)
-        cursor.execute(sql)
+        query = ir.read_text(sql, 'prune_user_agents.sql') 
+        self.logger.info(query)
+        self.cursor.execute(query)
 
         self.conn.commit()
 

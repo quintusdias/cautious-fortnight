@@ -1,7 +1,6 @@
-#!/usr/bin/env python
-
 # Standard library imports
 import datetime as dt
+import importlib.resources as ir
 import urllib.parse
 
 # 3rd party library imports
@@ -13,6 +12,7 @@ import seaborn as sns
 
 # Local imports
 from .common import CommonProcessor
+from . import sql
 
 sns.set()
 
@@ -122,22 +122,14 @@ class RefererProcessor(CommonProcessor):
 
     def preprocess_database(self):
         """
-        Do any cleaning necessary before processing any new records.
-
-        Delete anything older than 7 days.
+        Remove any referers without any recent activity.
         """
         if dt.date.today().weekday() != 0:
-            # If it's not Monday, do nothing.
             return
 
-        # Ok, it's Monday, drop the IP address tables, they will be recreated.
-        cursor = self.conn.cursor()
-
-        sql = """
-              delete from referer_logs
-              """
-        self.logger.info(sql)
-        cursor.execute(sql)
+        query = ir.read_text(sql, 'prune_referers.sql')
+        self.logger.info(query)
+        self.cursor.execute(query)
 
         self.conn.commit()
 
