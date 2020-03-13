@@ -124,6 +124,7 @@ class RefererProcessor(CommonProcessor):
         """
         Remove any referers without any recent activity.
         """
+        self.logger.info('preprocessing referers ...')
         if dt.date.today().weekday() != 0:
             return
 

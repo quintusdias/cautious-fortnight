@@ -217,6 +217,7 @@ class IPAddressProcessor(CommonProcessor):
         """
         Delete any IP addresses with no recent activity.
         """
+        self.logger.info('preprocessing IP addresses ...')
 
         if dt.date.today().weekday() != 0:
             return

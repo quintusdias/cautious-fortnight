@@ -116,6 +116,8 @@ class UserAgentProcessor(CommonProcessor):
         """
         Clean out the user agent tables on mondays.
         """
+        self.logger.info('preprocessing user agents ...')
+
         if dt.date.today().weekday() != 0:
             return
 
