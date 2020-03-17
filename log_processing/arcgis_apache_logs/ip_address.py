@@ -131,7 +131,7 @@ class IPAddressProcessor(CommonProcessor):
 
         kwargs = {
             'title': 'Top IPs:  Hits per Second',
-            'filename': 'top_ip_hits.png',
+            'filename': f'{self.project}_top_ip_hits.png',
         }
         self.write_html_and_image_output(df, html_doc, **kwargs)
 
@@ -159,7 +159,7 @@ class IPAddressProcessor(CommonProcessor):
 
         kwargs = {
             'title': 'Top IPs:  MBytes per Hour',
-            'filename': 'top_ip_nbytes.png'
+            'filename': f'{self.project}_top_ip_nbytes.png'
         }
         self.write_html_and_image_output(df, html_doc, **kwargs)
 
