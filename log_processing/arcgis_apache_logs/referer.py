@@ -132,6 +132,8 @@ class RefererProcessor(CommonProcessor):
         self.logger.info(query)
         self.cursor.execute(query)
 
+        self.logger.info(f'deleted {self.cursor.rowcount} referers ...')
+
         self.conn.commit()
 
     def process_graphics(self, html_doc):

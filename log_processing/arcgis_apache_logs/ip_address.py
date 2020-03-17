@@ -102,20 +102,12 @@ class IPAddressProcessor(CommonProcessor):
         """
         self.get_timeseries()
 
-        df = self.df_today.copy().groupby('ip_address').sum()
-
-        # Find the top 5 by hits over the past week, plus the top 5 by nbytes.
-        top5_hits = df.sort_values(by='hits', ascending=False) \
-                      .head(5) \
-                      .index \
-                      .values \
-                      .tolist()
-        top5_nbytes = df.sort_values(by='nbytes', ascending=False) \
-                        .head(5) \
-                        .index \
-                        .values \
-                        .tolist()
-        top_ips = set(top5_hits + top5_nbytes)
+        # Get all the top IP addresses as of yesterday.
+        query = ir.read_text(sql, 'top_ips.sql')
+        yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
+        query = query.format(yesterday=yesterday)
+        df = pd.read_sql(query, self.conn)
+        top_ips = df.ip_address.values
 
         self.summarize_ip_addresses(top_ips, html_doc)
         self.summarize_transactions(top_ips, html_doc)
@@ -225,5 +217,7 @@ class IPAddressProcessor(CommonProcessor):
         query = ir.read_text(sql, 'prune_ip_addresses.sql')
         self.logger.info(query)
         self.cursor.execute(query)
+
+        self.logger.info(f'deleted {self.cursor.rowcount} IP addresses ...')
 
         self.conn.commit()
