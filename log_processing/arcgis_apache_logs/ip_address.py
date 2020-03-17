@@ -114,11 +114,22 @@ class IPAddressProcessor(CommonProcessor):
         self.summarize_bandwidth(top_ips, html_doc)
 
     def summarize_transactions(self, top_ips, html_doc):
-
-        df = self.df[self.df['ip_address'].isin(top_ips)].copy()
-
-        # Rescale from hits/hour to hits/seconds.
-        df['hits'] /= 3600
+        # Get the hits of the top IP addresses over the last several days.
+        # Scale the hits from total per hour to hits/sec.
+        query = """
+        SELECT
+            logs.date,
+            logs.hits::real / 3600 as hits,
+            logs.nbytes,
+            lut.ip_address
+        FROM ip_address_logs logs INNER JOIN ip_address_lut lut using(id)
+        where
+            date > '{start_time}'
+            and ip_address in {top_ips}
+        """
+        query = query.format(top_ips=tuple(top_ips),
+                             start_time=dt.date.today()-dt.timedelta(days=14))
+        df = pd.read_sql(query, self.conn)
 
         df = df.pivot(index='date', columns='ip_address', values='hits')
 
