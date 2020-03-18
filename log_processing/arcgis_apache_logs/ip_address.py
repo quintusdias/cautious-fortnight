@@ -28,16 +28,6 @@ class IPAddressProcessor(CommonProcessor):
         """
         super().__init__(**kwargs)
 
-        self.time_series_sql = f"""
-            SELECT a.date, SUM(a.hits) as hits, SUM(a.errors) as errors,
-                   SUM(a.nbytes) as nbytes, b.ip_address
-            FROM ip_address_logs a
-            INNER JOIN ip_address_lut b
-            ON a.id = b.id
-            GROUP BY a.date, b.ip_address
-            ORDER BY a.date
-            """
-
         self.data_retention_days = 7
 
     def process_raw_records(self, df):
@@ -100,8 +90,6 @@ class IPAddressProcessor(CommonProcessor):
         html_doc : lxml.etree.ElementTree
             HTML document for the logs.
         """
-        self.get_timeseries()
-
         # Get all the top IP addresses as of yesterday.
         query = ir.read_text(sql, 'top_ips.sql')
         yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
@@ -120,7 +108,6 @@ class IPAddressProcessor(CommonProcessor):
         SELECT
             logs.date,
             logs.hits::real / 3600 as hits,
-            logs.nbytes,
             lut.ip_address
         FROM ip_address_logs logs INNER JOIN ip_address_lut lut using(id)
         where
@@ -148,7 +135,8 @@ class IPAddressProcessor(CommonProcessor):
 
     def summarize_bandwidth(self, top_ips, html_doc):
         """
-        Create plot of bandwidth usage of top IP addresses.
+        Create plot of bandwidth usage of top IP addresses.  Scale the
+        bandwidth to GBytes.
 
         Parameters
         ----------
@@ -157,8 +145,20 @@ class IPAddressProcessor(CommonProcessor):
         html_doc : etree Element
             The plot image is to be inserted into this document.
         """
-        df = self.df[self.df['ip_address'].isin(top_ips)].copy()
-        df['nbytes'] /= (1024 * 1024)
+        query = """
+        SELECT
+            logs.date,
+            logs.nbytes / 1024 ^ 2 as nbytes,
+            lut.ip_address
+        FROM ip_address_logs logs INNER JOIN ip_address_lut lut using(id)
+        where
+            date > '{start_time}'
+            and ip_address in {top_ips}
+        """
+        query = query.format(top_ips=tuple(top_ips),
+                             start_time=dt.date.today()-dt.timedelta(days=14))
+        df = pd.read_sql(query, self.conn)
+
         df = df.pivot(index='date', columns='ip_address', values='nbytes')
 
         # Order them by max value.
@@ -175,38 +175,46 @@ class IPAddressProcessor(CommonProcessor):
         self.write_html_and_image_output(df, html_doc, **kwargs)
 
     def summarize_ip_addresses(self, top_ips, html_doc):
-        df = self.df_today.copy().groupby('ip_address').sum()
+
+        query = """
+            SELECT
+                SUM(logs.hits) as hits,
+                SUM(logs.nbytes) / 1024 ^ 3 as GBytes,
+                SUM(logs.errors) as errors,
+                lut.ip_address
+            FROM ip_address_logs logs
+                INNER JOIN ip_address_lut lut ON logs.id = lut.id
+            where 
+                logs.date::date = '{yesterday}'
+                and ip_address in {top_ips}
+            GROUP BY lut.ip_address
+            order by hits desc
+        """
+        yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
+        query = query.format(yesterday=yesterday, top_ips=tuple(top_ips))
+        df = pd.read_sql(query, self.conn)
 
         total_hits = df['hits'].sum()
-        total_bytes = df['nbytes'].sum()
+        total_gbytes = df['gbytes'].sum()
         total_errors = df['errors'].sum()
 
         df['hits %'] = df['hits'] / total_hits * 100
-        df['GBytes'] = df['nbytes'] / (1024 ** 3)  # GBytes
-        df['GBytes %'] = df['nbytes'] / total_bytes * 100
-
-        idx = df['errors'].isnull()
-        df.loc[idx, ('errors')] = 0
+        df['GBytes %'] = df['gbytes'] / total_gbytes * 100
 
         df['errors: % of all hits'] = df['errors'] / total_hits * 100
         df['errors: % of all errors'] = df['errors'] / total_errors * 100
-
-        # How to these top 10 make up today's traffic?
-        df = df[df.index.isin(top_ips)].sort_values(by='hits', ascending=False)
 
         # Reorder the columns
         reordered_cols = [
             'hits',
             'hits %',
-            'GBytes',
+            'gbytes',
             'GBytes %',
             'errors',
             'errors: % of all hits',
             'errors: % of all errors'
         ]
         df = df[reordered_cols]
-
-        df = df.sort_values(by='hits', ascending=False)
 
         yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
         kwargs = {
