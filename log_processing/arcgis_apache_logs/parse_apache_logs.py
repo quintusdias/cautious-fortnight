@@ -67,7 +67,10 @@ class ApacheLogParser(object):
         self.graphics_setup()
 
     def __del__(self):
-        self.conn.commit()
+
+        # When cleaning up, if we had a connection, commit just to be sure.
+        if hasattr(self, 'conn'):
+            self.conn.commit()
 
     def graphics_setup(self):
         # Setup a skeleton output document.
@@ -176,7 +179,7 @@ class ApacheLogParser(object):
 
         sql = """
         create table burst (
-            date             timestamp,
+            date             timestamp with time zone,
             hits             bigint,
             errors           bigint,
             nbytes           bigint
@@ -195,7 +198,7 @@ class ApacheLogParser(object):
 
         sql = """
         create table summary (
-            date             timestamp,
+            date             timestamp with time zone,
             hits             bigint,
             errors           bigint,
             nbytes           bigint,
@@ -210,7 +213,7 @@ class ApacheLogParser(object):
         sql = """
         create table user_agent_logs (
             id               bigint,
-            date             timestamp,
+            date             timestamp with time zone,
             hits             bigint,
             errors           bigint,
             nbytes           bigint,
@@ -222,19 +225,22 @@ class ApacheLogParser(object):
         self.logger.info(sql)
         self.cursor.execute(sql)
 
-        comment = (
+        comments = [
             "comment on table referer_logs is "
             "'A referer cannot have a summarizing set of statistics at "
-            "the same time.'"
-        )
-        self.cursor.execute(comment)
+            "the same time.'",
+            "comment on column referer_logs.id is "
+            "'identifies referer in lookup table'"
+        ]
+        for comment in comments:
+            self.cursor.execute(comment)
 
     def create_referer_logs(self):
 
         sql = """
         create table referer_logs (
             id               bigint,
-            date             timestamp,
+            date             timestamp with time zone,
             hits             bigint,
             errors           bigint,
             nbytes           bigint,
@@ -246,19 +252,22 @@ class ApacheLogParser(object):
         self.logger.info(sql)
         self.cursor.execute(sql)
 
-        comment = (
+        comments = [
             "comment on table referer_logs is "
             "'A referer cannot have a summarizing set of statistics at "
-            "the same time.'"
-        )
-        self.cursor.execute(comment)
+            "the same time.'",
+            "comment on column referer_logs.id is "
+            "'identifies referer in lookup table'"
+        ]
+        for comment in comments:
+            self.cursor.execute(comment)
 
     def create_ip_address_logs(self):
 
         sql = """
         create table ip_address_logs (
             id               bigint,
-            date             timestamp,
+            date             timestamp with time zone,
             hits             bigint,
             errors           bigint,
             nbytes           bigint,
@@ -270,12 +279,15 @@ class ApacheLogParser(object):
         self.logger.info(sql)
         self.cursor.execute(sql)
 
-        comment = (
+        comments = [
             "comment on table ip_address_logs is "
             "'An IP address cannot have a summarizing set of statistics at "
-            "the same time.'"
-        )
-        self.cursor.execute(comment)
+            "the same time.'",
+            "comment on column ip_address_logs.id is "
+            "'identifies referer in lookup table'"
+        ]
+        for comment in comments:
+            self.cursor.execute(comment)
 
     def create_folder_lut(self):
 
@@ -367,7 +379,7 @@ class ApacheLogParser(object):
         sql = f"""
         create table service_logs (
             id               bigint,
-            date             timestamp,
+            date             timestamp with time zone,
             hits             bigint,
             errors           bigint,
             nbytes           bigint,
@@ -688,8 +700,8 @@ class ApacheLogParser(object):
         ]
         df = pd.DataFrame.from_records(records, columns=columns)
 
-        format = '%d/%b/%Y:%H:%M:%S'
-        df['date'] = pd.to_datetime(df['date'], format=format)
+        df['date'] = pd.to_datetime(df['date'], format='%d/%b/%Y:%H:%M:%S',
+                                    utc=True)
 
         df['errors'] = df.eval(
             'status_code < 200 or status_code >= 400'

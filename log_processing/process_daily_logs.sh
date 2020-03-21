@@ -9,9 +9,6 @@ do
 
     root=$HOME/data/logs/akamai/"$project"/incoming
     
-    # Delete files that are older than a week.
-    find "$root" -mtime +10080 | xargs -I fname rm fname
-    
     # Get any new log files.
     get_akamai_logs $project
     
@@ -25,12 +22,8 @@ do
 
     produce-ag-ap-pg-graphics $project
 
-    # Delete any files that are too old
-    for datenum in $(seq 20 25)
-    do
-        datestr=$(date +%Y%m%d --date="-""$datenum"" days")
-        rm $HOME/data/logs/akamai/$project/incoming/*.*.*-*-"$datestr"*.gz
-    done	
+    # Delete files that are older than a week.
+    find "$root" -mtime +10080 | xargs -I fname rm fname
     
 done
 

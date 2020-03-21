@@ -256,7 +256,7 @@ class SummaryProcessor(CommonProcessor):
 
         # Fill the area between the rolling min and max for hits.  This gives
         # an indication of the short term range.
-        time = (dfr.index - dt.datetime(1970, 1, 1)).total_seconds() / 60
+        time = (dfr.index - pd.Timestamp(0, tz='UTC')).total_seconds() / 60
 
         # facecolor = [0.29803922, 0.44705882, 0.69019608, 1.]
         bounds_artist = ax.fill_between(time, dfr['hits']['amax'],
@@ -335,7 +335,6 @@ class SummaryProcessor(CommonProcessor):
         # Now restrict the hourly data over the last few days to those
         # referers.  Then restrict to valid hits.  And rename valid_hits to
         # hits.
-        df['hits'] = df['hits']
         df = df[['date', 'hits', 'errors', 'mapdraws']]
         df = df.set_index('date').resample('D').sum()
 

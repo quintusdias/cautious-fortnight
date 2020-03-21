@@ -152,19 +152,17 @@ class RefererProcessor(CommonProcessor):
         self.logger.info(f'Referers:  done with graphics...')
 
     def get_top_referers(self):
-        # who are the top referers for today?
-        sql = r"""
-            SELECT
-                SUM(logs.hits) as hits,
-                lut.name as referer
-            FROM referer_logs logs INNER JOIN referer_lut lut using(id)
-            where logs.date = '{yesterday}'
-            GROUP BY referer
+        # who are the top referers for yesterday?
+        yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
+        sql = f"""
+            SELECT SUM(hits) as hits, id
+            FROM referer_logs logs
+            where logs.date::date = '{yesterday}'
+            GROUP BY id
             order by hits desc
             limit 7
             """
-        yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
-        df = pd.read_sql(sql, self.conn, index_col='referer')
+        df = pd.read_sql(sql, self.conn, index_col='id')
 
         return df.index
 
@@ -184,10 +182,11 @@ class RefererProcessor(CommonProcessor):
             FROM referer_logs logs INNER JOIN referer_lut lut using(id)
             where
                 date > '{start_time}'
-                and lut.name in {top_referers}
+                and lut.id in ({top_referers})
             order by logs.date desc
         """
-        query = query.format(top_referers=tuple(top_referers),
+        top_referers = ', '.join(str(id) for id in top_referers)
+        query = query.format(top_referers=top_referers,
                              start_time=dt.date.today()-dt.timedelta(days=14))
         df = pd.read_sql(query, self.conn)
 
@@ -218,10 +217,13 @@ class RefererProcessor(CommonProcessor):
             FROM referer_logs logs INNER JOIN referer_lut lut using(id)
             where
                 date > '{start_time}'
-                and lut.name in {top_referers}
+                and lut.id in ({top_referers})
             order by logs.date desc
         """
-        query = query.format(top_referers=tuple(top_referers),
+        # It's possible to format the referers list wrong if there's only one
+        # of them, so take this extra step.
+        top_referers = ', '.join(str(id) for id in top_referers) 
+        query = query.format(top_referers=top_referers,
                              start_time=dt.date.today()-dt.timedelta(days=14))
         df = pd.read_sql(query, self.conn)
 

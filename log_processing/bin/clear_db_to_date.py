@@ -11,14 +11,14 @@ import pathlib
 import psycopg2
 
 
-def run(project):
+def run(project, dbname='arcgis_logs'):
 
-    conn = psycopg2.connect(dbname='arcgis_logs')
+    conn = psycopg2.connect(dbname=dbname)
     cursor = conn.cursor()
 
-    cursor.execute('set search_path to idpgis')
+    cursor.execute(f'set search_path to {project}')
 
-    date = dt.datetime(2020, 2, 20, 0, 0, 0)
+    date = dt.datetime(2020, 3, 18, 0, 0, 0, tzinfo=dt.timezone.utc)
     print(date)
 
     sql = """
@@ -43,7 +43,8 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('project', choices=['idpgis', 'nowcoast'])
+    parser.add_argument('dbname', choices=['arcgis_logs', 'agpgtest'])
 
     args = parser.parse_args()
 
-    run(args.project)
+    run(args.project, args.dbname)
