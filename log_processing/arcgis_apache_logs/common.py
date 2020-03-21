@@ -74,6 +74,8 @@ class CommonProcessor(object):
             'hits': '{:,.0f}',
             'hits %': '{:.1f}',
             'mapdraw %': '{:.1f}',
+            'Daily Change %': '{:,.1f}',
+            'Weekly Change %': '{:,.1f}',
             'GBytes': '{:,.1f}',
             'GBytes %': '{:.1f}',
             'errors': '{:,.0f}',
@@ -91,21 +93,6 @@ class CommonProcessor(object):
 
         table_css = tree_doc.xpath('head/style')[0].text
         return table, table_css
-
-    def get_timeseries(self):
-        """
-        Collect a timeseries of information from the "*_logs" table.  The
-        data should be summed/aggregated for each time interval.
-        """
-
-        df = pd.read_sql(self.time_series_sql, self.conn)
-
-        # Right now the 'date' column is in timestamp form.  We need that
-        # in native datetime.
-        df['date'] = pd.to_datetime(df['date'], unit='s')
-
-        self.df = df
-        self.df_today = self.df[self.df.date.dt.day == self.df.date.max().day]
 
     def write_html_and_image_output(self, df, html_doc, title=None,
                                     filename=None, yaxis_formatter=None,

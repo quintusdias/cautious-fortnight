@@ -82,6 +82,41 @@ class IPAddressProcessor(CommonProcessor):
         self.logger.info('finished updating the IP address LUT...')
         return df
 
+    def get_top_ip_addresses(self):
+
+        # Get all the top IP addresses as of yesterday.
+        sql = """
+            -- Summarize the total hits and bytes by IP address for yesterday.
+            with today_cte as (
+                SELECT
+                    SUM(logs.hits) as hits,
+                    SUM(logs.nbytes) as nbytes,
+                    lut.ip_address
+                FROM ip_address_logs logs
+                    INNER JOIN ip_address_lut lut using(id)
+                where logs.date::date = '{yesterday}'
+                GROUP BY lut.ip_address
+            )
+            -- Get the top 5 IPs by bytes and hits
+            (
+                select ip_address from today_cte
+                order by hits desc
+                limit 5
+            )
+            UNION
+            (
+                select ip_address from today_cte
+                order by nbytes desc
+                limit 5
+            )
+        """
+        yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
+        sql = sql.format(yesterday=yesterday)
+        df = pd.read_sql(sql, self.conn)
+        top_ips = df.ip_address.values
+
+        return top_ips
+
     def process_graphics(self, html_doc):
         """Create the HTML and graphs for the IP addresses.
 
@@ -90,13 +125,7 @@ class IPAddressProcessor(CommonProcessor):
         html_doc : lxml.etree.ElementTree
             HTML document for the logs.
         """
-        # Get all the top IP addresses as of yesterday.
-        query = ir.read_text(sql, 'top_ips.sql')
-        yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
-        query = query.format(yesterday=yesterday)
-        df = pd.read_sql(query, self.conn)
-        top_ips = df.ip_address.values
-
+        top_ips = self.get_top_ip_addresses()
         self.summarize_ip_addresses(top_ips, html_doc)
         self.summarize_transactions(top_ips, html_doc)
         self.summarize_bandwidth(top_ips, html_doc)
@@ -183,7 +212,7 @@ class IPAddressProcessor(CommonProcessor):
                 SUM(logs.errors) as errors,
                 lut.ip_address
             FROM ip_address_logs logs
-                INNER JOIN ip_address_lut lut ON logs.id = lut.id
+                INNER JOIN ip_address_lut lut using(id)
             where 
                 logs.date::date = '{yesterday}'
                 and ip_address in {top_ips}
@@ -192,7 +221,7 @@ class IPAddressProcessor(CommonProcessor):
         """
         yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
         query = query.format(yesterday=yesterday, top_ips=tuple(top_ips))
-        df = pd.read_sql(query, self.conn)
+        df = pd.read_sql(query, self.conn, index_col='ip_address')
 
         total_hits = df['hits'].sum()
         total_gbytes = df['gbytes'].sum()

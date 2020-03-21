@@ -34,18 +34,6 @@ class SummaryProcessor(CommonProcessor):
         """
         super().__init__(**kwargs)
 
-        self.time_series_sql = """
-            SELECT
-                date,
-                SUM(hits) as hits,
-                SUM(errors) as errors,
-                SUM(nbytes) as nbytes,
-                SUM(mapdraws) as mapdraws
-            FROM summary
-            GROUP BY date
-            ORDER BY date
-            """
-
     def preprocess_database(self):
         """
         Do any cleaning necessary before processing any new records.
@@ -59,55 +47,6 @@ class SummaryProcessor(CommonProcessor):
         self.cursor.execute(sql, {'date': date})
 
         self.conn.commit()
-
-    def post_process_burst(self):
-        fig, ax = plt.subplots()
-
-        # Get the hourly data.
-        # Plot the errors and mapdraws
-        self.get_timeseries()
-
-        df = self.df.copy().tail(n=24)
-
-        # Now restrict the hourly data over the last few days to those
-        # referers.  Then restrict to valid hits.
-        # hits.
-        df['hits'] = df['hits']
-        df = df[['date', 'hits', 'errors', 'mapdraws']]
-        df = df.set_index('date')
-
-        # Turn the data from hits/hour to hits/second
-        df['hits'] /= 3600
-        df['errors'] /= 3600
-        df['mapdraws'] /= 3600
-
-        df.drop('hits', axis='columns', inplace=True)
-
-        df.plot(ax=ax)
-
-        sql = """
-              SELECT date,
-                     SUM(hits) as hits,
-                     SUM(errors) as errors,
-                     SUM(nbytes) as nbytes
-              FROM burst
-              GROUP BY date
-              ORDER BY date
-              """
-        df = pd.read_sql(sql, self.conn)
-        df['date'] = pd.to_datetime(df['date'], unit='s')
-
-        df = df.set_index('date')
-
-        # Get average rate per second.
-        df['hits'] /= 60
-        df['errors'] /= 60
-        df['nbytes'] /= 60
-
-        # Get the rolling mean.
-        dfr = df['hits'].rolling(15).aggregate([np.mean, np.max, np.min])
-        df.plot.bar(dfr.index.values, dfr['amax'] - dfr['amin'],
-                    bottom=dfr['amin'], edgecolor='none')
 
     def process_raw_records(self, raw_df):
 
@@ -156,33 +95,42 @@ class SummaryProcessor(CommonProcessor):
 
     def process_graphics(self, html_doc):
 
+        self.logger.info(f'Summary:  starting graphics...')
+
         body = html_doc.xpath('body')[0]
         div = lxml.etree.SubElement(body, 'div')
         lxml.etree.SubElement(div, 'hr')
         h1 = lxml.etree.SubElement(div, 'h1')
         h1.text = f"{self.project.upper()} Summary"
 
-        self.get_timeseries()
-        self.summarize_transactions(html_doc)
+        self.summarize_last_24_hours_transactions(html_doc)
+        self.summarize_daily_transactions_longer_span(html_doc)
+
         self.summarize_bandwidth(html_doc)
+
+        self.logger.info(f'Summary:  done with graphics...')
 
     def summarize_bandwidth(self, html_doc):
         """
         Create an image showing the bandwidth over the last few days.
         """
-        df = self.df[['date', 'nbytes']].copy()
-        df.columns = ['date', 'bandwidth']
-        df.loc[:, 'bandwidth'] /= (1024 ** 4)
-        df = df.set_index('date')
+        sql = """
+            SELECT
+                -- resample to dates
+                date::date,
+                -- scale to TBytes
+                SUM(nbytes) / 1024 ^ 4 as bandwidth
+            FROM summary
+            GROUP BY date::date
+            ORDER BY date::date
+            """
+        df = pd.read_sql(sql, self.conn, index_col='date')
 
-        total_throughput = df.tail(n=24).sum().values[0] * 1000
-
-        # Downsample to days.
-        df = df.resample('D').sum()
+        throughput_last24h = df.iloc[-1]['bandwidth'] * 1000
 
         text = (
             f"{self.project.upper()} processed a total of "
-            f"{total_throughput:.0f} Gbytes over the last 24 hours of "
+            f"{throughput_last24h:.0f} Gbytes over the last 24 hours of "
             f"measurements."
         )
 
@@ -198,25 +146,23 @@ class SummaryProcessor(CommonProcessor):
 
         self.write_html_and_image_output(df, html_doc, **kwargs)
 
-    def summarize_transactions(self, html_doc):
-        """
-        Create a PNG showing the top referers over the last few days.
-        """
-        df = self.df.copy()
-        self.summarize_last_24_hours_transactions(df, html_doc)
-        self.summarize_daily_transactions(df, html_doc)
-
-    def summarize_last_24_hours_transactions(self, df, html_doc):
+    def summarize_last_24_hours_transactions(self, html_doc):
         """
         """
         fig, ax = plt.subplots(figsize=(15, 7))
 
-        df = self.df.copy().tail(n=72)
-        df = df.set_index('date')
+        sql = """
+            SELECT
+                date,
+                SUM(mapdraws) / 3600 as mapdraws
+            FROM summary
+            GROUP BY date
+            ORDER BY date desc
+            -- Last 3 days = 72 hours
+            limit 72
+            """
+        df = pd.read_sql(sql, self.conn, index_col='date')
         df = df.resample('T').pad()
-
-        # Turn the data from hits/hour to hits/second
-        df['mapdraws'] /= 3600
 
         # green
         df['mapdraws'].plot(ax=ax, legend=None, gid='mapdraws',
@@ -226,27 +172,19 @@ class SummaryProcessor(CommonProcessor):
         # error information from burst table.
         sql = f"""
               SELECT date,
-                     SUM(hits) as hits,
-                     SUM(errors) as errors
+                     -- scale hits and errors to hits / sec
+                     SUM(hits) / 60 as hits,
+                     SUM(errors) / 60 as errors
               FROM burst
               GROUP BY date
-              ORDER BY date
+              -- last 3 days
+              ORDER BY date desc
+              limit 4320 
               """
-        df = pd.read_sql(sql, self.conn)
-        df['date'] = pd.to_datetime(df['date'], unit='s')
-
-        # This are by the minute, so restrict to last day = 1440 minutes.
-        df = df.tail(n=1440 * 3)
-
-        df = df.set_index('date')
-
-        # Get average rate per second.
-        df['hits'] /= 60
-        df['errors'] /= 60
+        df = pd.read_sql(sql, self.conn, index_col='date')
 
         # Get the rolling mean of hits and errors.
-        dfr = (df[['hits', 'errors']].rolling(15)
-                                     .aggregate([np.mean, np.max, np.min]))
+        dfr = df.rolling(15).aggregate([np.mean, np.max, np.min])
         max_burst = dfr['hits']['amax'].tail(n=1440).max()
 
         # Line plots for hits and errors.
@@ -268,27 +206,23 @@ class SummaryProcessor(CommonProcessor):
 
         # get the geoevent information
         sql = """
-              SELECT MAX(date) AS date FROM user_agent_logs
+              SELECT
+                  logs.date,
+                  -- scale to hits / sec
+                  SUM(logs.hits) / 3600 as hits
+              FROM user_agent_logs logs
+                  INNER JOIN user_agent_lut lut using(id)
+              WHERE lut.name LIKE 'GeoEvent%'
+              GROUP BY logs.date
+              -- last 3 days
+              ORDER BY logs.date desc
+              limit 72
               """
-        df = pd.read_sql(sql, self.conn)
-
-        sql = """
-              SELECT a.date, SUM(a.hits) as hits
-              FROM user_agent_logs a
-              INNER JOIN user_agent_lut b
-              ON a.id = b.id
-              WHERE b.name LIKE 'GeoEvent%'
-              GROUP BY a.date
-              ORDER BY a.date
-              """
-        # df = pd.read_sql(sql, self.conn, params=(max_date,))
-        df = pd.read_sql(sql, self.conn)
-        df['date'] = pd.to_datetime(df['date'], unit='s')
-        df = df.set_index('date')
+        df = pd.read_sql(sql, self.conn, index_col='date')
 
         # resample to minute
         df = df.resample('T').pad()
-        df /= 3600
+
         # red
         df.plot(ax=ax, label='GeoEvent', gid='GeoEvent', color='#d62728')
 
@@ -331,17 +265,22 @@ class SummaryProcessor(CommonProcessor):
 
         self.write_html_and_image_output(df, html_doc, **kwargs)
 
-    def summarize_daily_transactions(self, df, html_doc):
+    def summarize_daily_transactions_longer_span(self, html_doc):
         # Now restrict the hourly data over the last few days to those
         # referers.  Then restrict to valid hits.  And rename valid_hits to
         # hits.
-        df = df[['date', 'hits', 'errors', 'mapdraws']]
-        df = df.set_index('date').resample('D').sum()
-
-        # Turn the data from hits/day to hits/second
-        df['hits'] /= 86400
-        df['errors'] /= 86400
-        df['mapdraws'] /= 86400
+        sql = """
+            SELECT
+                date::date,
+                -- scale to hits / second
+                SUM(hits) / 86400 as hits,
+                SUM(errors) / 86400 as errors,
+                SUM(mapdraws) / 86400 as mapdraws
+            FROM summary
+            GROUP BY date::date
+            ORDER BY date::date desc
+            """
+        df = pd.read_sql(sql, self.conn, index_col='date')
 
         text = (
             "Here are daily averages of the hits, errors, and mapdraws "

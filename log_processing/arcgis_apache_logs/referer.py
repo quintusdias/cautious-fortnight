@@ -137,8 +137,6 @@ class RefererProcessor(CommonProcessor):
             HTML document for the logs.
         """
         self.logger.info(f'Referers:  starting graphics...')
-        self.logger.info(f'Referers:  getting initial time series...')
-
         self.logger.info(f'Referers:  summarizing table ...')
         self.summarize_referer_table(html_doc)
 
@@ -269,7 +267,7 @@ class RefererProcessor(CommonProcessor):
             """
         yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
         sql = sql.format(yesterday=yesterday)
-        df = pd.read_sql(sql, self.conn)
+        df = pd.read_sql(sql, self.conn, index_col='referer')
 
         total_hits = df['hits'].sum()
         total_bytes = df['nbytes'].sum()

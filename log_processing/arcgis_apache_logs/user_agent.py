@@ -26,8 +26,6 @@ class UserAgentProcessor(CommonProcessor):
         Path to database
     project : str
         Either nowcoast or idpgis
-    time_series_sql : str
-        SQL to collect a coherent timeseries of folder/service information.
     """
     def __init__(self, **kwargs):
         """
@@ -35,16 +33,6 @@ class UserAgentProcessor(CommonProcessor):
         ----------
         """
         super().__init__(**kwargs)
-
-        self.time_series_sql = """
-            SELECT a.date, SUM(a.hits) as hits, SUM(a.errors) as errors,
-                   SUM(a.nbytes) as nbytes, b.name as user_agent
-            FROM user_agent_logs a
-            INNER JOIN user_agent_lut b
-            ON a.id = b.id
-            GROUP BY a.date, user_agent
-            ORDER BY a.date
-            """
 
         self.data_retention_days = 7
 
@@ -130,38 +118,46 @@ class UserAgentProcessor(CommonProcessor):
         self.conn.commit()
 
     def process_graphics(self, html_doc):
-        self.get_timeseries()
+        self.logger.info(f'User agents:  starting graphics...')
+        top_user_agents = self.get_top_user_agents()
         self.summarize_user_agents(html_doc)
-        self.summarize_transactions(html_doc)
-        self.summarize_bandwidth(html_doc)
+        self.summarize_transactions(top_user_agents, html_doc)
+        self.summarize_bandwidth(top_user_agents, html_doc)
+        self.logger.info(f'User agents:  done with graphics...')
 
     def get_top_user_agents(self):
         # who are the top user_agents for today?
-        df = self.df_today.copy()
+        yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
+        sql = f"""
+            SELECT SUM(hits) as hits, id
+            FROM user_agent_logs
+            where date::date = '{yesterday}'
+            GROUP BY id
+            order by hits desc
+            limit 7
+            """
+        df = pd.read_sql(sql, self.conn, index_col='id')
 
-        df['valid_hits'] = df['hits'] - df['errors']
-        top_user_agents = (df.groupby('user_agent')
-                             .sum()
-                             .sort_values(by='valid_hits', ascending=False)
-                             .head(n=7)
-                             .index)
+        return df.index
 
-        return top_user_agents
-
-    def summarize_bandwidth(self, html_doc):
+    def summarize_bandwidth(self, top_user_agents, html_doc):
         """
         Create a PNG showing the top user_agents (bytes) over the last few
         days.
         """
-        top_user_agents = self.get_top_user_agents()
-
-        # Now restrict the hourly data over the last few days to those
-        # user_agents.  Then restrict to valid hits.  And rename valid_hits to
-        # hits.
-        idx = self.df.user_agent.isin(top_user_agents)
-        df = self.df[idx].sort_values(by='date')
-        df = df[['date', 'user_agent', 'nbytes']]
-        df['nbytes'] /= (1024 ** 3)
+        txt = """
+            SELECT
+                logs.date,
+                SUM(logs.nbytes) / 1024 ^ 3 as nbytes,
+                lut.name as user_agent
+            FROM user_agent_logs logs
+                INNER JOIN user_agent_lut lut ON logs.id = lut.id
+            WHERE logs.id in ({top_uas})
+            GROUP BY logs.date, lut.name
+            ORDER BY logs.date
+            """
+        sql = txt.format(top_uas=', '.join(str(id) for id in top_user_agents))
+        df = pd.read_sql(sql, self.conn)
 
         df = df.pivot(index='date', columns='user_agent', values='nbytes')
 
@@ -178,25 +174,25 @@ class UserAgentProcessor(CommonProcessor):
         }
         self.write_html_and_image_output(df, html_doc, **kwargs)
 
-    def summarize_transactions(self, html_doc):
+    def summarize_transactions(self, top_user_agents, html_doc):
         """
         Create a PNG showing the top user_agents over the last few days.
         """
-        top_user_agents = self.get_top_user_agents()
 
-        df = self.df.copy()
-
-        # Now restrict the hourly data over the last few days to those
-        # user_agents.  Then restrict to valid hits.  And rename valid_hits to
-        # hits.
-        idx = df.user_agent.isin(top_user_agents)
-        df = df[idx].sort_values(by='date').copy()
-
-        df['hits'] = df['hits'] - df['errors']
-        df = df[['date', 'user_agent', 'hits']]
-
-        # Rescale them from hits/hour to hits/second
-        df['hits'] /= 3600
+        txt = """
+            SELECT
+                logs.date,
+                -- scale to hits per second
+                SUM(logs.hits) / 3600 as hits,
+                lut.name as user_agent
+            FROM user_agent_logs logs
+                INNER JOIN user_agent_lut lut ON logs.id = lut.id
+            WHERE logs.id in ({top_uas})
+            GROUP BY logs.date, lut.name
+            ORDER BY logs.date
+            """
+        sql = txt.format(top_uas=', '.join(str(id) for id in top_user_agents))
+        df = pd.read_sql(sql, self.conn)
 
         df = df.pivot(index='date', columns='user_agent', values='hits')
 
@@ -225,20 +221,28 @@ class UserAgentProcessor(CommonProcessor):
 
         Just for the latest day, though.
         """
-        df = self.df_today.copy().groupby('user_agent').sum()
+        sql = r"""
+            SELECT
+                SUM(logs.hits) as hits,
+                SUM(logs.errors) as errors,
+                SUM(logs.nbytes) as nbytes,
+                lut.name as user_agent
+            FROM user_agent_logs logs INNER JOIN user_agent_lut lut using(id)
+            where logs.date = '{yesterday}'
+            GROUP BY user_agent
+            order by hits desc
+            """
+        yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
+        sql = sql.format(yesterday=yesterday)
+        df = pd.read_sql(sql, self.conn, index_col='user_agent')
 
         total_hits = df['hits'].sum()
         total_bytes = df['nbytes'].sum()
         total_errors = df['errors'].sum()
 
-        df = df[['hits', 'nbytes', 'errors']].copy()
         df['hits %'] = df['hits'] / total_hits * 100
         df['GBytes'] = df['nbytes'] / (1024 ** 3)  # GBytes
         df['GBytes %'] = df['nbytes'] / total_bytes * 100
-
-        idx = df['errors'].isnull()
-        df.loc[idx, ('errors')] = 0
-        df['errors'] = df['errors'].astype(np.uint64)
 
         df['errors: % of all hits'] = df['errors'] / total_hits * 100
         df['errors: % of all errors'] = df['errors'] / total_errors * 100
@@ -254,7 +258,7 @@ class UserAgentProcessor(CommonProcessor):
             'errors: % of all errors'
         ]
         df = df[reordered_cols]
-        df = df.sort_values(by='hits', ascending=False).head(15)
+        df = df.head(15)
 
         yesterday = (dt.date.today() - dt.timedelta(days=1)).isoformat()
         kwargs = {
