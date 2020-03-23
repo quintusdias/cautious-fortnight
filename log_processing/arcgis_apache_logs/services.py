@@ -54,24 +54,6 @@ class ServicesProcessor(CommonProcessor):
                    '''
         self.regex = re.compile(pattern, re.VERBOSE | re.IGNORECASE)
 
-        self.time_series_sql = f"""
-            SELECT
-                logs.date,
-                SUM(logs.hits) as hits,
-                SUM(logs.errors) as errors,
-                SUM(logs.nbytes) as nbytes,
-                SUM(logs.export_mapdraws) as export_mapdraws,
-                SUM(logs.wms_mapdraws) as wms_mapdraws,
-                f.folder, s_lut.service,
-                st_lut.name as service_type
-            FROM service_logs logs
-                 INNER JOIN service_lut s_lut ON logs.id = s_lut.id
-                 INNER JOIN folder_lut f on f.id = s_lut.folder_id
-                 INNER JOIN service_type_lut st_lut on s_lut.service_type_id = st_lut.id
-            WHERE service_lut.active
-            GROUP BY logs.date, f.folder, s_lut.service, st_lut.name
-            ORDER BY logs.date
-            """
         self.records = []
 
         self.data_retention_days = 180
