@@ -26,8 +26,6 @@ class SummaryProcessor(CommonProcessor):
         Path to database
     project : str
         Either nowcoast or idpgis
-    time_series_sql : str
-        SQL to collect a coherent timeseries of folder/service information.
     """
     def __init__(self, **kwargs):
         """

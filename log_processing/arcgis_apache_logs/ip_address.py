@@ -17,8 +17,6 @@ class IPAddressProcessor(CommonProcessor):
     """
     Attributes
     ----------
-    time_series_sql : str
-        SQL to collect a coherent timeseries of folder/service information.
     """
 
     def __init__(self, **kwargs):

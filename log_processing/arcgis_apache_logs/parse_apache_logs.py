@@ -671,6 +671,7 @@ class ApacheLogParser(object):
 
         records = []
 
+        self.logger.info('parsing the logs...')
         for line in gzip.open(self.infile, mode='rt', errors='replace'):
             m = regex.match(line)
             if m is None:
@@ -693,6 +694,8 @@ class ApacheLogParser(object):
                 m.group('referer'),
                 m.group('user_agent')
             ))
+
+        self.logger.info('done parsing the logs...')
 
         columns = [
             'date', 'ip_address', 'path', 'hits', 'status_code', 'nbytes',

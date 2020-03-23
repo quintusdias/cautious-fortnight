@@ -20,8 +20,6 @@ class ServicesProcessor(CommonProcessor):
     ----------
     regex : object
         Parses arcgis folders, services, types from the request path.
-    time_series_sql : str
-        SQL to collect a coherent timeseries of folder/service information.
     """
     def __init__(self, **kwargs):
         """
@@ -88,7 +86,9 @@ class ServicesProcessor(CommonProcessor):
         columns = ['date', 'path', 'hits', 'errors', 'nbytes']
         df = df[columns].copy()
 
+        self.logger.info('services:  regexing...')
         df_svc = df['path'].str.extract(self.regex)
+        self.logger.info('services:  done regexing...')
 
         # Cleanly determine export and WMS map draws.
         df_svc['export_mapdraws'] = (~df_svc['export'].isnull()).astype(int)
@@ -125,6 +125,9 @@ class ServicesProcessor(CommonProcessor):
 
     def replace_folders_and_services_with_ids(self, df_orig):
 
+        msg = 'selecting folders, services, service_types...'
+        self.logger.info(msg)
+
         sql = f"""
               select s_lut.id id, s_lut.service service, f.folder, st_lut.name service_type
               from service_lut s_lut
@@ -132,6 +135,9 @@ class ServicesProcessor(CommonProcessor):
                    inner join service_type_lut st_lut on s_lut.service_type_id = st_lut.id
               """
         known_services = pd.read_sql(sql, self.conn)
+
+        msg = 'done selecting folders, services, service_types...'
+        self.logger.info(msg)
 
         group_cols = ['folder', 'service', 'service_type']
 
