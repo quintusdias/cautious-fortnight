@@ -39,7 +39,7 @@ class ServicesProcessor(CommonProcessor):
                    (
                        (
                            # an export map draw
-                           (?P<export>/(export|exportImage))
+                           (?P<export>/(export|exportimage))
                            .+?
                            (?P<imageformat>f=image)
                        )

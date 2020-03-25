@@ -46,11 +46,16 @@ class ApacheLogParser(object):
 
         self.schema = project
 
-        self.conn = psycopg2.connect(dbname=dbname)
-        self.cursor = self.conn.cursor()
-        self.cursor.execute(f"set search_path to {self.schema}")
+        if dbname is not None:
+            self.conn = psycopg2.connect(dbname=dbname)
+            self.cursor = self.conn.cursor()
+            self.cursor.execute(f"set search_path to {self.schema}")
+        else:
+            self.conn, self.cursor = None, None
+
 
         self.setup_logger()
+        self.setup_regex()
 
         kwargs = {
             'logger': self.logger,
@@ -623,17 +628,12 @@ class ApacheLogParser(object):
 
         self.logger.info('done preprocessing the database...')
 
-    def parse_input(self):
+    def setup_regex(self):
         """
-        Process the entire log file.
+        Create the regular expression for parsing apache logs.
         """
-        self.logger.info('And so it begins...')
-        if self.infile is None:
-            return
-
         pattern = r'''
-            # (?P<ip_address>((\d+.\d+.\d+.\d+)|((\w*?:){6}(\w*?:)?(\w+)?)))
-            (?P<ip_address>.*?)
+            (?P<ip_address>[a-z\d.:]+)
             \s
             # Client identity, always -?
             -
@@ -648,7 +648,8 @@ class ApacheLogParser(object):
             # The request
             "(?P<request_op>(GET|DELETE|HEAD|OPTIONS|POST|PROPFIND|PUT))
             \s
-            (?P<path>.*?)
+            # match anything but a space
+            (?P<path>[^ ]+)
             \s
             HTTP\/1.1"
             \s
@@ -659,21 +660,31 @@ class ApacheLogParser(object):
             (?P<nbytes>\d+)
             \s
             # referer
-            "(?P<referer>.*?)"
+            # Match anything but a double quote.
+            "(?P<referer>[^"]+)"
             \s
             # user agent
+            # Match anything but a double quote.
             "(?P<user_agent>.*?)"
             \s
             # something else that seems to always be "-"
             "-"
             '''
-        regex = re.compile(pattern, re.VERBOSE)
+        self.regex = re.compile(pattern, re.VERBOSE)
+
+    def parse_input(self):
+        """
+        Process the entire log file.
+        """
+        self.logger.info('And so it begins...')
+        if self.infile is None:
+            return
 
         records = []
 
         self.logger.info('parsing the logs...')
         for line in gzip.open(self.infile, mode='rt', errors='replace'):
-            m = regex.match(line)
+            m = self.regex.match(line)
             if m is None:
                 msg = (
                     f"This line from the apache log files was not matched.\n"
