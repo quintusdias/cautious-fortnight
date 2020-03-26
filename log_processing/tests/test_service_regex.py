@@ -30,4 +30,16 @@ class TestSuite(unittest.TestCase):
         m = o.regex.match(txt)
         self.assertIsNotNone(m)
 
+    def test_user_agent_has_double_quotes(self):
+        """
+        SCENARIO:  the user agent as embedded double quotes
+
+        EXPECTED RESULT:  the regular expression match should not be none
+        """
+
+        txt = ir.read_text('tests.data', 'thang.txt')
+        o = ApacheLogParser('idpgis', dbname=None)
+        m = o.regex.match(txt)
+        self.assertIsNotNone(m)
+
 

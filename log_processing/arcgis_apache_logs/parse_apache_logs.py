@@ -74,7 +74,7 @@ class ApacheLogParser(object):
     def __del__(self):
 
         # When cleaning up, if we had a connection, commit just to be sure.
-        if hasattr(self, 'conn'):
+        if hasattr(self, 'conn') and self.conn is not None:
             self.conn.commit()
 
     def graphics_setup(self):
@@ -660,8 +660,8 @@ class ApacheLogParser(object):
             (?P<nbytes>\d+)
             \s
             # referer
-            # Match anything but a double quote.
-            "(?P<referer>[^"]+)"
+            # Match anything but a double quote followed by a space
+            "(?P<referer>.*?(?=" ))"
             \s
             # user agent
             # Match anything but a double quote.
