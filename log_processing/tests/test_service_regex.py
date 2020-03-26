@@ -37,9 +37,22 @@ class TestSuite(unittest.TestCase):
         EXPECTED RESULT:  the regular expression match should not be none
         """
 
-        txt = ir.read_text('tests.data', 'thang.txt')
+        txt = ir.read_text('tests.data', 'ua_double_quotes.txt')
         o = ApacheLogParser('idpgis', dbname=None)
         m = o.regex.match(txt)
         self.assertIsNotNone(m)
+
+    def test__service__basic(self):
+        """
+        SCENARIO:  a basic path with an export mapdraw is provided
+        provided
+
+        EXPECTED RESULT:  the export group should not be None
+        """
+
+        txt = ir.read_text('tests.data', 'nohrsc_export.txt')
+        o = ApacheLogParser('idpgis', dbname=None)
+        m = o.services.regex.match(txt)
+        self.assertIsNotNone(m.group('export'))
 
 

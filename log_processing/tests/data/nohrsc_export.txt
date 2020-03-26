@@ -1,0 +1,1 @@
+/idpgis.ncep.noaa.gov.akadns.net/arcgis/rest/services/NWS_Observations/NOHRSC_Snow_Analysis/MapServer/export?dpi=96&transparent=true&format=png32&layers=show%3A3&bbox=-12602630.964606823%2C3748596.9335437454%2C-9985427.116123086%2C6683778.819693733&bboxSR=102100&imageSR=102100&size=535%2C600&f=image
