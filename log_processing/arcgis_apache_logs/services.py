@@ -37,18 +37,17 @@ class ServicesProcessor(CommonProcessor):
                    /(?P<service>\w+)
                    /(?P<service_type>\w+)
                    (
+                       /
                        (
-                           # an export map draw
-                           (?P<export>/(export|exportimage))
-                           .+?
-                           (?P<imageformat>f=image)
-                       )
-                       |
-                       (
-                           # a WMS map draw
-                           (?P<wmsserver>/wmsserver)
-                           .+?
-                           (?P<wmsgetmap>request=getmap)
+                           (
+                               (?P<export>(export|exportimage))
+                               (?P<export_mapdraws>.*?f=image)?
+                           )
+                           |
+                           (
+                               (?P<wms>wmsserver)
+                               (?P<wms_mapdraws>.*?request=getmap)?
+                           )
                        )
                    )?
                    '''
@@ -72,9 +71,9 @@ class ServicesProcessor(CommonProcessor):
         df_svc = df['path'].str.extract(self.regex)
         self.logger.info('services:  done regexing...')
 
-        # Cleanly determine export and WMS map draws.
-        df_svc['export_mapdraws'] = (~df_svc['export'].isnull()).astype(int)
-        df_svc['wms_mapdraws'] = (~df_svc['wmsgetmap'].isnull()).astype(int)
+        # convert the mapdraw columns to integer
+        df_svc['wms_mapdraws'] = (~(df_svc.wms_mapdraws.isnull())).astype(int)
+        df_svc['export_mapdraws'] = (~(df_svc.export_mapdraws.isnull())).astype(int)
 
         cols = [
             'folder', 'service', 'service_type', 'export_mapdraws',

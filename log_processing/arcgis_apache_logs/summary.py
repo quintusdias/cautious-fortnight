@@ -144,11 +144,7 @@ class SummaryProcessor(CommonProcessor):
 
         self.write_html_and_image_output(df, html_doc, **kwargs)
 
-    def summarize_last_24_hours_transactions(self, html_doc):
-        """
-        """
-        fig, ax = plt.subplots(figsize=(15, 7))
-
+    def get_hourly_mapdraws_over_last_72_hours(self):
         sql = """
             SELECT
                 date,
@@ -160,14 +156,10 @@ class SummaryProcessor(CommonProcessor):
             limit 72
             """
         df = pd.read_sql(sql, self.conn, index_col='date')
-        df = df.resample('T').pad()
+        df = df.resample('min').pad()
+        return df
 
-        # green
-        df['mapdraws'].plot(ax=ax, legend=None, gid='mapdraws',
-                            color='#2ca02c')
-
-        # Ok, have the mapdraws and the axis in place.  Now add the hits and
-        # error information from burst table.
+    def get_by_the_minute_hits_and_errors(self):
         sql = f"""
               SELECT date,
                      -- scale hits and errors to hits / sec
@@ -180,10 +172,41 @@ class SummaryProcessor(CommonProcessor):
               limit 4320 
               """
         df = pd.read_sql(sql, self.conn, index_col='date')
+        return df
+
+    def get_geoevent_information(self):
+        sql = """
+              SELECT
+                  logs.date,
+                  -- scale to hits / sec
+                  SUM(logs.hits) / 3600 as hits
+              FROM user_agent_logs logs
+                  INNER JOIN user_agent_lut lut using(id)
+              WHERE lut.name LIKE 'GeoEvent%'
+              GROUP BY logs.date
+              -- last 3 days
+              ORDER BY logs.date desc
+              limit 72
+              """
+        df = pd.read_sql(sql, self.conn, index_col='date')
+        return df
+
+    def summarize_last_24_hours_transactions(self, html_doc):
+        """
+        """
+        fig, ax = plt.subplots(figsize=(15, 7))
+
+        # green mapdraws
+        df = self.get_hourly_mapdraws_over_last_72_hours()
+        df['mapdraws'].plot(ax=ax, legend=None, gid='mapdraws',
+                            color='#2ca02c')
+
+        # Ok, have the mapdraws and the axis in place.  Now add the hits and
+        # error information from burst table.
+        df_min = self.get_by_the_minute_hits_and_errors()
 
         # Get the rolling mean of hits and errors.
-        dfr = df.rolling(15).aggregate([np.mean, np.max, np.min])
-        max_burst = dfr['hits']['amax'].tail(n=1440).max()
+        dfr = df_min.rolling(15).aggregate([np.mean, np.max, np.min])
 
         # Line plots for hits and errors.
         dfr['hits']['mean'].plot(ax=ax, gid='hits', color='black')
@@ -202,29 +225,11 @@ class SummaryProcessor(CommonProcessor):
 
         xlim = ax.get_xlim()
 
-        # get the geoevent information
-        sql = """
-              SELECT
-                  logs.date,
-                  -- scale to hits / sec
-                  SUM(logs.hits) / 3600 as hits
-              FROM user_agent_logs logs
-                  INNER JOIN user_agent_lut lut using(id)
-              WHERE lut.name LIKE 'GeoEvent%'
-              GROUP BY logs.date
-              -- last 3 days
-              ORDER BY logs.date desc
-              limit 72
-              """
-        df = pd.read_sql(sql, self.conn, index_col='date')
-
-        # resample to minute
-        df = df.resample('T').pad()
+        df_geoevent = self.get_geoevent_information()
+        df_geoevent = df_geoevent.resample('min').pad()
 
         # red
-        df.plot(ax=ax, label='GeoEvent', gid='GeoEvent', color='#d62728')
-
-        # purple and brown, #9467bd, #8c564b
+        df_geoevent.plot(ax=ax, label='GeoEvent', gid='GeoEvent', color='#d62728')
 
         ax.set_xlim(xlim)
 
@@ -246,13 +251,15 @@ class SummaryProcessor(CommonProcessor):
 
         ax.set_ylabel('Per Second')
 
+        max_burst_1min = df_min['hits'].head(n=1440).max()
+        max_burst_rolling = dfr['hits']['amax'].head(n=1440).max()
         text = (
             "This shows the rolling mean (15 minutes) for the hits and "
             "errors over the last 3 days for which Akamai logs exist.  "
             "The variability surrounding the mean corresponds to the "
             "minimum and maximum hit rates during the 15 minute window.  "
             "The maximum 1-minute burst over the last 24 hours was "
-            f"{max_burst:.0f} hits/sec."
+            f"{max_burst_1min:.0f} hits/sec."
         )
         kwargs = {
             'title': 'Throughput Last 72 Hours',
