@@ -4,9 +4,7 @@ import importlib.resources as ir
 import urllib.parse
 
 # 3rd party library imports
-import datetime as dt
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import psycopg2
 import seaborn as sns
@@ -218,7 +216,7 @@ class RefererProcessor(CommonProcessor):
         """
         # It's possible to format the referers list wrong if there's only one
         # of them, so take this extra step.
-        top_referers = ', '.join(str(id) for id in top_referers) 
+        top_referers = ', '.join(str(id) for id in top_referers)
         query = query.format(top_referers=top_referers,
                              start_time=dt.date.today()-dt.timedelta(days=14))
         df = pd.read_sql(query, self.conn)

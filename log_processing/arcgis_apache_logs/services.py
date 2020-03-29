@@ -73,7 +73,7 @@ class ServicesProcessor(CommonProcessor):
 
         # convert the mapdraw columns to integer
         df_svc['wms_mapdraws'] = (~(df_svc.wms_mapdraws.isnull())).astype(int)
-        df_svc['export_mapdraws'] = (~(df_svc.export_mapdraws.isnull())).astype(int)
+        df_svc['export_mapdraws'] = (~(df_svc.export_mapdraws.isnull())).astype(int)  # noqa : E501
 
         cols = [
             'folder', 'service', 'service_type', 'export_mapdraws',
@@ -110,10 +110,15 @@ class ServicesProcessor(CommonProcessor):
         self.logger.info(msg)
 
         sql = f"""
-              select s_lut.id id, s_lut.service service, f.folder, st_lut.name service_type
+              select
+                  s_lut.id id,
+                  s_lut.service service,
+                  f.folder,
+                  st_lut.name service_type
               from service_lut s_lut
                    inner join folder_lut f on s_lut.folder_id = f.id
-                   inner join service_type_lut st_lut on s_lut.service_type_id = st_lut.id
+                   inner join service_type_lut st_lut
+                       on s_lut.service_type_id = st_lut.id
               """
         known_services = pd.read_sql(sql, self.conn)
 
@@ -186,10 +191,13 @@ class ServicesProcessor(CommonProcessor):
             if not np.all(np.diff(dfg.index.codes[0]) > 0):
                 # Overlapping names, so collapse the service and service_type
                 # columns.
-                df_grp.loc[:, 'service'] = df_grp['service'] + '/' + df_grp['service_type']
+                df_grp.loc[:, 'service'] = (
+                    df_grp['service'] + '/' + df_grp['service_type']
+                )
             df_grp = df_grp[['date', 'service', 'hits']]
 
-            df_grp = df_grp.pivot(index='date', columns='service', values='hits')
+            df_grp = df_grp.pivot(index='date', columns='service',
+                                  values='hits')
 
             # Order them by max value.
             s = df_grp.max().sort_values(ascending=False)
@@ -198,7 +206,8 @@ class ServicesProcessor(CommonProcessor):
             service_max = df_grp.max()
 
             # Drop any services where the total hits too low.
-            df_grp = df_grp.drop(service_max[service_max <= 1].index.values, axis=1)
+            df_grp = df_grp.drop(service_max[service_max <= 1].index.values,
+                                 axis=1)
             if df_grp.shape[1] == 0:
                 continue
 
@@ -253,7 +262,7 @@ class ServicesProcessor(CommonProcessor):
             (
                 "\"mapdraw %\" is the ratio of service mapdraws to the "
                 "service hits."
-            ),                    
+            ),
 
         ]
         kwargs = {

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 # Standard library imports
-import datetime as dt
 
 # 3rd party library imports
 import lxml.etree
@@ -42,7 +41,7 @@ class SummaryProcessor(CommonProcessor):
               DELETE FROM burst
               WHERE date < current_date - interval '14 days'
               """
-        self.cursor.execute(sql, {'date': date})
+        self.cursor.execute(sql)
 
         self.conn.commit()
 
@@ -169,7 +168,7 @@ class SummaryProcessor(CommonProcessor):
               GROUP BY date
               -- last 3 days
               ORDER BY date desc
-              limit 4320 
+              limit 4320
               """
         df = pd.read_sql(sql, self.conn, index_col='date')
         return df
@@ -229,7 +228,8 @@ class SummaryProcessor(CommonProcessor):
         df_geoevent = df_geoevent.resample('min').pad()
 
         # red
-        df_geoevent.plot(ax=ax, label='GeoEvent', gid='GeoEvent', color='#d62728')
+        df_geoevent.plot(ax=ax, label='GeoEvent', gid='GeoEvent',
+                         color='#d62728')
 
         ax.set_xlim(xlim)
 
@@ -252,7 +252,6 @@ class SummaryProcessor(CommonProcessor):
         ax.set_ylabel('Per Second')
 
         max_burst_1min = df_min['hits'].head(n=1440).max()
-        max_burst_rolling = dfr['hits']['amax'].head(n=1440).max()
         text = (
             "This shows the rolling mean (15 minutes) for the hits and "
             "errors over the last 3 days for which Akamai logs exist.  "

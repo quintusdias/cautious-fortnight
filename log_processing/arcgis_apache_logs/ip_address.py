@@ -4,7 +4,6 @@ import importlib.resources as ir
 
 # 3rd party library imports
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import psycopg2.extras
 
@@ -211,7 +210,7 @@ class IPAddressProcessor(CommonProcessor):
                 lut.ip_address
             FROM ip_address_logs logs
                 INNER JOIN ip_address_lut lut using(id)
-            where 
+            where
                 logs.date::date = '{yesterday}'
                 and ip_address in {top_ips}
             GROUP BY lut.ip_address

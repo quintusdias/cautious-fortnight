@@ -9,7 +9,6 @@ import lxml.etree
 import pandas as pd
 import psycopg2
 import requests
-import sqlalchemy
 
 # local imports
 from .ip_address import IPAddressProcessor
@@ -52,7 +51,6 @@ class ApacheLogParser(object):
             self.cursor.execute(f"set search_path to {self.schema}")
         else:
             self.conn, self.cursor = None, None
-
 
         self.setup_logger()
         self.setup_regex()
@@ -445,15 +443,16 @@ class ApacheLogParser(object):
 
         sql = """
         SELECT
-            f.folder,
-            f.id as folder_id,
-            s.service, 
-            s.id as service_id,
-            service_type_lut.name as service_type,
-            service_type_lut.id
-        from folder_lut f
-            inner join service_lut s on f.id = s.folder_id
-            inner join service_type_lut on service_type_lut.id = s.service_type_id
+            lut_f.folder,
+            lut_f.id as folder_id,
+            lut_s.service,
+            lut_s.id as service_id,
+            lut_t.name as service_type,
+            lut_t.id
+        from folder_lut lut_f
+            inner join service_lut lut_s on lut_f.id = lut_s.folder_id
+            inner join service_type_lut lut_t
+                on lut_t.id = lut_s.service_type_id
         """
         return pd.read_sql(sql, self.conn)
 
@@ -475,9 +474,9 @@ class ApacheLogParser(object):
         else:
             print('there are no new services')
 
-        if len(retired_diff) > 0:
+        if len(retired_services) > 0:
             print(f'these services seem to have been retired:')
-            for t in retired_diff:
+            for t in retired_services:
                 print(f"\t{t[0]}/{t[1]}/{t[2]}")
         else:
             print('no services have been dropped')

@@ -206,7 +206,7 @@ class CommonProcessor(object):
         sql = f"""
                select *
                from {table}
-               where date >= %(date)s 
+               where date >= %(date)s
                order BY date
                """
         params = {'date': pd.Timestamp(df_current.iloc[0].date)}
@@ -246,4 +246,3 @@ class CommonProcessor(object):
         template = ', '.join([f'%({col})s' for col in df.columns])
         template = f"({template})"
         psycopg2.extras.execute_values(self.cursor, sql, rows, template)
-

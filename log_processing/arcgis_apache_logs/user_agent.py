@@ -4,7 +4,6 @@ import importlib.resources as ir
 
 # 3rd party library imports
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import psycopg2
 import seaborn as sns
@@ -109,7 +108,7 @@ class UserAgentProcessor(CommonProcessor):
         if dt.date.today().weekday() != 0:
             return
 
-        query = ir.read_text(sql, 'prune_user_agents.sql') 
+        query = ir.read_text(sql, 'prune_user_agents.sql')
         self.logger.info(query)
         self.cursor.execute(query)
 
