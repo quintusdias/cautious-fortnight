@@ -111,14 +111,14 @@ class ServicesProcessor(CommonProcessor):
 
         sql = f"""
               select
-                  s_lut.id id,
-                  s_lut.service service,
-                  f.folder,
-                  st_lut.name service_type
-              from service_lut s_lut
-                   inner join folder_lut f on s_lut.folder_id = f.id
-                   inner join service_type_lut st_lut
-                       on s_lut.service_type_id = st_lut.id
+                  lu_s.id id,
+                  lu_s.service service,
+                  lu_f.folder,
+                  lu_st.name service_type
+              from service_lut lu_s
+                   inner join folder_lut lu_f on lu_s.folder_id = lu_f.id
+                   inner join service_type_lut lu_st
+                       on lu_s.service_type_id = lu_st.id
               """
         known_services = pd.read_sql(sql, self.conn)
 
@@ -133,10 +133,14 @@ class ServicesProcessor(CommonProcessor):
                       left_on=group_cols,
                       right_on=group_cols)
 
-        # How many services have NaN for IDs?  This must be dropped.
+        # How many services have NaN for IDs?  These are requests that do not
+        # correspond to a valid service.  Normally you might think that these
+        # would be logged as errors, but AGS doesn't always do this.
+        # This must be dropped.  Maybe they could be folded into the error
+        # count somehow.
         dfnull = df[df.id.isnull()]
         n = len(dfnull)
-        msg = f"Dropping {n} unmatched IDs"
+        msg = f"Dropping {n} unmatched IDs, invalid service name given?"
         self.logger.info(msg)
         df = df.dropna(subset=['id'])
 

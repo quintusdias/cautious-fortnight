@@ -60,7 +60,8 @@ def initialize_ag_ap_pg_database():
 def check_ag_ap_pg_services():
     """
     Entry point for checking the database against existing services without
-    updating.
+    updating.  This is useful in case you want to see beforehand what would
+    happen.
     """
 
     parser = argparse.ArgumentParser()
