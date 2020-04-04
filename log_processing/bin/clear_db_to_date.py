@@ -18,7 +18,7 @@ def run(project, dbname='arcgis_logs'):
 
     cursor.execute(f'set search_path to {project}')
 
-    date = dt.datetime(2020, 3, 23, 0, 0, 0, tzinfo=dt.timezone.utc)
+    date = dt.datetime(2020, 4, 6, 0, 0, 0, tzinfo=dt.timezone.utc)
     print(date)
 
     sql = """
@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('project', choices=['idpgis', 'nowcoast'])
-    parser.add_argument('dbname', choices=['arcgis_logs', 'agpgtest'])
+    parser.add_argument('dbname', choices=['arcgis_logs', 'agpgtest', 'tmp_test'])
 
     args = parser.parse_args()
 

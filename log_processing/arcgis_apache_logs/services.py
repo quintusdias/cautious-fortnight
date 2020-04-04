@@ -110,14 +110,12 @@ class ServicesProcessor(CommonProcessor):
 
         sql = f"""
               select
-                  lu_s.id id,
-                  lu_s.service service,
-                  lu_f.folder,
-                  lu_st.name service_type
-              from service_lut lu_s
-                   inner join folder_lut lu_f on lu_s.folder_id = lu_f.id
-                   inner join service_type_lut lu_st
-                       on lu_s.service_type_id = lu_st.id
+                  s.id id,
+                  s.service service,
+                  f.folder,
+                  s.service_type
+              from service_lut s
+                   inner join folder_lut f on s.folder_id = f.id
               """
         known_services = pd.read_sql(sql, self.conn)
 
@@ -162,6 +160,9 @@ class ServicesProcessor(CommonProcessor):
         query = ir.read_text(sql, 'services_summary.sql')
         df = pd.read_sql(query, self.conn, index_col='rank')
 
+        # Ensure that the delta columns have zeros instead of None.
+        df.day_pct_delta = df.day_pct_delta.fillna(0).astype(np.float64)
+        df.week_pct_delta = df.week_pct_delta.fillna(0).astype(np.float64)
         self.create_services_table(df, html_doc)
 
         # Link in a folder list.
@@ -182,7 +183,20 @@ class ServicesProcessor(CommonProcessor):
 
         hits are true hits, i.e. hits minus errors
         """
-        query = ir.read_text(sql, 'services_transactions_over_days.sql')
+        query = """
+            SELECT
+                logs.date,
+                f.folder,
+                SUM(logs.hits) - SUM(logs.errors) as hits,
+                svc.service,
+                svc.service_type
+            FROM service_logs logs
+                INNER JOIN service_lut svc ON logs.id = svc.id
+                INNER JOIN folder_lut f on f.id = svc.folder_id
+            where logs.date > current_date - interval '2 weeks'
+            GROUP BY logs.date, f.folder, svc.service, svc.service_type
+            ORDER BY logs.date
+        """
         df = pd.read_sql(query, self.conn)
 
         for folder, df_grp in df.groupby('folder'):

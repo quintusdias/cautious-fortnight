@@ -32,10 +32,13 @@ def produce_arcgis_apache_graphics():
 
     parser = argparse.ArgumentParser()
 
+    help = "Database name"
+    parser.add_argument('--dbname', default='arcgis_logs', help=help)
+
     parser.add_argument('project', choices=['idpgis', 'nowcoast'])
     args = parser.parse_args()
 
-    p = ApacheLogParser(args.project, infile=None)
+    p = ApacheLogParser(args.project, infile=None, dbname=args.dbname)
     p.process_graphics()
 
 
@@ -44,7 +47,17 @@ def initialize_ag_ap_pg_database():
     Entry point for initializing the postgresql database.
     """
 
-    parser = argparse.ArgumentParser()
+    epilog = (
+        "Prior to running this script, the database must be created with the "
+        "proper owner, i.e."
+        "\n"
+        "\n"
+        "    createdb --owner=name dbname"
+    )
+    parser = argparse.ArgumentParser(
+        epilog=epilog,
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
 
     parser.add_argument('project', choices=['idpgis', 'nowcoast'])
 

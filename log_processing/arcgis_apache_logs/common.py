@@ -79,8 +79,8 @@ class CommonProcessor(object):
             'GBytes': '{:,.1f}',
             'GBytes %': '{:.1f}',
             'errors': '{:,.0f}',
-            'errors: % of all hits': '{:,.1f}',
-            'errors: % of all errors': '{:,.1f}',
+            'errors: % of all hits': '{:.1f}',
+            'errors: % of all errors': '{:.1f}',
         }
         tablestr = (df.style
                       .set_table_styles(table_styles)

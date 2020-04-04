@@ -146,7 +146,7 @@ select
     ) as rank,
     folder_lut.folder,
     service_lut.service,
-    service_type_lut.name as service_type,
+    service_lut.service_type,
     day_pct_change_cte.hits,
     round(day_pct_change_cte.hits_pct::numeric, 1) as "hits %",
     round(day_pct_change_cte.day_pct_delta, 1) as day_pct_delta,
@@ -160,7 +160,6 @@ select
 from week_pct_change_cte
      inner join service_lut on week_pct_change_cte.service_id = service_lut.id
      inner join folder_lut on service_lut.folder_id = folder_lut.id
-     inner join service_type_lut on service_type_lut.id = service_lut.service_type_id
      inner join day_pct_change_cte on service_lut.id = day_pct_change_cte.service_id
 where service_lut.active
 order by hits desc;

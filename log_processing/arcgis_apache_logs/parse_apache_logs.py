@@ -1,5 +1,6 @@
 # standard library imports
 import gzip
+import importlib.resources as ir
 import logging
 import pathlib
 import re
@@ -16,6 +17,7 @@ from .referer import RefererProcessor
 from .services import ServicesProcessor
 from .summary import SummaryProcessor
 from .user_agent import UserAgentProcessor
+from . import sql
 
 
 class ApacheLogParser(object):
@@ -90,323 +92,18 @@ class ApacheLogParser(object):
         Examine the project web site and populate the services database with
         existing services.
         """
-        self.create_pg_database()
+        text = ir.read_text(sql, 'init.sql')
+        
+        # The commands cannot be directly run.  The correct schema has to be
+        # placed inside.
+        commands = text.format(myschema=self.project)
+        self.cursor.execute(commands)
+
+        self.cursor.execute(f"set search_path to {self.schema}")
 
         self.update_ag_ap_pg_services()
-        self.conn.commit()
-
-    def create_pg_database(self):
-        """
-        Create the postgresql database.
-        """
-        sql = f"""
-        DROP SCHEMA {self.schema} CASCADE
-        """
-        self.logger.info(sql)
-        self.cursor.execute(sql)
-
-        sql = f"""
-        CREATE SCHEMA {self.schema}
-        """
-        self.logger.info(sql)
-        self.cursor.execute(sql)
-
-        cmd = f"set search_path to {self.schema}"
-        self.logger.info(sql)
-        self.cursor.execute(cmd)
-
-        self.create_folder_lut()
-        self.create_service_type_lut()
-        self.create_service_lut()
-        self.create_service_logs()
-
-        self.create_ip_address_lut()
-        self.create_ip_address_logs()
-
-        self.create_referer_lut()
-        self.create_referer_logs()
-
-        self.create_user_agent_lut()
-        self.create_user_agent_logs()
-
-        self.create_summary()
-        self.create_burst()
 
         self.conn.commit()
-
-    def create_user_agent_lut(self):
-
-        sql = """
-        create table user_agent_lut (
-            id     serial primary key,
-            name   text
-        )
-        """
-        self.logger.info(sql)
-        self.cursor.execute(sql)
-
-        # don't repeat user agents
-        sql = """
-        alter table user_agent_lut
-        add constraint user_agent_exists
-        unique(name)
-        """
-        self.logger.info(sql)
-        self.cursor.execute(sql)
-
-    def create_referer_lut(self):
-
-        sql = """
-        create table referer_lut (
-            id     serial primary key,
-            name   text,
-            constraint   referer_exists unique (name)
-        )
-        """
-        self.logger.info(sql)
-        self.cursor.execute(sql)
-
-    def create_ip_address_lut(self):
-
-        sql = """
-        create table ip_address_lut (
-            id           serial primary key,
-            ip_address   inet,
-            constraint   ip_address_exists unique (ip_address)
-        )
-        """
-        self.logger.info(sql)
-        self.cursor.execute(sql)
-
-    def create_burst(self):
-
-        sql = """
-        create table burst (
-            date             timestamp with time zone,
-            hits             bigint,
-            errors           bigint,
-            nbytes           bigint
-        )
-        """
-        self.logger.info(sql)
-        self.cursor.execute(sql)
-
-        sql = """
-        create index on burst(date);
-        """
-        self.logger.info(sql)
-        self.cursor.execute(sql)
-
-    def create_summary(self):
-
-        sql = """
-        create table summary (
-            date             timestamp with time zone,
-            hits             bigint,
-            errors           bigint,
-            nbytes           bigint,
-            mapdraws         bigint
-        )
-        """
-        self.logger.info(sql)
-        self.cursor.execute(sql)
-
-    def create_user_agent_logs(self):
-
-        sql = """
-        create table user_agent_logs (
-            id               bigint,
-            date             timestamp with time zone,
-            hits             bigint,
-            errors           bigint,
-            nbytes           bigint,
-            unique           (id, date),
-            foreign key (id) references user_agent_lut (id)
-                             on delete cascade
-        )
-        """
-        self.logger.info(sql)
-        self.cursor.execute(sql)
-
-        comments = [
-            "comment on table referer_logs is "
-            "'A referer cannot have a summarizing set of statistics at "
-            "the same time.'",
-            "comment on column referer_logs.id is "
-            "'identifies referer in lookup table'"
-        ]
-        for comment in comments:
-            self.cursor.execute(comment)
-
-    def create_referer_logs(self):
-
-        sql = """
-        create table referer_logs (
-            id               bigint,
-            date             timestamp with time zone,
-            hits             bigint,
-            errors           bigint,
-            nbytes           bigint,
-            unique           (id, date),
-            foreign key (id) references referer_lut (id)
-                             on delete cascade
-        )
-        """
-        self.logger.info(sql)
-        self.cursor.execute(sql)
-
-        comments = [
-            "comment on table referer_logs is "
-            "'A referer cannot have a summarizing set of statistics at "
-            "the same time.'",
-            "comment on column referer_logs.id is "
-            "'identifies referer in lookup table'"
-        ]
-        for comment in comments:
-            self.cursor.execute(comment)
-
-    def create_ip_address_logs(self):
-
-        sql = """
-        create table ip_address_logs (
-            id               bigint,
-            date             timestamp with time zone,
-            hits             bigint,
-            errors           bigint,
-            nbytes           bigint,
-            unique           (id, date),
-            foreign key (id) references ip_address_lut (id)
-                             on delete cascade
-        )
-        """
-        self.logger.info(sql)
-        self.cursor.execute(sql)
-
-        comments = [
-            "comment on table ip_address_logs is "
-            "'An IP address cannot have a summarizing set of statistics at "
-            "the same time.'",
-            "comment on column ip_address_logs.id is "
-            "'identifies referer in lookup table'"
-        ]
-        for comment in comments:
-            self.cursor.execute(comment)
-
-    def create_folder_lut(self):
-
-        sql = f"""
-        create table folder_lut (
-            id           serial primary key,
-            folder       text,
-            constraint   folder_exists unique (folder)
-        )
-        """
-        self.logger.info(sql)
-        self.cursor.execute(sql)
-
-        comment = (
-            "comment on table folder_lut is "
-            "'This table should not vary unless there is a new release "
-            "at NCEP, and usually not even then...'"
-        )
-        self.cursor.execute(comment)
-
-    def create_service_type_lut(self):
-
-        sql = f"""
-        create table service_type_lut (
-            id           serial primary key,
-            name         text,
-            constraint   service_type_exists unique (name)
-        )
-        """
-        self.logger.info(sql)
-        self.cursor.execute(sql)
-
-        comment = (
-            "comment on table service_type_lut is "
-            "'This table should not vary unless there is a new release "
-            "at NCEP, and even then...'"
-        )
-        self.cursor.execute(comment)
-
-    def create_service_lut(self):
-
-        sql = f"""
-        create table service_lut (
-            id              serial primary key,
-            active          boolean default true,
-            service         text,
-            folder_id       integer,
-            service_type_id integer
-        )
-        """
-        self.logger.info(sql)
-        self.cursor.execute(sql)
-
-        # services must be unique
-        sql = """
-        alter table service_lut
-        add constraint service_exists
-        unique(folder_id, service, service_type_id)
-        """
-        self.logger.info(sql)
-        self.cursor.execute(sql)
-
-        # folders have to already be known
-        sql = """
-        alter table service_lut
-        add constraint service_lut_folder_id_fkey
-        foreign key(folder_id)
-        references folder_lut(id)
-        on delete cascade
-        """
-        self.logger.info(sql)
-        self.cursor.execute(sql)
-
-        comment = (
-            "comment on table service_lut is "
-            "'This table should not vary unless there is a new release "
-            "at NCEP'"
-        )
-        self.cursor.execute(comment)
-
-        comment = (
-            "comment on column service_lut.active is "
-            "'False if a service has been retired.'"
-        )
-        self.cursor.execute(comment)
-
-    def create_service_logs(self):
-
-        sql = f"""
-        create table service_logs (
-            id               bigint,
-            date             timestamp with time zone,
-            hits             bigint,
-            errors           bigint,
-            nbytes           bigint,
-            export_mapdraws  bigint,
-            wms_mapdraws     bigint,
-            unique           (id, date),
-            foreign key (id) references service_lut (id)
-                             on delete cascade
-        )
-        """
-        self.logger.info(sql)
-        self.cursor.execute(sql)
-
-        comment = (
-            "comment on table service_logs is "
-            "'Aggregated summary statistics'"
-        )
-        self.cursor.execute(comment)
-
-        comment = (
-            "comment on column service_logs.hits is "
-            "'Number of hits aggregated over a set time period (one hour?)'"
-        )
-        self.cursor.execute(comment)
 
     def upsert_new_folders(self, df):
 
@@ -422,20 +119,6 @@ class ApacheLogParser(object):
             if self.cursor.rowcount == 1:
                 self.logger.info(f"Upserted {folder}")
 
-    def upsert_new_service_types(self, df):
-
-        service_types = df['service_type'].unique()
-
-        sql = f"""
-        insert into service_type_lut (name)
-        values (%(service_type)s)
-        on conflict on constraint service_type_exists do nothing
-        """
-        for service_type in service_types:
-            self.cursor.execute(sql, {'service_type': service_type})
-            if self.cursor.rowcount == 1:
-                self.logger.info(f"Upserted {service_type}")
-
     def retrieve_services_from_database(self):
         """
         What are the existing services that we already have in the database?
@@ -449,11 +132,9 @@ class ApacheLogParser(object):
             lu_s.id as service_id,
             lu_st.name as service_type,
             lu_s.active,
-            lu_st.id
+            lu_s.service_type
         from folder_lut lu_f
             inner join service_lut lu_s on lu_f.id = lu_s.folder_id
-            inner join service_type_lut lu_st
-                on lu_st.id = lu_s.service_type_id
         """
         return pd.read_sql(sql, self.conn)
 
@@ -500,7 +181,6 @@ class ApacheLogParser(object):
     def create_any_new_services(self, nco_df):
 
         self.upsert_new_folders(nco_df)
-        self.upsert_new_service_types(nco_df)
 
         # update the dataframe with folder and service type IDs
         df_folders = pd.read_sql("select * from folder_lut", self.conn)
@@ -509,10 +189,6 @@ class ApacheLogParser(object):
 
         df = df[['id', 'service', 'service_type']]
         df.columns = ['folder_id', 'service', 'service_type']
-
-        df_svc_type = pd.read_sql("select * from service_type_lut", self.conn)
-        df = pd.merge(df, df_svc_type,
-                      how='inner', left_on='service_type', right_on='name')
 
         df = df[['folder_id', 'service', 'id']]
         df.columns = ['folder_id', 'service', 'service_type_id']
