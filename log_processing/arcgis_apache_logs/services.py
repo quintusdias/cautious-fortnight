@@ -59,15 +59,14 @@ class ServicesProcessor(CommonProcessor):
 
     def process_raw_records(self, df):
         """
-        We have reached a limit on how many records we accumulate before
-        processing.  Turn what we have into a dataframe and aggregate it
-        to the appropriate granularity.
+        Turn what we have into a dataframe and aggregate it to the
+        appropriate granularity.
         """
         self.logger.info(f'services:  processing {len(df)} raw records...')
         columns = ['date', 'path', 'hits', 'errors', 'nbytes']
         df = df[columns].copy()
 
-        self.logger.info('services:  regexing...')
+        self.logger.info('services:  regexing service IDs...')
         df_svc = df['path'].str.extract(self.regex)
         self.logger.info('services:  done regexing...')
 

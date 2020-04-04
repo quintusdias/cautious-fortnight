@@ -443,16 +443,17 @@ class ApacheLogParser(object):
 
         sql = """
         SELECT
-            lut_f.folder,
-            lut_f.id as folder_id,
-            lut_s.service,
-            lut_s.id as service_id,
-            lut_t.name as service_type,
-            lut_t.id
-        from folder_lut lut_f
-            inner join service_lut lut_s on lut_f.id = lut_s.folder_id
-            inner join service_type_lut lut_t
-                on lut_t.id = lut_s.service_type_id
+            lu_f.folder,
+            lu_f.id as folder_id,
+            lu_s.service,
+            lu_s.id as service_id,
+            lu_st.name as service_type,
+            lu_s.active,
+            lu_st.id
+        from folder_lut lu_f
+            inner join service_lut lu_s on lu_f.id = lu_s.folder_id
+            inner join service_type_lut lu_st
+                on lu_st.id = lu_s.service_type_id
         """
         return pd.read_sql(sql, self.conn)
 
@@ -489,7 +490,7 @@ class ApacheLogParser(object):
         nco_services = set((r.folder, r.service, r.service_type)
                            for _, r in nco_df.iterrows())
         db_services = set((r.folder, r.service, r.service_type)
-                          for _, r in db_df.iterrows())
+                          for _, r in db_df.iterrows() if r['active'])
 
         new_diff = nco_services.difference(db_services)
         old_diff = db_services.difference(nco_services)
