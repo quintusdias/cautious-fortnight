@@ -192,6 +192,7 @@ class RefererProcessor(CommonProcessor):
 
         fig, ax = plt.subplots(figsize=(15, 7))
         df.plot(ax=ax)
+        ax.set_xlabel('')
 
         kwargs = {
             'title': 'GBytes per Hour',
@@ -231,6 +232,7 @@ class RefererProcessor(CommonProcessor):
 
         fig, ax = plt.subplots(figsize=(15, 7))
         df.plot(ax=ax)
+        ax.set_xlabel('')
 
         kwargs = {
             'title': (
