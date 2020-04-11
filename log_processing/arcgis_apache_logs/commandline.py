@@ -5,7 +5,7 @@ import argparse
 from .parse_apache_logs import ApacheLogParser
 
 
-def parse_arcgis_apache_logs():
+def parse_ags_logs():
     """
     Entry point for parsing the log fragments.
     """
@@ -25,7 +25,7 @@ def parse_arcgis_apache_logs():
     log_processor.parse_input()
 
 
-def produce_arcgis_apache_graphics():
+def produce_ags_graphics():
     """
     Entry point for creating the HTML and graphics.
     """
@@ -42,35 +42,22 @@ def produce_arcgis_apache_graphics():
     p.process_graphics()
 
 
-def initialize_ag_ap_pg_database():
+def initialize_ags_database():
     """
     Entry point for initializing the postgresql database.
     """
 
-    epilog = (
-        "Prior to running this script, the database must be created with the "
-        "proper owner, i.e."
-        "\n"
-        "\n"
-        "    createdb --owner=name dbname"
-    )
-    parser = argparse.ArgumentParser(
-        epilog=epilog,
-        formatter_class=argparse.RawDescriptionHelpFormatter
-    )
+    parser = argparse.ArgumentParser()
 
     parser.add_argument('project', choices=['idpgis', 'nowcoast'])
 
-    help = "Database name"
-    parser.add_argument('--dbname', default='arcgis_logs', help=help)
-
     args = parser.parse_args()
 
-    processor = ApacheLogParser(args.project, dbname=args.dbname)
-    processor.initialize_ag_ap_pg_database()
+    processor = ApacheLogParser(args.project, init=True)
+    processor.initialize_ags_database()
 
 
-def check_ag_ap_pg_services():
+def check_ags_services():
     """
     Entry point for checking the database against existing services without
     updating.  This is useful in case you want to see beforehand what would
@@ -87,10 +74,10 @@ def check_ag_ap_pg_services():
     args = parser.parse_args()
 
     processor = ApacheLogParser(args.project, dbname=args.dbname)
-    processor.check_ag_ap_pg_services()
+    processor.check_ags_services()
 
 
-def update_ag_ap_pg_database():
+def update_ags_database():
     """
     Entry point for updating the postgresql database.
     """
@@ -105,10 +92,10 @@ def update_ag_ap_pg_database():
     args = parser.parse_args()
 
     processor = ApacheLogParser(args.project, dbname=args.dbname)
-    processor.update_ag_ap_pg_services()
+    processor.update_ags_services()
 
 
-def prune_arcgis_apache_database():
+def prune_ags_database():
     """
     Entry point for cleaning up the database.
     """

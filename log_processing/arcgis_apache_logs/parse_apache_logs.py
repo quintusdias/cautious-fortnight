@@ -4,11 +4,11 @@ import importlib.resources as ir
 import logging
 import pathlib
 import re
+import sqlite3
 
 # 3rd party library imports
 import lxml.etree
 import pandas as pd
-import psycopg2
 import requests
 
 # local imports
@@ -33,26 +33,30 @@ class ApacheLogParser(object):
     project : str
         Either nowcoast or idpgis
     """
-    def __init__(self, project, dbname='arcgis_logs', infile=None):
+    def __init__(self, project, infile=None, init=False):
         """
         Parameters
         ----------
-        graphics : bool
-            Whether or not to produce any plots or HTML output.
+        project : str
+            Either idpgis or nowcoast.
+        infile : str
+            Path to log file
         """
         self.project = project
         self.infile = infile
 
         self.root = pathlib.Path.home() / 'Documents' / 'arcgis_apache_logs'
+        if not self.root.exists():
+            self.root.mkdir(parents=True, exist_ok=True)
+
+        self.dbpath = self.root / f"{project}.db"
+        if init and self.dbpath.exists():
+            self.dbpath.unlink()
 
         self.schema = project
 
-        if dbname is not None:
-            self.conn = psycopg2.connect(dbname=dbname)
-            self.cursor = self.conn.cursor()
-            self.cursor.execute(f"set search_path to {self.schema}")
-        else:
-            self.conn, self.cursor = None, None
+        self.conn = sqlite3.connect(self.dbpath)
+        self.cursor = self.conn.cursor()
 
         self.setup_logger()
         self.setup_regex()
@@ -87,21 +91,19 @@ class ApacheLogParser(object):
         ul = lxml.etree.SubElement(body, 'ul')
         ul.attrib['class'] = 'tableofcontents'
 
-    def initialize_ag_ap_pg_database(self):
+    def initialize_ags_database(self):
         """
         Examine the project web site and populate the services database with
         existing services.
         """
+
         text = ir.read_text(sql, 'init.sql')
         
-        # The commands cannot be directly run.  The correct schema has to be
-        # placed inside.
-        commands = text.format(myschema=self.project)
-        self.cursor.execute(commands)
+        for command in text.split('\n\n'):
+            self.logger.info(command)
+            self.cursor.execute(command)
 
-        self.cursor.execute(f"set search_path to {self.schema}")
-
-        self.update_ag_ap_pg_services()
+        self.update_ags_services()
 
         self.conn.commit()
 
@@ -138,7 +140,7 @@ class ApacheLogParser(object):
         """
         return pd.read_sql(sql, self.conn)
 
-    def check_ag_ap_pg_services(self):
+    def check_ags_services(self):
         """
         Check the services lookup table against any new services.
         DO NOT do any UPSERTS.
@@ -205,7 +207,7 @@ class ApacheLogParser(object):
                 svc = f"{r['folder_id']}/{r['service']}/{r['service_type_id']}"
                 self.logger.info(f"Upserted {svc}")
 
-    def update_ag_ap_pg_services(self):
+    def update_ags_services(self):
         """
         Update the services lookup table with any new services.
         Use an UPSERT so that existing rows are left alone.

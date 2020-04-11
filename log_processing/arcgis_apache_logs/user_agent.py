@@ -1,11 +1,11 @@
 # Standard library imports
 import datetime as dt
 import importlib.resources as ir
+import sqlite3
 
 # 3rd party library imports
 import matplotlib.pyplot as plt
 import pandas as pd
-import psycopg2
 import seaborn as sns
 
 # Local imports

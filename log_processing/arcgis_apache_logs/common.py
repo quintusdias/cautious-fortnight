@@ -1,12 +1,12 @@
 # Standard library imports
 import logging
 import pathlib
+import sqlite3
 
 # 3rd party library imports
 from lxml import etree
 import matplotlib.pyplot as plt
 import pandas as pd
-import psycopg2
 
 
 class CommonProcessor(object):
