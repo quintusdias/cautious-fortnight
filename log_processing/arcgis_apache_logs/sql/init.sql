@@ -424,14 +424,6 @@ ALTER TABLE ONLY {myschema}.ip_address_lut
 
 
 --
--- Name: ip_address_logs ip_address_logs_id_date_key; Type: CONSTRAINT; Schema: {myschema}; Owner: jevans
---
-
-ALTER TABLE ONLY {myschema}.ip_address_logs
-    ADD CONSTRAINT ip_address_logs_id_date_key UNIQUE (id, date);
-
-
---
 -- Name: ip_address_lut ip_address_lut_pkey; Type: CONSTRAINT; Schema: {myschema}; Owner: jevans
 --
 
@@ -448,14 +440,6 @@ ALTER TABLE ONLY {myschema}.referer_lut
 
 
 --
--- Name: referer_logs referer_logs_id_date_key; Type: CONSTRAINT; Schema: {myschema}; Owner: jevans
---
-
-ALTER TABLE ONLY {myschema}.referer_logs
-    ADD CONSTRAINT referer_logs_id_date_key UNIQUE (id, date);
-
-
---
 -- Name: referer_lut referer_lut_pkey; Type: CONSTRAINT; Schema: {myschema}; Owner: jevans
 --
 
@@ -469,14 +453,6 @@ ALTER TABLE ONLY {myschema}.referer_lut
 
 ALTER TABLE ONLY {myschema}.service_lut
     ADD CONSTRAINT service_exists UNIQUE (folder_id, service, service_type_id);
-
-
---
--- Name: service_logs service_logs_id_date_key; Type: CONSTRAINT; Schema: {myschema}; Owner: jevans
---
-
-ALTER TABLE ONLY {myschema}.service_logs
-    ADD CONSTRAINT service_logs_id_date_key UNIQUE (id, date);
 
 
 --
@@ -509,14 +485,6 @@ ALTER TABLE ONLY {myschema}.service_type_lut
 
 ALTER TABLE ONLY {myschema}.user_agent_lut
     ADD CONSTRAINT user_agent_exists UNIQUE (name);
-
-
---
--- Name: user_agent_logs user_agent_logs_id_date_key; Type: CONSTRAINT; Schema: {myschema}; Owner: jevans
---
-
-ALTER TABLE ONLY {myschema}.user_agent_logs
-    ADD CONSTRAINT user_agent_logs_id_date_key UNIQUE (id, date);
 
 
 --
