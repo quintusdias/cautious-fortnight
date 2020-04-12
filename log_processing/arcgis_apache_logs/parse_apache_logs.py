@@ -109,15 +109,21 @@ class ApacheLogParser(object):
 
     def upsert_new_folders(self, df):
 
-        folders = df['folder'].unique()
+        sql = "select distinct folder from folder_lut"
+        df_existing = pd.read_sql(sql, self.conn)
+        old_folders = df_existing['folder']
 
-        sql = f"""
-        insert into folder_lut (folder)
-        values (%(folder)s)
-        on conflict on constraint folder_exists do nothing
-        """
-        for folder in folders:
-            self.cursor.execute(sql, {'folder': folder})
+        current_folders = df['folder'].unique()
+
+        # which folders are new?
+        new_folders = [
+            folder for folder in current_folders
+            if folder not in old_folders
+        ] 
+
+        sql = "insert into folder_lut (folder) values (?)"
+        for folder in new_folders:
+            self.cursor.execute(sql, (folder,))
             if self.cursor.rowcount == 1:
                 self.logger.info(f"Upserted {folder}")
 
@@ -132,9 +138,8 @@ class ApacheLogParser(object):
             lu_f.id as folder_id,
             lu_s.service,
             lu_s.id as service_id,
-            lu_st.name as service_type,
             lu_s.active,
-            lu_s.service_type
+            lu_s.service_type_id as service_type
         from folder_lut lu_f
             inner join service_lut lu_s on lu_f.id = lu_s.folder_id
         """
@@ -190,22 +195,28 @@ class ApacheLogParser(object):
                       how='inner', left_on='folder', right_on='folder')
 
         df = df[['id', 'service', 'service_type']]
-        df.columns = ['folder_id', 'service', 'service_type']
+        index_cols = ['folder_id', 'service', 'service_type_id']
+        df.columns = index_cols
+        current = df.set_index(index_cols).index
 
-        df = df[['folder_id', 'service', 'id']]
-        df.columns = ['folder_id', 'service', 'service_type_id']
+        # Get the existing services
+        sql = "select * from service_lut"
+        df_existing = pd.read_sql(sql, self.conn)
+        existing = df_existing.set_index(index_cols).index
+
+        new_services = [
+            service for service in current if service not in existing
+        ]
 
         # And finally, insert any new services.
         sql = f"""
         insert into service_lut (folder_id, service, service_type_id)
-        values (%(folder_id)s, %(service)s, %(service_type_id)s)
-        on conflict on constraint service_exists do nothing
+        values (?, ?, ?)
         """
-        for _, r in df.iterrows():
-            self.cursor.execute(sql, r.to_dict())
+        for service in new_services:
+            self.cursor.execute(sql, service)
             if self.cursor.rowcount == 1:
-                svc = f"{r['folder_id']}/{r['service']}/{r['service_type_id']}"
-                self.logger.info(f"Upserted {svc}")
+                self.logger.info(f"Upserted {service}")
 
     def update_ags_services(self):
         """

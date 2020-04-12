@@ -17,7 +17,6 @@ CREATE TABLE ip_address_logs (
     hits bigint,
     errors bigint,
     nbytes bigint,
-    CONSTRAINT ip_address_logs_id_date_key UNIQUE (id, date),
     CONSTRAINT ip_address_logs_id_fkey FOREIGN KEY (id) REFERENCES ip_address_lut(id) ON DELETE CASCADE
 );
 
@@ -34,7 +33,6 @@ CREATE TABLE referer_logs (
     hits bigint,
     errors bigint,
     nbytes bigint,
-    CONSTRAINT referer_logs_id_date_key UNIQUE (id, date),
     CONSTRAINT referer_logs_id_fkey FOREIGN KEY (id) REFERENCES referer_lut(id) ON DELETE CASCADE
 );
 
@@ -53,7 +51,6 @@ CREATE TABLE service_logs (
     nbytes bigint,
     export_mapdraws bigint,
     wms_mapdraws bigint,
-    CONSTRAINT service_logs_id_date_key UNIQUE (id, date),
     CONSTRAINT service_logs_id_fkey FOREIGN KEY (id) REFERENCES service_lut(id) ON DELETE CASCADE
 );
 

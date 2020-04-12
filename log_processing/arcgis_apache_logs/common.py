@@ -202,14 +202,16 @@ class CommonProcessor(object):
         The current set of records may overlap with existing records in the
         database, so we must merge them.
         """
+        start = df_current.iloc[0].date
+
         # Get everything from the database after this time.
         sql = f"""
-               select *
-               from {table}
-               where date >= %(date)s
-               order BY date
+               SELECT *
+               FROM {table}
+               WHERE date >= ?
+               ORDER BY date
                """
-        params = {'date': pd.Timestamp(df_current.iloc[0].date)}
+        params = (start.to_pydatetime(), )
         df_database = pd.read_sql(sql, self.conn, params=params)
         if df_database.shape[0] == 0:
             # Nothing to merge.
@@ -219,7 +221,7 @@ class CommonProcessor(object):
         sql = f"""
                DELETE
                FROM {table}
-               WHERE date >= %(date)s
+               WHERE date >= ?
                """
         self.cursor.execute(sql, params)
 
@@ -236,13 +238,4 @@ class CommonProcessor(object):
 
     def to_table(self, df, table):
 
-        column_list = ', '.join(df.columns)
-        sql = f"""
-        insert into {table}
-        ({column_list})
-        values %s
-        """
-        rows = [row.to_dict() for _, row in df.iterrows()]
-        template = ', '.join([f'%({col})s' for col in df.columns])
-        template = f"({template})"
-        psycopg2.extras.execute_values(self.cursor, sql, rows, template)
+        df.to_sql(table, self.conn, if_exists='append', index=False)

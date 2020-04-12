@@ -17,10 +17,15 @@ conda env create -f environment.yml
 
 ## Initialize the database
 
+So, for example, to setup for nowcoast, use
+
 ```
-usage: initialize-ags-database [-h] [--dbname DBNAME] {idpgis,nowcoast}
-initialize-ags-database: error: the following arguments are required: project
+initialize-ags-database nowcoast
 ```
 
-So, for example, to setup for nowcoast, use
+# Test on a log fragment from Akamai
+
+```
+parse-ags-logs nowcoast --infile /path/to/log/file
+```
 

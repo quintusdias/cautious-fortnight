@@ -15,13 +15,9 @@ def parse_ags_logs():
     parser.add_argument('project', choices=['idpgis', 'nowcoast'])
     parser.add_argument('--infile')
 
-    help = "Database name"
-    parser.add_argument('--dbname', default='arcgis_logs', help=help)
-
     args = parser.parse_args()
 
-    log_processor = ApacheLogParser(args.project, infile=args.infile,
-                                    dbname=args.dbname)
+    log_processor = ApacheLogParser(args.project, infile=args.infile)
     log_processor.parse_input()
 
 
@@ -32,13 +28,10 @@ def produce_ags_graphics():
 
     parser = argparse.ArgumentParser()
 
-    help = "Database name"
-    parser.add_argument('--dbname', default='arcgis_logs', help=help)
-
     parser.add_argument('project', choices=['idpgis', 'nowcoast'])
     args = parser.parse_args()
 
-    p = ApacheLogParser(args.project, infile=None, dbname=args.dbname)
+    p = ApacheLogParser(args.project, infile=None)
     p.process_graphics()
 
 

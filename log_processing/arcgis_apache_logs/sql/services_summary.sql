@@ -148,15 +148,15 @@ select
     service_lut.service,
     service_lut.service_type,
     day_pct_change_cte.hits,
-    round(day_pct_change_cte.hits_pct::numeric, 1) as "hits %",
+    round(day_pct_change_cte.hits_pct, 1) as "hits %",
     round(day_pct_change_cte.day_pct_delta, 1) as day_pct_delta,
     round(week_pct_change_cte.week_pct_delta, 1) as week_pct_delta,
-    round(day_pct_change_cte.mapdraw_pct::numeric, 1) as "mapdraw %",
-    round(gbytes::numeric, 1) as gbytes,
-    round(gbytes_pct::numeric, 1) as "gbytes %",
+    round(day_pct_change_cte.mapdraw_pct, 1) as "mapdraw %",
+    round(gbytes, 1) as gbytes,
+    round(gbytes_pct, 1) as "gbytes %",
     errors,
-    round(error_pct_all_hits::numeric, 1) as "errors: % of all hits",
-    round(error_pct_all_errors::numeric, 1) as "errors: % of all errors"
+    round(error_pct_all_hits, 1) as "errors: % of all hits",
+    round(error_pct_all_errors, 1) as "errors: % of all errors"
 from week_pct_change_cte
      inner join service_lut on week_pct_change_cte.service_id = service_lut.id
      inner join folder_lut on service_lut.folder_id = folder_lut.id

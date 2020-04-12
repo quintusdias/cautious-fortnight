@@ -76,10 +76,13 @@ class SummaryProcessor(CommonProcessor):
                      SUM(export_mapdraws) as export_mapdraws,
                      SUM(wms_mapdraws) as wms_mapdraws
               FROM service_logs
-              WHERE date >= %(date)s
+              WHERE date >= ?
               GROUP BY date
               """
-        df_svc = pd.read_sql(sql, self.conn, params={'date': starting_date})
+        params = (starting_date.to_pydatetime(), )
+        df_svc = pd.read_sql(sql, self.conn, params=params)
+        df['date'] = pd.to_datetime(df['date'], utc=True)
+        df_svc['date'] = pd.to_datetime(df_svc['date'], utc=True)
         df = pd.merge(df, df_svc, on='date', how='left')
         df = df.fillna(value=0)
 
@@ -114,14 +117,16 @@ class SummaryProcessor(CommonProcessor):
         sql = """
             SELECT
                 -- resample to dates
-                date::date,
+                date,
                 -- scale to TBytes
-                SUM(nbytes) / 1024 ^ 4 as bandwidth
+                SUM(nbytes) / 1024 / 1024 / 1024 / 1024 as bandwidth
             FROM summary
-            GROUP BY date::date
-            ORDER BY date::date
+            GROUP BY date
+            ORDER BY date
             """
-        df = pd.read_sql(sql, self.conn, index_col='date')
+        df = pd.read_sql(sql, self.conn)
+        df['date'] = pd.to_datetime(df['date'], utc=True)
+        df.set_index('date', inplace=True)
 
         throughput_last24h = df.iloc[-1]['bandwidth'] * 1000
 
@@ -154,7 +159,9 @@ class SummaryProcessor(CommonProcessor):
             -- Last 3 days = 72 hours
             limit 72
             """
-        df = pd.read_sql(sql, self.conn, index_col='date')
+        df = pd.read_sql(sql, self.conn)
+        df['date'] = pd.to_datetime(df['date'], utc=True)
+        df.set_index('date', inplace=True)
         df = df.resample('min').pad()
         return df
 
@@ -170,7 +177,9 @@ class SummaryProcessor(CommonProcessor):
               ORDER BY date desc
               limit 4320
               """
-        df = pd.read_sql(sql, self.conn, index_col='date')
+        df = pd.read_sql(sql, self.conn)
+        df['date'] = pd.to_datetime(df['date'], utc=True)
+        df = df.set_index('date')
         return df
 
     def get_geoevent_information(self):
@@ -187,7 +196,9 @@ class SummaryProcessor(CommonProcessor):
               ORDER BY logs.date desc
               limit 72
               """
-        df = pd.read_sql(sql, self.conn, index_col='date')
+        df = pd.read_sql(sql, self.conn)
+        df['date'] = pd.to_datetime(df['date'], utc=True)
+        df = df.set_index('date')
         return df
 
     def summarize_last_24_hours_transactions(self, html_doc):
@@ -275,16 +286,18 @@ class SummaryProcessor(CommonProcessor):
         # hits.
         sql = """
             SELECT
-                date::date,
+                date,
                 -- scale to hits / second
                 SUM(hits) / 86400 as hits,
                 SUM(errors) / 86400 as errors,
                 SUM(mapdraws) / 86400 as mapdraws
             FROM summary
-            GROUP BY date::date
-            ORDER BY date::date desc
+            GROUP BY date
+            ORDER BY date desc
             """
-        df = pd.read_sql(sql, self.conn, index_col='date')
+        df = pd.read_sql(sql, self.conn)
+        df['date'] = pd.to_datetime(df['date'], utc=True)
+        df = df.set_index('date')
 
         text = (
             "Here are daily averages of the hits, errors, and mapdraws "

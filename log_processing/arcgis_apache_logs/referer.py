@@ -76,36 +76,40 @@ class RefererProcessor(CommonProcessor):
 
         self.logger.info('Referers:  done processing records...')
 
-    def replace_referers_with_ids(self, df):
+    def replace_referers_with_ids(self, df_orig):
         """
         Record any new referers and get IDs for them.
         """
         self.logger.info('about to update the referer LUT...')
 
-        # Try upserting all the current referers.  If a referer is already
-        # known, then do nothing.
-        sql = f"""
-        insert into referer_lut (name) values %s
-        on conflict on constraint referer_exists do nothing
-        """
-
-        args = ((x,) for x in df.referer.unique())
-
-        psycopg2.extras.execute_values(self.cursor, sql, args, page_size=1000)
-
-        # Get the all the IDs associated with the referers.  Fold then back
-        # into our data frame, then drop the referer names because we don't
-        # need them anymore.
-        sql = f"""
-               SELECT id, name from referer_lut
-               """
+        sql = """
+              SELECT * from referer_lut
+              """
         known_referers = pd.read_sql(sql, self.conn)
 
-        df = pd.merge(df, known_referers,
+        # Get the referer IDs
+        df = pd.merge(df_orig, known_referers,
                       how='left', left_on='referer', right_on='name')
 
-        df = df.drop(['referer', 'name'], axis='columns')
-        self.logger.info('finished updating the referer LUT...')
+        # How many referers have NaN for IDs?  This must populate the known
+        # referers table before going further.
+        unknown_referers = df['referer'][df['id'].isnull()].unique()
+        if len(unknown_referers) > 0:
+            new_df = pd.Series(unknown_referers, name='name').to_frame()
+
+            new_df.to_sql('referer_lut', self.conn,
+                          if_exists='append', index=False)
+            self.conn.commit()
+
+            sql = """
+                  SELECT * from referer_lut
+                  """
+            known_referers = pd.read_sql(sql, self.conn)
+            df = pd.merge(df_orig, known_referers,
+                          how='left', left_on='referer', right_on='name')
+
+        df.drop(['referer', 'name'], axis='columns', inplace=True)
+
         return df
 
     def preprocess_database(self):
@@ -151,7 +155,7 @@ class RefererProcessor(CommonProcessor):
         sql = f"""
             SELECT SUM(hits) as hits, id
             FROM referer_logs logs
-            where logs.date::date = '{yesterday}'
+            where date(logs.date) = '{yesterday}'
             GROUP BY id
             order by hits desc
             limit 7
@@ -171,7 +175,7 @@ class RefererProcessor(CommonProcessor):
         query = """
             SELECT
                 logs.date,
-                logs.nbytes::real / 1024 ^ 3 as nbytes,
+                logs.nbytes / 1024 / 1024 / 1024 as nbytes,
                 lut.name as referer
             FROM referer_logs logs INNER JOIN referer_lut lut using(id)
             where
@@ -207,7 +211,7 @@ class RefererProcessor(CommonProcessor):
         query = """
             SELECT
                 logs.date,
-                logs.hits::real / 3600 as hits,
+                logs.hits / 3600 as hits,
                 lut.name as referer
             FROM referer_logs logs INNER JOIN referer_lut lut using(id)
             where

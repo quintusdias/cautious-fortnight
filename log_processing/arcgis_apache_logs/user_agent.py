@@ -69,35 +69,42 @@ class UserAgentProcessor(CommonProcessor):
 
         self.logger.info("user agents:  done processing raw records")
 
-    def replace_user_agents_with_ids(self, df):
+    def replace_user_agents_with_ids(self, df_orig):
         """
         Record any new user agents and get IDs for them.
         """
         self.logger.info('about to update the user agent LUT...')
 
-        # Try upserting all the current referers.  If a user agent is already
-        # known, then do nothing.
-        sql = f"""
-        insert into user_agent_lut (name) values %s
-        on conflict on constraint user_agent_exists do nothing
-        """
-        args = ((x,) for x in df.user_agent.unique())
-        psycopg2.extras.execute_values(self.cursor, sql, args, page_size=1000)
+        sql = """
+              SELECT * from user_agent_lut
+              """
+        known_user_agents = pd.read_sql(sql, self.conn)
 
-        # Get the all the IDs associated with the referers.  Fold then back
-        # into our data frame, then drop the referers because we don't need
-        # them anymore.
-        sql = f"""
-               SELECT id, name from user_agent_lut
-               """
-        known_referers = pd.read_sql(sql, self.conn)
-
-        df = pd.merge(df, known_referers,
+        # Get the user_agent IDs
+        df = pd.merge(df_orig, known_user_agents,
                       how='left', left_on='user_agent', right_on='name')
 
-        df = df.drop(['user_agent', 'name'], axis='columns')
-        self.logger.info('finished updating the user agent LUT...')
+        # How many user_agents have NaN for IDs?  This must populate the known
+        # user_agents table before going further.
+        unknown_user_agents = df['user_agent'][df['id'].isnull()].unique()
+        if len(unknown_user_agents) > 0:
+            new_df = pd.Series(unknown_user_agents, name='name').to_frame()
+
+            new_df.to_sql('user_agent_lut', self.conn,
+                          if_exists='append', index=False)
+            self.conn.commit()
+
+            sql = """
+                  SELECT * from user_agent_lut
+                  """
+            known_user_agents = pd.read_sql(sql, self.conn)
+            df = pd.merge(df_orig, known_user_agents,
+                          how='left', left_on='user_agent', right_on='name')
+
+        df.drop(['user_agent', 'name'], axis='columns', inplace=True)
+
         return df
+
 
     def preprocess_database(self):
         """

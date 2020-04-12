@@ -94,8 +94,9 @@ class ServicesProcessor(CommonProcessor):
             return
 
         df = self.merge_with_database(df, 'service_logs')
+        df['date'] = pd.to_datetime(df['date'], utc=True)
 
-        self.to_table(df, 'service_logs')
+        df.to_sql('service_logs', self.conn, if_exists='append', index=False)
         self.conn.commit()
 
         # Reset
@@ -108,36 +109,26 @@ class ServicesProcessor(CommonProcessor):
         msg = 'selecting folders, services, service_types...'
         self.logger.info(msg)
 
-        sql = f"""
-              select
-                  s.id id,
-                  s.service service,
-                  f.folder,
-                  s.service_type
-              from service_lut s
-                   inner join folder_lut f on s.folder_id = f.id
+        group_cols = ['folder', 'service', 'service_type']
+
+        sql = """
+              SELECT
+                  s.id, f.folder, s.service,
+                  s.service_type_id as service_type
+              from service_lut s inner join folder_lut f
+              on s.folder_id = f.id
               """
         known_services = pd.read_sql(sql, self.conn)
 
-        msg = 'done selecting folders, services, service_types...'
-        self.logger.info(msg)
-
-        group_cols = ['folder', 'service', 'service_type']
-
-        # Get the service IDs
         df = pd.merge(df_orig, known_services,
                       how='left',
                       left_on=group_cols,
                       right_on=group_cols)
 
-        # How many services have NaN for IDs?  These are requests that do not
-        # correspond to a valid service.  Normally you might think that these
-        # would be logged as errors, but AGS doesn't always do this.
-        # This must be dropped.  Maybe they could be folded into the error
-        # count somehow.
+        # How many services have NaN for IDs?  This must be dropped.
         dfnull = df[df.id.isnull()]
         n = len(dfnull)
-        msg = f"Dropping {n} unmatched IDs, invalid service name given?"
+        msg = f"Dropping {n} unmatched IDs"
         self.logger.info(msg)
         df = df.dropna(subset=['id'])
 
