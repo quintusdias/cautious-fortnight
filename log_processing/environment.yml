@@ -1,0 +1,14 @@
+name: agslogs
+channels:
+  - defaults
+dependencies:
+  - coverage
+  - jinja2
+  - lxml
+  - matplotlib
+  - numpy
+  - pandas
+  - pytest
+  - python
+  - requests
+  - seaborn
