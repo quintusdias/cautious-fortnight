@@ -8,9 +8,10 @@ do
     prune-arcgis-apache-database $project
 
     root=$HOME/data/logs/akamai/"$project"/incoming
+    mkdir -p $root
     
     # Delete files that are older than a week.
-    find "$root" -mtime +10080 | xargs -I fname rm fname
+    #find "$root" -mtime +10080 | xargs -I fname rm fname
     
     # Get any new log files.
     get_akamai_logs $project
@@ -29,10 +30,10 @@ do
     for datenum in $(seq 10 15)
     do
         datestr=$(date +%Y%m%d --date="-""$datenum"" days")
-        rm $HOME/data/logs/akamai/$project/incoming/*.*.*-*-"$datestr"*.gz
+        # rm $HOME/data/logs/akamai/$project/incoming/*.*.*-*-"$datestr"*.gz
     done	
     
 done
 
-rsync -avz ~/Documents/arcgis_apache_logs/*.{html,png} jevans@cerebrus:/var/www/html/gis
+# rsync -avz ~/Documents/arcgis_apache_logs/*.{html,png} jevans@cerebrus:/var/www/html/gis
 
