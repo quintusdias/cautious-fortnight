@@ -34,6 +34,8 @@ SET default_with_oids = false;
 -- Name: burst; Type: TABLE; Schema: {myschema}; Owner: jevans
 --
 
+create type {myschema}.svc_type_enum as ENUM('MapServer', 'ImageServer', 'FeatureServer');
+
 CREATE TABLE {myschema}.burst (
     date timestamp with time zone,
     hits bigint,
@@ -251,7 +253,7 @@ CREATE TABLE {myschema}.service_lut (
     active boolean DEFAULT true,
     service text,
     folder_id integer,
-    service_type_id integer
+    service_type_id {myschema}.svc_type_enum
 );
 
 
@@ -386,13 +388,6 @@ ALTER TABLE ONLY {myschema}.service_lut ALTER COLUMN id SET DEFAULT nextval('{my
 
 
 --
--- Name: service_type_lut id; Type: DEFAULT; Schema: {myschema}; Owner: jevans
---
-
-ALTER TABLE ONLY {myschema}.service_type_lut ALTER COLUMN id SET DEFAULT nextval('{myschema}.service_type_lut_id_seq'::regclass);
-
-
---
 -- Name: user_agent_lut id; Type: DEFAULT; Schema: {myschema}; Owner: jevans
 --
 
@@ -461,22 +456,6 @@ ALTER TABLE ONLY {myschema}.service_lut
 
 ALTER TABLE ONLY {myschema}.service_lut
     ADD CONSTRAINT service_lut_pkey PRIMARY KEY (id);
-
-
---
--- Name: service_type_lut service_type_exists; Type: CONSTRAINT; Schema: {myschema}; Owner: jevans
---
-
-ALTER TABLE ONLY {myschema}.service_type_lut
-    ADD CONSTRAINT service_type_exists UNIQUE (name);
-
-
---
--- Name: service_type_lut service_type_lut_pkey; Type: CONSTRAINT; Schema: {myschema}; Owner: jevans
---
-
-ALTER TABLE ONLY {myschema}.service_type_lut
-    ADD CONSTRAINT service_type_lut_pkey PRIMARY KEY (id);
 
 
 --

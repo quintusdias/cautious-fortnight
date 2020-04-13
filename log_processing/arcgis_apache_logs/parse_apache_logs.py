@@ -130,9 +130,8 @@ class ApacheLogParser(object):
             lu_f.id as folder_id,
             lu_s.service,
             lu_s.id as service_id,
-            lu_st.name as service_type,
-            lu_s.active,
-            lu_s.service_type
+            lu_s.service_type_id as service_type,
+            lu_s.active
         from folder_lut lu_f
             inner join service_lut lu_s on lu_f.id = lu_s.folder_id
         """
@@ -188,15 +187,12 @@ class ApacheLogParser(object):
                       how='inner', left_on='folder', right_on='folder')
 
         df = df[['id', 'service', 'service_type']]
-        df.columns = ['folder_id', 'service', 'service_type']
-
-        df = df[['folder_id', 'service', 'id']]
         df.columns = ['folder_id', 'service', 'service_type_id']
 
         # And finally, insert any new services.
         sql = f"""
         insert into service_lut (folder_id, service, service_type_id)
-        values (%(folder_id)s, %(service)s, %(service_type_id)s)
+        values (%(folder_id)s, %(service)s, %(service_type_id)s::svc_type_enum)
         on conflict on constraint service_exists do nothing
         """
         for _, r in df.iterrows():
