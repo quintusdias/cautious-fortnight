@@ -92,11 +92,7 @@ class ApacheLogParser(object):
         Examine the project web site and populate the services database with
         existing services.
         """
-        text = ir.read_text(sql, 'init.sql')
-        
-        # The commands cannot be directly run.  The correct schema has to be
-        # placed inside.
-        commands = text.format(myschema=self.project)
+        commands = ir.read_text(sql, f'init_{self.schema}.sql')
         self.cursor.execute(commands)
 
         self.cursor.execute(f"set search_path to {self.schema}")
@@ -130,7 +126,7 @@ class ApacheLogParser(object):
             lu_f.id as folder_id,
             lu_s.service,
             lu_s.id as service_id,
-            lu_s.service_type_id as service_type,
+            lu_s.service_type as service_type,
             lu_s.active
         from folder_lut lu_f
             inner join service_lut lu_s on lu_f.id = lu_s.folder_id
@@ -191,7 +187,7 @@ class ApacheLogParser(object):
 
         # And finally, insert any new services.
         sql = f"""
-        insert into service_lut (folder_id, service, service_type_id)
+        insert into service_lut (folder_id, service, service_type)
         values (%(folder_id)s, %(service)s, %(service_type_id)s::svc_type_enum)
         on conflict on constraint service_exists do nothing
         """
