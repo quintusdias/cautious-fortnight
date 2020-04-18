@@ -1,6 +1,7 @@
 # Standard libraary imports
 import datetime as dt
 import importlib.resources as ir
+import unittest
 from unittest.mock import patch
 
 # 3rd party library imports
@@ -11,6 +12,7 @@ from arcgis_apache_logs import ApacheLogParser, ServicesProcessor
 from .test_core import TestCore
 
 
+@unittest.skip('not yet')
 class TestSuite(TestCore):
 
     def test_database_not_initialized(self):

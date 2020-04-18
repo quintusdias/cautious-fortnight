@@ -2,12 +2,14 @@
 
 # 3rd party library imports
 import pandas as pd
+import unittest
 
 # Local imports
 from arcgis_apache_logs import IPAddressProcessor
 from .test_core import TestCore
 
 
+@unittest.skip('not yet')
 class TestSuite(TestCore):
 
     def test_database_not_initialized(self):

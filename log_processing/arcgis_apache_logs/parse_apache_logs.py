@@ -71,11 +71,21 @@ class ApacheLogParser(object):
 
         self.graphics_setup()
 
-    def __del__(self):
-
+    def cleanup(self):
         # When cleaning up, if we had a connection, commit just to be sure.
         if hasattr(self, 'conn') and self.conn is not None:
             self.conn.commit()
+            self.conn.close()
+            self.conn = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self.cleanup()
+
+    def __del__(self):
+        self.cleanup()
 
     def graphics_setup(self):
         # Setup a skeleton output document.

@@ -2,6 +2,7 @@
 import os
 import pathlib
 import tempfile
+import unittest
 from unittest.mock import patch
 
 # 3rd party library imports
@@ -12,6 +13,7 @@ from arcgis_apache_logs import UserAgentProcessor
 from .test_core import TestCore
 
 
+@unittest.skip('not yet')
 class TestSuite(TestCore):
 
     def setUp(self):

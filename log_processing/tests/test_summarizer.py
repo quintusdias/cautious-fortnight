@@ -1,4 +1,5 @@
 # Standard libraary imports
+import unittest
 
 # 3rd party library imports
 import pandas as pd
@@ -8,6 +9,7 @@ from arcgis_apache_logs import SummaryProcessor
 from .test_core import TestCore
 
 
+@unittest.skip('not yet')
 class TestSuite(TestCore):
 
     def test_summary_database_tables_not_initialized(self):

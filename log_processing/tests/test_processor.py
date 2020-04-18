@@ -1,36 +1,97 @@
 # Standard library imports
 import importlib.resources as ir
+import unittest
 from unittest.mock import patch
 
 # 3rd party library imports
 import pandas as pd
+import psycopg2
 
+import arcgis_apache_logs
 from arcgis_apache_logs import ApacheLogParser
 from .test_core import TestCore
 
 
 @patch('arcgis_apache_logs.common.logging.getLogger')
-class TestSuite(TestCore):
+class TestSuite(unittest.TestCase):
+
+    def setUp(self):
+
+        self.dbname = 'agpgtest'
+        self.conn = psycopg2.connect(dbname=self.dbname)
+
+        with self.conn.cursor() as cursor:
+            for schema in ('idpgis', 'nowcoast'):
+                cursor.execute(f'drop schema {schema} cascade')
+
+                commands = ir.read_text(arcgis_apache_logs.sql,
+                                        f"init_{schema}.sql")
+                cursor.execute(commands)
+
+            sql = """
+            insert into idpgis.folder_lut (folder)
+            values 
+                ('NWS_Forecasts_Guidance_Warnings'),
+                ('radar'),
+                ('NOS_ESI'),
+                ('NWS_Observations'),
+                ('NOAA')
+            """
+            cursor.execute(sql)
+
+            sql = """
+            insert into idpgis.service_lut
+            (service, folder_id, service_type)
+            values 
+                ('watch_warn_adv', 1, 'MapServer'::idpgis.svc_type_enum),
+                ('radar_base_reflectivity_time', 2, 'ImageServer'::idpgis.svc_type_enum),
+                ('ESI_NorthwestArctic_Data', 3, 'MapServer'::idpgis.svc_type_enum),
+                ('ESI_Virginia_Data', 3, 'MapServer'::idpgis.svc_type_enum),
+                ('wpc_qpf', 1, 'MapServer'::idpgis.svc_type_enum),
+                ('radar_base_reflectivity', 4, 'MapServer'::idpgis.svc_type_enum),
+                ('NOAA_Estuarine_Bathymetry', 5, 'MapServer'::idpgis.svc_type_enum)
+            """
+            cursor.execute(sql)
+
+        self.conn.commit()
+
+    def test_good_folder_good_service(self, mock_logger):
+        """
+        SCENARIO:  The log has one entry that happens to be valid.
+
+        EXPECTED RESULT:   The service_logs, user_agent_logs, referer_logs,
+        and ip_address_logs all have one entry.
+        """
+        with ir.path('tests.data', 'single_valid_entry.gz') as logfile:
+            with ApacheLogParser(
+                'idpgis', dbname=self.dbname, infile=logfile
+            ) as p:
+                p.parse_input()
+
+        for table in [
+            "service_logs", "user_agent_logs", "referer_logs",
+            "ip_address_logs"
+        ]:
+            sql = f"SELECT * from idpgis.{table}"
+            df = pd.read_sql(sql, self.conn)
+            self.assertEqual(df.shape[0], 1)
 
     def test_bad_folder(self, mock_logger):
         """
-        SCENARIO:  Seven IDPGIS log records are processed as the database is
-        initialized.  One of the seven records does not come from a recognized
-        folder.  The other six records all come from individual services.
+        SCENARIO:  The input record does not have a recognized folder.
 
-        EXPECTED RESULT:  The known_services table is populated with only the
-        seven records that it was initially populated with.
+        EXPECTED RESULT:  The service_logs table is still empty.
         """
-        with ir.path('tests.data', 'one_invalid_folder.dat.gz') as logfile:
-            p = ApacheLogParser('idpgis', logfile)
-            self.initialize_known_services_table(p.services)
-            p.parse_input()
+        with ir.path('tests.data', 'invalid_folder.gz') as logfile:
+            with ApacheLogParser(
+                'idpgis', dbname=self.dbname, infile=logfile
+            ) as p:
+                p.parse_input()
 
-        conn = p.referer.conn
+        df = pd.read_sql("SELECT * from idpgis.service_logs", self.conn)
+        self.assertEqual(df.shape[0], 0)
 
-        df = pd.read_sql("SELECT * from known_services", conn)
-        self.assertEqual(df.shape[0], 7)
-
+    @unittest.skip('not yet')
     def test_export_mapdraw(self, mock_logger):
         """
         SCENARIO:  Ten IDPGIS log records are processed, six of them have
@@ -40,7 +101,7 @@ class TestSuite(TestCore):
         that marks a wms map draw.
         """
         with ir.path('tests.data', 'export.dat.gz') as logfile:
-            p = ApacheLogParser('idpgis', logfile)
+            p = ApacheLogParser('idpgis', dbname=self.dbname, infile=logfile)
             self.initialize_known_services_table(p.services)
             p.parse_input()
             p.services.get_timeseries()
@@ -51,6 +112,7 @@ class TestSuite(TestCore):
         s = df.sum()
         self.assertEqual(s['export_mapdraws'], 6)
 
+    @unittest.skip('not yet')
     def test_wms_get_map(self, mock_logger):
         """
         SCENARIO:  Ten IDPGIS log records are processed, one of them has a
@@ -60,7 +122,7 @@ class TestSuite(TestCore):
         that marks a wms map draw.
         """
         with ir.path('tests.data', 'ten.dat.gz') as logfile:
-            p = ApacheLogParser('idpgis', logfile)
+            p = ApacheLogParser('idpgis', dbname=self.dbname, infile=logfile)
             self.initialize_known_services_table(p.services)
             p.parse_input()
 
@@ -71,6 +133,7 @@ class TestSuite(TestCore):
         s = df.sum()
         self.assertEqual(s['wms_mapdraws'], 1)
 
+    @unittest.skip('not yet')
     def test_init_ten_records(self, mock_logger):
         """
         SCENARIO:  Ten IDPGIS log records are processed as the database is
@@ -99,7 +162,7 @@ class TestSuite(TestCore):
         """
         with ir.path('tests.data', 'ten.dat.gz') as logfile:
 
-            p = ApacheLogParser('idpgis', logfile)
+            p = ApacheLogParser('idpgis', dbname=self.dbname, infile=logfile)
             self.initialize_known_services_table(p.services)
             p.parse_input()
             conn = p.referer.conn
@@ -134,6 +197,7 @@ class TestSuite(TestCore):
 
         self.assertTrue(p.logger.info.call_count > 0)
 
+    @unittest.skip('not yet')
     def test_records_aggregated(self, mock_logger):
         """
         SCENARIO:  Ten records come in, then the same ten records offset by 30
@@ -142,7 +206,7 @@ class TestSuite(TestCore):
         EXPECTED RESULT:  The tables reflect fully aggregated data.
         """
         with ir.path('tests.data', 'ten.dat.gz') as logfile:
-            p = ApacheLogParser('idpgis', logfile)
+            p = ApacheLogParser('idpgis', dbname=self.dbname, infile=logfile)
             self.initialize_known_services_table(p.services)
             p.parse_input()
 
@@ -160,7 +224,7 @@ class TestSuite(TestCore):
 
         with ir.path('tests.data', 'another_ten.dat.gz') as logfile:
 
-            p = ApacheLogParser('idpgis', logfile)
+            p = ApacheLogParser('idpgis', dbname=self.dbname, infile=logfile)
             p.parse_input()
 
             # There is only 1 new referer record.  All the others fell into
@@ -181,6 +245,7 @@ class TestSuite(TestCore):
                              p.user_agent.conn)
             self.assertEqual(df.shape[0], n_user_agent_recs + 3)
 
+    @unittest.skip('not yet')
     def test_deleteme(self, mock_logger):
         """
         SCENARIO:  the request path shows the command was DELETEME, which is
@@ -189,12 +254,13 @@ class TestSuite(TestCore):
         EXPECTED RESULT:  The error logger is invoked.
         """
         with ir.path('tests.data', 'deleteme.dat.gz') as logfile:
-            p = ApacheLogParser('idpgis', logfile)
+            p = ApacheLogParser('idpgis', dbname=self.dbname, infile=logfile)
             self.initialize_known_services_table(p.services)
             p.parse_input()
 
         self.assertEqual(p.logger.warning.call_count, 1)
 
+    @unittest.skip('not yet')
     def test_out_of_order(self, mock_logger):
         """
         SCENARIO:  The records are out of order.
@@ -204,7 +270,7 @@ class TestSuite(TestCore):
         """
         with ir.path('tests.data', 'out_of_order.dat.gz') as logfile:
 
-            p = ApacheLogParser('idpgis', logfile)
+            p = ApacheLogParser('idpgis', dbname=self.dbname, infile=logfile)
             self.initialize_known_services_table(p.services)
             p.parse_input()
 
@@ -212,6 +278,7 @@ class TestSuite(TestCore):
 
             self.assertTrue(p.referer.df.date.is_monotonic)
 
+    @unittest.skip('not yet')
     def test_puts(self, mock_logger):
         """
         SCENARIO:  The requests are all "PUT"s.
@@ -219,13 +286,14 @@ class TestSuite(TestCore):
         EXPECTED RESULT:  The results are recorded, not dropped.
         """
         with ir.path('tests.data', 'put.dat.gz') as logfile:
-            p = ApacheLogParser('idpgis', logfile)
+            p = ApacheLogParser('idpgis', dbname=self.dbname, infile=logfile)
             self.initialize_known_services_table(p.services)
             p.parse_input()
             df = pd.read_sql('select * from referer_logs', p.referer.conn)
 
         self.assertTrue(len(df) > 0)
 
+    @unittest.skip('not yet')
     def test_co_ops(self, mock_logger):
         """
         SCENARIO:  There are ten records for the 4 CO_OPS FeatureServer and
@@ -244,7 +312,7 @@ class TestSuite(TestCore):
 
         # Put ten records into the database.
         with ir.path('tests.data', 'ten_co_ops.dat.gz') as logfile:
-            p1 = ApacheLogParser('idpgis', logfile)
+            p1 = ApacheLogParser('idpgis', dbname=self.dbname, infile=logfile)
             self.initialize_known_services_table(p1.services,
                                                  services=services)
             p1.parse_input()
@@ -254,6 +322,7 @@ class TestSuite(TestCore):
 
         self.assertEqual(len(df), 4)
 
+    @unittest.skip('not yet')
     def test_baidu(self, mock_logger):
         """
         SCENARIO:  The Baidu referer often manages to get non-UTF8 characters
@@ -267,7 +336,7 @@ class TestSuite(TestCore):
         ]
 
         with ir.path('tests.data', 'baidu.dat.gz') as logfile:
-            p1 = ApacheLogParser('nowcoast', logfile)
+            p1 = ApacheLogParser('nowcoast', dbname=self.dbname, infile=logfile)
             self.initialize_known_services_table(p1.services,
                                                  services=services)
             p1.parse_input()

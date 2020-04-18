@@ -4,6 +4,7 @@ import unittest
 
 from arcgis_apache_logs import ApacheLogParser
 
+@unittest.skip('not yet')
 class TestSuite(unittest.TestCase):
 
     def test_user_agent_with_embedded_double_quotes(self):
