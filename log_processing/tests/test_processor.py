@@ -1,5 +1,7 @@
 # Standard library imports
+import gzip
 import importlib.resources as ir
+import io
 import unittest
 from unittest.mock import patch
 
@@ -91,47 +93,71 @@ class TestSuite(unittest.TestCase):
         df = pd.read_sql("SELECT * from idpgis.service_logs", self.conn)
         self.assertEqual(df.shape[0], 0)
 
-    @unittest.skip('not yet')
     def test_export_mapdraw(self, mock_logger):
         """
-        SCENARIO:  Ten IDPGIS log records are processed, six of them have
-        export mapdraws.
+        SCENARIO:  The record being processed indicates an export mapdraw.
 
         EXPECTED RESULT:  There is a single record in the service_logs table
-        that marks a wms map draw.
+        that marks an export map draw, but not a wms map draw.
         """
-        with ir.path('tests.data', 'export.dat.gz') as logfile:
-            p = ApacheLogParser('idpgis', dbname=self.dbname, infile=logfile)
-            self.initialize_known_services_table(p.services)
-            p.parse_input()
-            p.services.get_timeseries()
-            df = p.services.df
+        b = io.BytesIO()
+        log_entry = (
+            "2600:387:b:f::bb - - [17/Jul/2019:23:40:31 +0000] "
+            "\"GET /idpgis.ncep.noaa.gov.akadns.net/arcgis/rest/services"
+            "/NWS_Observations/radar_base_reflectivity/MapServer/export"
+            "?bboxSR=3857&imageSR=3857&format=png32&dpi=192&transparent=true"
+            "&f=image&size=750.0,1334.0"
+            "&bbox=%7B-11229452.36082417%7D,"
+            "%0A%7B5920960.861703797%7D,%0A%7B-11228791.814512394%7D,"
+            "%0A%7B5922135.75341032%7D&layers=show:0 HTTP/1.1\" " 
+            "200 7355 \"-\" \"Hunt/258 CFNetwork/978.0.7 Darwin/18.6.0\" \"-\""
+        )
+        with gzip.GzipFile(fileobj=b, mode='w') as gf:
+            gf.write(log_entry.encode('utf-8'))
+        b.seek(0)
+        p = ApacheLogParser('idpgis', dbname=self.dbname, infile=b)
+        p.parse_input()
+        del p
 
-        self.assertEqual(df.loc[1]['export_mapdraws'], 3)
-        self.assertEqual(df.loc[2]['export_mapdraws'], 3)
-        s = df.sum()
-        self.assertEqual(s['export_mapdraws'], 6)
+        sql = "SELECT export_mapdraws, wms_mapdraws from idpgis.service_logs"
+        df = pd.read_sql(sql, self.conn)
 
-    @unittest.skip('not yet')
-    def test_wms_get_map(self, mock_logger):
+        records = {'export_mapdraws': [1], 'wms_mapdraws': [0]}
+        expected = pd.DataFrame(records)
+        pd.testing.assert_frame_equal(df, expected)
+
+    def test_wms_mapdraw(self, mock_logger):
         """
-        SCENARIO:  Ten IDPGIS log records are processed, one of them has a
-        WMS getmap operation.
+        SCENARIO:  The record being processed indicates a wms mapdraw.
 
         EXPECTED RESULT:  There is a single record in the service_logs table
-        that marks a wms map draw.
+        that marks a wms map draw, but not an export map draw.
         """
-        with ir.path('tests.data', 'ten.dat.gz') as logfile:
-            p = ApacheLogParser('idpgis', dbname=self.dbname, infile=logfile)
-            self.initialize_known_services_table(p.services)
-            p.parse_input()
+        b = io.BytesIO()
+        log_entry = (
+            "216.117.49.196 - - [26/Jun/2019:00:03:57 +0000] "
+            "\"GET /idpgis.ncep.noaa.gov.akadns.net/arcgis/services"
+            "/NWS_Observations/radar_base_reflectivity/MapServer/WmsServer"
+            "?SERVICE=WMS&LAYERS=1&CQL_FILTER=INCLUDE&CRS=EPSG:3857"
+            "&FORMAT=image%2Fpng&HEIGHT=256&TRANSPARENT=TRUE&REQUEST=GetMap"
+            "&WIDTH=256&BBOX=-1.1114555408890909E7,2974317.644632779,"
+            "-1.0958012374962868E7,3130860.67856082&STYLES=&VERSION=1.3.0 "
+            "HTTP/1.1\" 301 484 \"-\" "
+            "\"Jakarta Commons-HttpClient/3.1\" \"-\""
+        )
+        with gzip.GzipFile(fileobj=b, mode='w') as gf:
+            gf.write(log_entry.encode('utf-8'))
+        b.seek(0)
+        p = ApacheLogParser('idpgis', dbname=self.dbname, infile=b)
+        p.parse_input()
+        del p
 
-            p.services.get_timeseries()
-            df = p.services.df
+        sql = "SELECT export_mapdraws, wms_mapdraws from idpgis.service_logs"
+        df = pd.read_sql(sql, self.conn)
 
-        self.assertEqual(df.loc[6]['wms_mapdraws'], 1)
-        s = df.sum()
-        self.assertEqual(s['wms_mapdraws'], 1)
+        records = {'export_mapdraws': [0], 'wms_mapdraws': [1]}
+        expected = pd.DataFrame(records)
+        pd.testing.assert_frame_equal(df, expected)
 
     @unittest.skip('not yet')
     def test_init_ten_records(self, mock_logger):
