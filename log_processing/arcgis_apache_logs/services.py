@@ -88,6 +88,10 @@ class ServicesProcessor(CommonProcessor):
         ]
         df = df.set_index('date').groupby(groupers).sum().reset_index()
 
+        if len(df) == 0:
+            # no services, so nothing to do
+            return
+
         # Have to have the same column names as the database.
         df = self.replace_folders_and_services_with_ids(df)
         if len(df) == 0:

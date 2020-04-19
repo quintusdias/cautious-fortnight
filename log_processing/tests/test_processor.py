@@ -2,6 +2,7 @@
 import gzip
 import importlib.resources as ir
 import io
+import logging
 import unittest
 from unittest.mock import patch
 
@@ -56,6 +57,12 @@ class TestSuite(unittest.TestCase):
             cursor.execute(sql)
 
         self.conn.commit()
+
+    def tearDown(self):
+        return
+        with self.conn.cursor() as cursor:
+            self.cursor.execute('drop schema idpgis cascade')
+            self.cursor.execute('drop schema nowcoast cascade')
 
     def test_good_folder_good_service(self, mock_logger):
         """
@@ -159,7 +166,6 @@ class TestSuite(unittest.TestCase):
         expected = pd.DataFrame(records)
         pd.testing.assert_frame_equal(df, expected)
 
-    @unittest.skip('not yet')
     def test_init_ten_records(self, mock_logger):
         """
         SCENARIO:  Ten IDPGIS log records are processed as the database is
@@ -173,10 +179,10 @@ class TestSuite(unittest.TestCase):
 
         Only eight of the ten requests are for defined services, and two of
         those eight are for the same service, 'watch_warn_adv', but both are
-        in the same hour.  So the known_services table gets populated with
+        in the same hour.  So the service_lut table gets populated with
         seven records, and the services_logs table gets seven records.
 
-        Three IP addresses have two hits each, so the known_ip_addresses table
+        Three IP addresses have two hits each, so the ip_address_lut table
         has seven entries while the ip_logs table gets eight entries (the first
         two log entries are from the same source during the same hour, same
         for the 4th and 5th).
@@ -189,41 +195,37 @@ class TestSuite(unittest.TestCase):
         with ir.path('tests.data', 'ten.dat.gz') as logfile:
 
             p = ApacheLogParser('idpgis', dbname=self.dbname, infile=logfile)
-            self.initialize_known_services_table(p.services)
             p.parse_input()
-            conn = p.referer.conn
+            del p
 
-        df = pd.read_sql("SELECT * from known_referers", conn)
+        df = pd.read_sql("SELECT * from idpgis.referer_lut", self.conn)
         self.assertEqual(df.shape[0], 1)
 
-        df = pd.read_sql("SELECT * from referer_logs", conn)
+        df = pd.read_sql("SELECT * from idpgis.referer_logs", self.conn)
         self.assertEqual(df.shape[0], 5)
 
-        df = pd.read_sql("SELECT * from known_services", conn)
+        df = pd.read_sql("SELECT * from idpgis.service_lut", self.conn)
         self.assertEqual(df.shape[0], 7)
 
-        df = pd.read_sql("SELECT * from service_logs", conn)
+        df = pd.read_sql("SELECT * from idpgis.service_logs", self.conn)
         self.assertEqual(df.shape[0], 7)
 
-        df = pd.read_sql("SELECT * from known_ip_addresses", conn)
+        df = pd.read_sql("SELECT * from idpgis.ip_address_lut", self.conn)
         self.assertEqual(df.shape[0], 7)
 
-        df = pd.read_sql("SELECT * from ip_address_logs", conn)
+        df = pd.read_sql("SELECT * from idpgis.ip_address_logs", self.conn)
         self.assertEqual(df.shape[0], 8)
 
-        df = pd.read_sql("SELECT * from known_user_agents", conn)
+        df = pd.read_sql("SELECT * from idpgis.user_agent_lut", self.conn)
         self.assertEqual(df.shape[0], 7)
 
-        df = pd.read_sql("SELECT * from user_agent_logs", conn)
+        df = pd.read_sql("SELECT * from idpgis.user_agent_logs", self.conn)
         self.assertEqual(df.shape[0], 8)
 
         # The data is resampled, so 23 records, one for each hour.
-        df = pd.read_sql("SELECT * from summary", conn)
+        df = pd.read_sql("SELECT * from idpgis.summary", self.conn)
         self.assertEqual(df.shape[0], 23)
 
-        self.assertTrue(p.logger.info.call_count > 0)
-
-    @unittest.skip('not yet')
     def test_records_aggregated(self, mock_logger):
         """
         SCENARIO:  Ten records come in, then the same ten records offset by 30
@@ -233,45 +235,41 @@ class TestSuite(unittest.TestCase):
         """
         with ir.path('tests.data', 'ten.dat.gz') as logfile:
             p = ApacheLogParser('idpgis', dbname=self.dbname, infile=logfile)
-            self.initialize_known_services_table(p.services)
             p.parse_input()
+            del p
 
-            # Get the current number of records in the tables.
-            df = pd.read_sql("SELECT * from referer_logs", p.referer.conn)
-            n_referer_recs = df.shape[0]
-            df = pd.read_sql("SELECT * from service_logs", p.services.conn)
-            n_service_recs = df.shape[0]
-            df = pd.read_sql("SELECT * from ip_address_logs",
-                             p.ip_address.conn)
-            n_ip_address_recs = df.shape[0]
-            df = pd.read_sql("SELECT * from user_agent_logs",
-                             p.user_agent.conn)
-            n_user_agent_recs = df.shape[0]
+        # Get the current number of records in the tables.
+        df = pd.read_sql("SELECT * from idpgis.referer_logs", self.conn)
+        n_referer_recs = df.shape[0]
+        df = pd.read_sql("SELECT * from idpgis.service_logs", self.conn)
+        n_service_recs = df.shape[0]
+        df = pd.read_sql("SELECT * from idpgis.ip_address_logs", self.conn)
+        n_ip_address_recs = df.shape[0]
+        df = pd.read_sql("SELECT * from idpgis.user_agent_logs", self.conn)
+        n_user_agent_recs = df.shape[0]
 
         with ir.path('tests.data', 'another_ten.dat.gz') as logfile:
 
             p = ApacheLogParser('idpgis', dbname=self.dbname, infile=logfile)
             p.parse_input()
+            del p
 
-            # There is only 1 new referer record.  All the others fell into
-            # existing bins.
-            df = pd.read_sql("SELECT * from referer_logs", p.referer.conn)
-            self.assertEqual(df.shape[0], n_referer_recs + 1)
+        # There is only 1 new referer record.  All the others fell into
+        # existing bins.
+        df = pd.read_sql("SELECT * from idpgis.referer_logs", self.conn)
+        self.assertEqual(df.shape[0], n_referer_recs + 1)
 
-            # Out of the ten new records, only 3 new service records  drop into
-            # new bins.
-            df = pd.read_sql("SELECT * from service_logs", p.services.conn)
-            self.assertEqual(df.shape[0], n_service_recs + 3)
+        # Out of the ten new records, only 3 new service records  drop into
+        # new bins.
+        df = pd.read_sql("SELECT * from idpgis.service_logs", self.conn)
+        self.assertEqual(df.shape[0], n_service_recs + 3)
 
-            df = pd.read_sql("SELECT * from ip_address_logs",
-                             p.ip_address.conn)
-            self.assertEqual(df.shape[0], n_ip_address_recs + 3)
+        df = pd.read_sql("SELECT * from idpgis.ip_address_logs", self.conn)
+        self.assertEqual(df.shape[0], n_ip_address_recs + 3)
 
-            df = pd.read_sql("SELECT * from user_agent_logs",
-                             p.user_agent.conn)
-            self.assertEqual(df.shape[0], n_user_agent_recs + 3)
+        df = pd.read_sql("SELECT * from idpgis.user_agent_logs", self.conn)
+        self.assertEqual(df.shape[0], n_user_agent_recs + 3)
 
-    @unittest.skip('not yet')
     def test_deleteme(self, mock_logger):
         """
         SCENARIO:  the request path shows the command was DELETEME, which is
@@ -281,30 +279,13 @@ class TestSuite(unittest.TestCase):
         """
         with ir.path('tests.data', 'deleteme.dat.gz') as logfile:
             p = ApacheLogParser('idpgis', dbname=self.dbname, infile=logfile)
-            self.initialize_known_services_table(p.services)
             p.parse_input()
 
-        self.assertEqual(p.logger.warning.call_count, 1)
+            self.assertEqual(p.logger.warning.call_count, 1)
 
-    @unittest.skip('not yet')
-    def test_out_of_order(self, mock_logger):
-        """
-        SCENARIO:  The records are out of order.
+            del p
 
-        EXPECTED RESULT:  The time series retrieved from the database are in
-        order.
-        """
-        with ir.path('tests.data', 'out_of_order.dat.gz') as logfile:
 
-            p = ApacheLogParser('idpgis', dbname=self.dbname, infile=logfile)
-            self.initialize_known_services_table(p.services)
-            p.parse_input()
-
-            p.referer.get_timeseries()
-
-            self.assertTrue(p.referer.df.date.is_monotonic)
-
-    @unittest.skip('not yet')
     def test_puts(self, mock_logger):
         """
         SCENARIO:  The requests are all "PUT"s.
@@ -313,42 +294,13 @@ class TestSuite(unittest.TestCase):
         """
         with ir.path('tests.data', 'put.dat.gz') as logfile:
             p = ApacheLogParser('idpgis', dbname=self.dbname, infile=logfile)
-            self.initialize_known_services_table(p.services)
             p.parse_input()
-            df = pd.read_sql('select * from referer_logs', p.referer.conn)
+            del p
+
+        df = pd.read_sql('select * from idpgis.referer_logs', self.conn)
 
         self.assertTrue(len(df) > 0)
 
-    @unittest.skip('not yet')
-    def test_co_ops(self, mock_logger):
-        """
-        SCENARIO:  There are ten records for the 4 CO_OPS FeatureServer and
-        MapServer.
-
-        EXPECTED RESULT:  There are hits recorded for the CO_OPS_Stations
-        and CO_OPS Products MapServers and FeatureServers.  There are
-        2 hits for the CO_OPS Products.
-        """
-        services = [
-            ('NOS_Observations', 'CO_OPS_Stations', 'FeatureServer'),
-            ('NOS_Observations', 'CO_OPS_Stations', 'MapServer'),
-            ('NOS_Observations', 'CO_OPS_Products', 'FeatureServer'),
-            ('NOS_Observations', 'CO_OPS_Products', 'MapServer'),
-        ]
-
-        # Put ten records into the database.
-        with ir.path('tests.data', 'ten_co_ops.dat.gz') as logfile:
-            p1 = ApacheLogParser('idpgis', dbname=self.dbname, infile=logfile)
-            self.initialize_known_services_table(p1.services,
-                                                 services=services)
-            p1.parse_input()
-
-        df = pd.read_sql("SELECT * from service_logs", p1.services.conn)
-        df = df.groupby('id').count()
-
-        self.assertEqual(len(df), 4)
-
-    @unittest.skip('not yet')
     def test_baidu(self, mock_logger):
         """
         SCENARIO:  The Baidu referer often manages to get non-UTF8 characters
@@ -357,17 +309,12 @@ class TestSuite(unittest.TestCase):
 
         EXPECTED RESULT:  The file's single record should be read.
         """
-        services = [
-            ('nowcoast', 'radar', 'MapServer'),
-        ]
-
         with ir.path('tests.data', 'baidu.dat.gz') as logfile:
-            p1 = ApacheLogParser('nowcoast', dbname=self.dbname, infile=logfile)
-            self.initialize_known_services_table(p1.services,
-                                                 services=services)
+            p1 = ApacheLogParser('idpgis', dbname=self.dbname, infile=logfile)
             p1.parse_input()
+            del p1
 
-        df = pd.read_sql("SELECT * from referer_logs", p1.referer.conn)
+        df = pd.read_sql("SELECT * from idpgis.referer_logs", self.conn)
         df = df.groupby('id').count()
 
         self.assertEqual(len(df), 1)

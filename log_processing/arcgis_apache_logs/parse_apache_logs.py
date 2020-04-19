@@ -33,7 +33,8 @@ class ApacheLogParser(object):
     project : str
         Either nowcoast or idpgis
     """
-    def __init__(self, project, dbname='arcgis_logs', infile=None):
+    def __init__(self, project, dbname='arcgis_logs', infile=None,
+                 verbosity=logging.WARNING):
         """
         Parameters
         ----------
@@ -54,7 +55,7 @@ class ApacheLogParser(object):
         else:
             self.conn, self.cursor = None, None
 
-        self.setup_logger()
+        self.setup_logger(verbosity)
         self.setup_regex()
 
         kwargs = {
@@ -278,13 +279,13 @@ class ApacheLogParser(object):
         df = pd.DataFrame.from_records(records, columns=columns)
         return df
 
-    def setup_logger(self):
+    def setup_logger(self, level):
 
         self.logger = logging.getLogger('AGS Apache PG')
-        self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(level)
 
         ch = logging.StreamHandler()
-        ch.setLevel(logging.INFO)
+        ch.setLevel(level)
 
         format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         formatter = logging.Formatter(format)
