@@ -2,10 +2,12 @@
 import importlib.resources as ir
 import unittest
 
-from arcgis_apache_logs import ApacheLogParser
+from arcgis_apache_logs.regexps import (
+   apache_common_log_format_regex, path_regex
+)
 
-@unittest.skip('not yet')
-class TestSuite(unittest.TestCase):
+
+class TestSuiteLogEntry(unittest.TestCase):
 
     def test_user_agent_with_embedded_double_quotes(self):
         """
@@ -15,8 +17,7 @@ class TestSuite(unittest.TestCase):
         """
 
         txt = ir.read_text('tests.data', 'nohrsc_snow_analysis.txt')
-        o = ApacheLogParser('idpgis', dbname=None)
-        m = o.regex.match(txt)
+        m = apache_common_log_format_regex.match(txt)
         self.assertIsNotNone(m)
 
     def test_user_agent_with_surrounding_triple_quotes(self):
@@ -27,8 +28,7 @@ class TestSuite(unittest.TestCase):
         """
 
         txt = ir.read_text('tests.data', 'triple_quotes.txt')
-        o = ApacheLogParser('idpgis', dbname=None)
-        m = o.regex.match(txt)
+        m = apache_common_log_format_regex.match(txt)
         self.assertIsNotNone(m)
 
     def test_user_agent_has_double_quotes(self):
@@ -39,9 +39,11 @@ class TestSuite(unittest.TestCase):
         """
 
         txt = ir.read_text('tests.data', 'ua_double_quotes.txt')
-        o = ApacheLogParser('idpgis', dbname=None)
-        m = o.regex.match(txt)
+        m = apache_common_log_format_regex.match(txt)
         self.assertIsNotNone(m)
+
+
+class TestSuitePath(unittest.TestCase):
 
     def test__service__basic(self):
         """
@@ -52,8 +54,5 @@ class TestSuite(unittest.TestCase):
         """
 
         txt = ir.read_text('tests.data', 'nohrsc_export.txt')
-        o = ApacheLogParser('idpgis', dbname=None)
-        m = o.services.regex.match(txt)
+        m = path_regex.match(txt)
         self.assertIsNotNone(m.group('export'))
-
-

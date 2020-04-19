@@ -11,6 +11,7 @@ import pandas as pd
 
 # Local imports
 from .common import CommonProcessor
+from . import regexps
 from . import sql
 
 
@@ -28,30 +29,7 @@ class ServicesProcessor(CommonProcessor):
         """
         super().__init__(**kwargs)
 
-        pattern = r'''
-                   /(nowcoast|idpgis).ncep.noaa.gov.akadns.net
-                   /arcgis
-                   (?P<rest>/rest)?
-                   /services
-                   /(?P<folder>\w+)
-                   /(?P<service>\w+)
-                   /(?P<service_type>\w+)
-                   (
-                       /
-                       (
-                           (
-                               (?P<export>(export|exportimage))
-                               (?P<export_mapdraws>.*?f=image)?
-                           )
-                           |
-                           (
-                               (?P<wms>wmsserver)
-                               (?P<wms_mapdraws>.*?request=getmap)?
-                           )
-                       )
-                   )?
-                   '''
-        self.regex = re.compile(pattern, re.VERBOSE | re.IGNORECASE)
+        self.regex = regexps.path_regex
 
         self.records = []
 

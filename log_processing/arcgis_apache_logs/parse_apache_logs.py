@@ -17,6 +17,7 @@ from .referer import RefererProcessor
 from .services import ServicesProcessor
 from .summary import SummaryProcessor
 from .user_agent import UserAgentProcessor
+from . import regexps
 from . import sql
 
 
@@ -56,7 +57,8 @@ class ApacheLogParser(object):
             self.conn, self.cursor = None, None
 
         self.setup_logger(verbosity)
-        self.setup_regex()
+
+        self.regex = regexps.apache_common_log_format_regex
 
         kwargs = {
             'logger': self.logger,
@@ -306,50 +308,6 @@ class ApacheLogParser(object):
         self.user_agent.preprocess_database()
 
         self.logger.info('done preprocessing the database...')
-
-    def setup_regex(self):
-        """
-        Create the regular expression for parsing apache logs.
-        """
-        pattern = r'''
-            (?P<ip_address>[a-z\d.:]+)
-            \s
-            # Client identity, always -?
-            -
-            \s
-            # Remote user, always -?
-            -
-            \s
-            # Time of request.  The timezone is always UTC, so don't bother
-            # parsing it.
-            \[(?P<timestamp>\d{2}/\w{3}/\d{4}:\d{2}:\d{2}:\d{2})\s.....\]
-            \s
-            # The request
-            "(?P<request_op>(GET|DELETE|HEAD|OPTIONS|POST|PROPFIND|PUT))
-            \s
-            # match anything but a space
-            (?P<path>[^ ]+)
-            \s
-            HTTP\/1.1"
-            \s
-            # Status code
-            (?P<status_code>\d+)
-            \s
-            # payload size
-            (?P<nbytes>\d+)
-            \s
-            # referer
-            # Match anything but a double quote followed by a space
-            "(?P<referer>.*?(?=" ))"
-            \s
-            # user agent
-            # Match anything but a double quote.
-            "(?P<user_agent>.*?)"
-            \s
-            # something else that seems to always be "-"
-            "-"
-            '''
-        self.regex = re.compile(pattern, re.VERBOSE)
 
     def parse_input(self):
         """
