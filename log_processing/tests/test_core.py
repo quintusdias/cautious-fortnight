@@ -1,4 +1,6 @@
 # Standard libraary imports
+import datetime as dt
+import json
 import os
 import pathlib
 import tempfile
@@ -10,54 +12,58 @@ import pandas as pd
 
 # Local imports
 
-
-class TestCore(unittest.TestCase):
-
-    def setUp(self):
+class MockRequestsResponse:
+    """
+    Mock out the actions of the response of a requests.get operation.  The
+    expected sequence of events in a "good" requests.get operation would be
+    >>> r = requests.get(url)
+    >>> r.content
+    Attributes
+    ----------
+    content, text, status_code, elapsed
+        Corresponds to the same items in a requests.Response object
+    """
+    def __init__(self, content=None, status_code=200):
         """
-        Create a temporary directory in which to create artifacts (often the
-        current directory).
         """
+        self.content = content
 
-        self.starting_dir = pathlib.Path.cwd()
-        self.tempdir = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tempdir.cleanup)
+        # Allow for the possibility of a text response.
+        try:
+            self.text = content.decode('utf-8')
+        except (AttributeError, UnicodeDecodeError):
+            # AttributeError if content was None, UnicodeDecodeError if the
+            # content was binary.
+            self.text = ''
 
-        os.chdir(self.tempdir.name)
+        # We might have a JSON response as well.
+        try:
+            self._json = json.loads(content.decode('utf-8'))
+        except AttributeError:
+            # AttributeError if content was None.
+            self._json = None
+        except UnicodeDecodeError:
+            # UnicodeDecodeError if the content was binary.
+            self._json = None
+        except JSONDecodeError:
+            self._json = None
 
-        fake_home_dir = tempfile.TemporaryDirectory()
-        self.fake_home_dir = pathlib.Path(fake_home_dir.name)
-        self.addCleanup(fake_home_dir.cleanup)
+        self.status_code = status_code
+        self.elapsed = dt.timedelta(seconds=1)
 
-        patchee = 'arcgis_apache_logs.common.pathlib.Path.home'
-        self.homedir_patcher = patch(patchee, return_value=self.fake_home_dir)
-        self.homedir_patcher.start()
-
-    def tearDown(self):
+    def raise_for_status(self):
         """
-        Change back to the starting directory and remove any artifacts created
-        during a test.
+        Mock out the following sequence of events.
+        >>> r = requests.get(bad url)
+        >>> r.raise_for_status()
         """
-        os.chdir(self.starting_dir)
+        if self.status_code != 200:
+            raise requests.HTTPError('bad url')
 
-        self.homedir_patcher.stop()
-
-    def initialize_known_services_table(self, svcs_obj, services=None):
+    def json(self):
         """
-        The known services table must be initialized BEFORE it can be used.
+        Mock out these sequence of events.
+        >>> r = requests.get(blahblahblah)
+        >>> r.json()
         """
-        if services is None:
-            services = [
-                ('NWS_Forecasts_Guidance_Warnings', 'watch_warn_adv',
-                 'MapServer'),
-                ('radar', 'radar_base_reflectivity_time', 'ImageServer'),
-                ('NOS_ESI', 'ESI_NorthwestArctic_Data', 'MapServer'),
-                ('NOS_ESI', 'ESI_Virginia_Data', 'MapServer'),
-                ('NWS_Forecasts_Guidance_Warnings', 'wpc_qpf', 'MapServer'),
-                ('NWS_Observations', 'radar_base_reflectivity', 'MapServer'),
-                ('NOAA', 'NOAA_Estuarine_Bathymetry', 'MapServer'),
-            ]
-        columns = ['folder', 'service', 'service_type']
-        df = pd.DataFrame.from_records(services, columns=columns)
-        df.to_sql('known_services', svcs_obj.conn,
-                  index=False, if_exists='append')
+        return self._json

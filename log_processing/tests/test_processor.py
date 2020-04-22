@@ -12,7 +12,6 @@ import psycopg2
 
 import arcgis_apache_logs
 from arcgis_apache_logs import ApacheLogParser
-from .test_core import TestCore
 
 
 @patch('arcgis_apache_logs.common.logging.getLogger')
@@ -59,10 +58,9 @@ class TestSuite(unittest.TestCase):
         self.conn.commit()
 
     def tearDown(self):
-        return
         with self.conn.cursor() as cursor:
-            self.cursor.execute('drop schema idpgis cascade')
-            self.cursor.execute('drop schema nowcoast cascade')
+            cursor.execute('drop schema idpgis cascade')
+            cursor.execute('drop schema nowcoast cascade')
 
     def test_good_folder_good_service(self, mock_logger):
         """
