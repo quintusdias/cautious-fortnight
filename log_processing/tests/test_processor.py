@@ -2,7 +2,6 @@
 import gzip
 import importlib.resources as ir
 import io
-import logging
 import unittest
 from unittest.mock import patch
 
@@ -32,7 +31,7 @@ class TestSuite(unittest.TestCase):
 
             sql = """
             insert into idpgis.folder_lut (folder)
-            values 
+            values
                 ('NWS_Forecasts_Guidance_Warnings'),
                 ('radar'),
                 ('NOS_ESI'),
@@ -44,14 +43,30 @@ class TestSuite(unittest.TestCase):
             sql = """
             insert into idpgis.service_lut
             (service, folder_id, service_type)
-            values 
+            values
                 ('watch_warn_adv', 1, 'MapServer'::idpgis.svc_type_enum),
-                ('radar_base_reflectivity_time', 2, 'ImageServer'::idpgis.svc_type_enum),
-                ('ESI_NorthwestArctic_Data', 3, 'MapServer'::idpgis.svc_type_enum),
+                (
+                    'radar_base_reflectivity_time',
+                    2,
+                    'ImageServer'::idpgis.svc_type_enum
+                ),
+                (
+                    'ESI_NorthwestArctic_Data',
+                    3,
+                    'MapServer'::idpgis.svc_type_enum
+                ),
                 ('ESI_Virginia_Data', 3, 'MapServer'::idpgis.svc_type_enum),
                 ('wpc_qpf', 1, 'MapServer'::idpgis.svc_type_enum),
-                ('radar_base_reflectivity', 4, 'MapServer'::idpgis.svc_type_enum),
-                ('NOAA_Estuarine_Bathymetry', 5, 'MapServer'::idpgis.svc_type_enum)
+                (
+                    'radar_base_reflectivity',
+                    4,
+                    'MapServer'::idpgis.svc_type_enum
+                ),
+                (
+                    'NOAA_Estuarine_Bathymetry',
+                    5,
+                    'MapServer'::idpgis.svc_type_enum
+                )
             """
             cursor.execute(sql)
 
@@ -114,7 +129,7 @@ class TestSuite(unittest.TestCase):
             "&f=image&size=750.0,1334.0"
             "&bbox=%7B-11229452.36082417%7D,"
             "%0A%7B5920960.861703797%7D,%0A%7B-11228791.814512394%7D,"
-            "%0A%7B5922135.75341032%7D&layers=show:0 HTTP/1.1\" " 
+            "%0A%7B5922135.75341032%7D&layers=show:0 HTTP/1.1\" "
             "200 7355 \"-\" \"Hunt/258 CFNetwork/978.0.7 Darwin/18.6.0\" \"-\""
         )
         with gzip.GzipFile(fileobj=b, mode='w') as gf:
@@ -282,7 +297,6 @@ class TestSuite(unittest.TestCase):
             self.assertEqual(p.logger.warning.call_count, 1)
 
             del p
-
 
     def test_puts(self, mock_logger):
         """

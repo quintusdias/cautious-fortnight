@@ -3,7 +3,6 @@ import gzip
 import importlib.resources as ir
 import logging
 import pathlib
-import re
 
 # 3rd party library imports
 import lxml.etree

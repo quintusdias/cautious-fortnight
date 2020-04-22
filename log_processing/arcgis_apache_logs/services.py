@@ -1,7 +1,6 @@
 # Standard library imports
 import datetime as dt
 import importlib.resources as ir
-import re
 
 # 3rd party libraries
 from lxml import etree

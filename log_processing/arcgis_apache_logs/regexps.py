@@ -67,4 +67,3 @@ pattern = r'''
            )?
            '''
 path_regex = re.compile(pattern, re.VERBOSE | re.IGNORECASE)
-

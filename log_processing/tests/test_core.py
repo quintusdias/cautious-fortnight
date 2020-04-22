@@ -1,16 +1,12 @@
 # Standard libraary imports
 import datetime as dt
 import json
-import os
-import pathlib
-import tempfile
-import unittest
-from unittest.mock import patch
 
 # 3rd party library imports
-import pandas as pd
+import requests
 
 # Local imports
+
 
 class MockRequestsResponse:
     """
@@ -45,7 +41,7 @@ class MockRequestsResponse:
         except UnicodeDecodeError:
             # UnicodeDecodeError if the content was binary.
             self._json = None
-        except JSONDecodeError:
+        except json.JSONDecodeError:
             self._json = None
 
         self.status_code = status_code

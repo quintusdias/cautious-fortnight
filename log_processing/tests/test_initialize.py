@@ -13,6 +13,7 @@ import arcgis_apache_logs
 from arcgis_apache_logs import ApacheLogParser
 from .test_core import MockRequestsResponse
 
+
 class TestSuite(unittest.TestCase):
 
     def setUp(self):
@@ -44,9 +45,9 @@ class TestSuite(unittest.TestCase):
         if json_response is not None:
             content = json.dumps(json_response).encode('utf-8')
             self._responses.append({'content': content})
-            
+
     def _start_patchers(self):
-        
+
         side_effect = [
             MockRequestsResponse(**kwargs) for kwargs in self._responses
         ]
@@ -67,14 +68,16 @@ class TestSuite(unittest.TestCase):
 
         json_services = {
             "folders": [],
-            "services": [{
-                "name": "NWS_Forecasts_Guidance_Warnings/NDFD_temp",
-                "type": "MapServer"
-            },
-            {
-                "name": "NWS_Forecasts_Guidance_Warnings/ndgd_apm25_hr01_bc",
-                "type": "ImageServer"
-            }]
+            "services": [
+                {
+                    "name": "NWS_Forecasts_Guidance_Warnings/NDFD_temp",
+                    "type": "MapServer"
+                },
+                {
+                    "name": "NWS_Forecasts_Guidance_Warnings/ndgd_apm25_hr01_bc",  # noqa : E501
+                    "type": "ImageServer"
+                }
+            ]
         }
         self._set_response(json_response=json_services)
 
@@ -98,5 +101,3 @@ class TestSuite(unittest.TestCase):
         expected = pd.DataFrame(records)
 
         pd.testing.assert_frame_equal(actual, expected)
-
-
