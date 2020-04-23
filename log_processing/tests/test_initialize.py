@@ -1,6 +1,7 @@
 # standard library imports
 import importlib.resources as ir
 import json
+import logging
 import unittest
 from unittest.mock import patch
 
@@ -26,18 +27,20 @@ class TestSuite(unittest.TestCase):
 
         with self.conn.cursor() as cursor:
             for schema in ('idpgis', 'nowcoast'):
-                cursor.execute(f'drop schema {schema} cascade')
+                cursor.execute(f'drop schema if exists {schema} cascade')
 
                 commands = ir.read_text(arcgis_apache_logs.sql,
                                         f"init_{schema}.sql")
                 cursor.execute(commands)
 
+        self.conn.commit()
         self._responses = []
 
     def tearDown(self):
         with self.conn.cursor() as cursor:
             cursor.execute('drop schema idpgis cascade')
             cursor.execute('drop schema nowcoast cascade')
+        self.conn.commit()
 
         self.requests_patcher.stop()
 
@@ -56,7 +59,7 @@ class TestSuite(unittest.TestCase):
         self.requests_patcher = patch(patchee, side_effect=side_effect)
         self.requests_patcher.start()
 
-    def test_retrieve_services_from_nco(self):
+    def _set_minimal_requests_responses(self):
 
         json_folders = {
             "folders": [
@@ -81,6 +84,10 @@ class TestSuite(unittest.TestCase):
         }
         self._set_response(json_response=json_services)
 
+    def test_retrieve_services_from_nco(self):
+
+        self._set_minimal_requests_responses()
+
         self._start_patchers()
 
         with ApacheLogParser('idpgis', dbname=self.dbname) as p:
@@ -100,4 +107,44 @@ class TestSuite(unittest.TestCase):
         ]
         expected = pd.DataFrame(records)
 
+        pd.testing.assert_frame_equal(actual, expected)
+
+    def test_create_new_services(self):
+        """
+        SCENARIO:  Folders and services are ingested into an empty database.
+
+        EXPECTED RESULT:  The new folders and services are verified.
+        """
+
+        self._set_minimal_requests_responses()
+
+        self._start_patchers()
+
+        records = [
+            {
+                'folder': 'NWS_Forecasts_Guidance_Warnings',
+                'service': 'NDFD_temp',
+                'service_type': 'MapServer',
+            },
+            {
+                'folder': 'NWS_Forecasts_Guidance_Warnings',
+                'service': 'ndgd_apm25_hr01_bc',
+                'service_type': 'ImageServer',
+            },
+        ]
+        expected = pd.DataFrame(records)
+
+        with ApacheLogParser('idpgis', dbname=self.dbname,
+                             verbosity=logging.CRITICAL) as p:
+            p.create_any_new_services(expected)
+
+        sql = """
+        SELECT
+            lu_f.folder,
+            lu_s.service,
+            lu_s.service_type as service_type
+        from idpgis.folder_lut lu_f
+            inner join idpgis.service_lut lu_s on lu_f.id = lu_s.folder_id
+        """
+        actual = pd.read_sql(sql, self.conn)
         pd.testing.assert_frame_equal(actual, expected)

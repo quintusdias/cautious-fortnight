@@ -23,7 +23,7 @@ class TestSuite(unittest.TestCase):
 
         with self.conn.cursor() as cursor:
             for schema in ('idpgis', 'nowcoast'):
-                cursor.execute(f'drop schema {schema} cascade')
+                cursor.execute(f'drop schema if exists {schema} cascade')
 
                 commands = ir.read_text(arcgis_apache_logs.sql,
                                         f"init_{schema}.sql")
