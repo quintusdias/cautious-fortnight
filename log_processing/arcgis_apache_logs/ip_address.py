@@ -1,6 +1,5 @@
 # Standard library imports
 import datetime as dt
-import importlib.resources as ir
 
 # 3rd party library imports
 import matplotlib.pyplot as plt
@@ -9,7 +8,6 @@ import psycopg2.extras
 
 # Local imports
 from .common import CommonProcessor
-from . import sql
 
 
 class IPAddressProcessor(CommonProcessor):
@@ -24,8 +22,6 @@ class IPAddressProcessor(CommonProcessor):
         ----------
         """
         super().__init__(**kwargs)
-
-        self.data_retention_days = 7
 
     def process_raw_records(self, df):
         """
@@ -250,18 +246,27 @@ class IPAddressProcessor(CommonProcessor):
         }
         self.create_html_table(df, html_doc, **kwargs)
 
-    def preprocess_database(self):
+    def preprocess_database(self, num_days=14):
         """
         Delete any IP addresses with no recent activity.
+
+        Parameters
+        ----------
+        num_days : int, optional
+            Delete user agent entries older than this many days.
         """
         self.logger.info('preprocessing IP addresses ...')
 
-        if dt.date.today().weekday() != 0:
-            return
-
-        query = ir.read_text(sql, 'prune_ip_addresses.sql')
-        self.logger.info(query)
-        self.cursor.execute(query)
+        sql = f"""
+            delete from ip_address_lut where id in (
+                  select logs.id
+                  from ip_address_logs logs
+                  group by id
+                  having max(date) < current_date - interval '{num_days} days'
+            )
+        """
+        self.logger.info(sql)
+        self.cursor.execute(sql)
 
         self.logger.info(f'deleted {self.cursor.rowcount} IP addresses ...')
 

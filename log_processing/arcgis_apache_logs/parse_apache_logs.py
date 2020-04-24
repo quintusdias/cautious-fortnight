@@ -1,4 +1,5 @@
 # standard library imports
+import datetime as dt
 import gzip
 import importlib.resources as ir
 import logging
@@ -294,13 +295,16 @@ class ApacheLogParser(object):
 
         self.logger.addHandler(ch)
 
-    def preprocess_database(self):
+    def preprocess_database(self, force=False):
         """
         Do any cleaning necessary before processing any new records.
         """
         self.logger.info('preprocessing the database...')
 
-        # self.summarizer.preprocess_database()
+        if not force and dt.date.today().weekday() != 0:
+            self.logger.info('skipping preprocessing since it is Monday...')
+            return
+
         self.ip_address.preprocess_database()
         self.referer.preprocess_database()
         # self.services.preprocess_database()

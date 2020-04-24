@@ -330,3 +330,78 @@ class TestSuite(unittest.TestCase):
         df = df.groupby('id').count()
 
         self.assertEqual(len(df), 1)
+
+    def test__preprocess_database(self, mock_logger):
+        """
+        SCENARIO:  The database preprocessor is called.
+
+        EXPECTED RESULT:  Since the data retention time is shorter than the
+        age of the entry, all database entries are dropped.
+        """
+        b = io.BytesIO()
+        log_entry = (
+            "216.117.49.196 - - [26/Jun/2019:00:03:57 +0000] "
+            "\"GET /idpgis.ncep.noaa.gov.akadns.net/arcgis/services"
+            "/NWS_Observations/radar_base_reflectivity/MapServer/WmsServer"
+            "?SERVICE=WMS&LAYERS=1&CQL_FILTER=INCLUDE&CRS=EPSG:3857"
+            "&FORMAT=image%2Fpng&HEIGHT=256&TRANSPARENT=TRUE&REQUEST=GetMap"
+            "&WIDTH=256&BBOX=-1.1114555408890909E7,2974317.644632779,"
+            "-1.0958012374962868E7,3130860.67856082&STYLES=&VERSION=1.3.0 "
+            "HTTP/1.1\" 301 484 \"-\" "
+            "\"Jakarta Commons-HttpClient/3.1\" \"-\""
+        )
+        with gzip.GzipFile(fileobj=b, mode='w') as gf:
+            gf.write(log_entry.encode('utf-8'))
+        b.seek(0)
+        with ApacheLogParser('idpgis', dbname=self.dbname, infile=b) as p:
+            p.parse_input()
+
+        sql = """
+            with cte1(relation, num_entries) as (
+                SELECT 'ip_address_logs', count(*) from idpgis.ip_address_logs
+                UNION
+                SELECT 'referer_logs', count(*) from idpgis.referer_logs
+                UNION
+                SELECT 'user_agent_logs', count(*) from idpgis.user_agent_logs
+            )
+            select * from cte1
+            order by relation
+            """
+        actual = pd.read_sql(sql, self.conn)
+        records = [
+            {
+                'relation': 'ip_address_logs',
+                'num_entries': 1
+            },
+            {
+                'relation': 'referer_logs',
+                'num_entries': 1
+            },
+            {
+                'relation': 'user_agent_logs',
+                'num_entries': 1
+            },
+        ]
+        expected = pd.DataFrame(records)
+        pd.testing.assert_frame_equal(actual, expected)
+
+        with ApacheLogParser('idpgis', dbname=self.dbname, infile=b) as p:
+            p.preprocess_database(force=True)
+
+        actual = pd.read_sql(sql, self.conn)
+        records = [
+            {
+                'relation': 'ip_address_logs',
+                'num_entries': 0
+            },
+            {
+                'relation': 'referer_logs',
+                'num_entries': 0
+            },
+            {
+                'relation': 'user_agent_logs',
+                'num_entries': 0
+            },
+        ]
+        expected = pd.DataFrame(records)
+        pd.testing.assert_frame_equal(actual, expected)

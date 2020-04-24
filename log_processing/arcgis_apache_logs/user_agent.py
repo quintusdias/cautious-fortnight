@@ -1,6 +1,5 @@
 # Standard library imports
 import datetime as dt
-import importlib.resources as ir
 
 # 3rd party library imports
 import matplotlib.pyplot as plt
@@ -10,7 +9,6 @@ import seaborn as sns
 
 # Local imports
 from .common import CommonProcessor
-from . import sql
 
 sns.set()
 
@@ -32,8 +30,6 @@ class UserAgentProcessor(CommonProcessor):
         ----------
         """
         super().__init__(**kwargs)
-
-        self.data_retention_days = 7
 
     def verify_database_setup(self):
         """
@@ -99,18 +95,38 @@ class UserAgentProcessor(CommonProcessor):
         self.logger.info('finished updating the user agent LUT...')
         return df
 
-    def preprocess_database(self):
+    def preprocess_database(self, num_days=14):
         """
         Clean out the user agent tables on mondays.
+
+        Parameters
+        ----------
+        num_days : int, optional
+            Delete user agent entries older than this many days.
         """
         self.logger.info('preprocessing user agents ...')
 
-        if dt.date.today().weekday() != 0:
-            return
+        sql = f"""
+            -- Get the most recent activity on all user agents.
+            with ua_age as (
+                select id, max(date) as max_date
+                from user_agent_logs
+                group by id
+            )
 
-        query = ir.read_text(sql, 'prune_user_agents.sql')
-        self.logger.info(query)
-        self.cursor.execute(query)
+            -- Delete any user agents with no recent activity.
+            --
+            -- The foreign key constraint will cascade-delete rows
+            -- in user_agent_logs.
+            delete from user_agent_lut
+            where id in (
+                select distinct id
+                from ua_age
+                where max_date < current_date - interval '{num_days} days'
+            );
+        """
+        self.logger.info(sql)
+        self.cursor.execute(sql)
 
         self.logger.info(f'deleted {self.cursor.rowcount} user agents ...')
 

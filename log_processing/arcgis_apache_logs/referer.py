@@ -1,6 +1,5 @@
 # Standard library imports
 import datetime as dt
-import importlib.resources as ir
 import urllib.parse
 
 # 3rd party library imports
@@ -11,7 +10,6 @@ import seaborn as sns
 
 # Local imports
 from .common import CommonProcessor
-from . import sql
 
 sns.set()
 
@@ -35,8 +33,6 @@ class RefererProcessor(CommonProcessor):
             All referers that have been previously encountered.
         """
         super().__init__(**kwargs)
-
-        self.data_retention_days = 7
 
     def process_raw_records(self, df):
         """
@@ -108,17 +104,38 @@ class RefererProcessor(CommonProcessor):
         self.logger.info('finished updating the referer LUT...')
         return df
 
-    def preprocess_database(self):
+    def preprocess_database(self, num_days=14):
         """
         Remove any referers without any recent activity.
+
+        Parameters
+        ----------
+        num_days : int, optional
+            Delete user agent entries older than this many days.
         """
         self.logger.info('preprocessing referers ...')
-        if dt.date.today().weekday() != 0:
-            return
 
-        query = ir.read_text(sql, 'prune_referers.sql')
-        self.logger.info(query)
-        self.cursor.execute(query)
+        sql = f"""
+            -- Get the most recent activity on all referers.
+            with ref_age as (
+                select id, max(date) as max_date
+                from referer_logs
+                group by id
+            )
+
+            -- Delete any referers with no recent activity.
+            --
+            -- The foreign key constraint will cascade-delete rows
+            -- in referer_logs.
+            delete from referer_lut
+            where id in (
+                select distinct id
+                from ref_age
+                where max_date < current_date - interval '{num_days} days'
+            );
+        """
+        self.logger.info(sql)
+        self.cursor.execute(sql)
 
         self.logger.info(f'deleted {self.cursor.rowcount} referers ...')
 
