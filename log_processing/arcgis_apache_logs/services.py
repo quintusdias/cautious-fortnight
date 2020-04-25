@@ -136,14 +136,38 @@ class ServicesProcessor(CommonProcessor):
         html_doc : lxml.etree.ElementTree
             HTML document for the logs.
         """
-        self.logger.info('services:  starting graphics...')
+        self.logger.info(
+            'services:  starting production of services graphics...'
+        )
 
+        df = self.process_graphics_no_ui()
+        self.process_graphics_ui(df, html_doc)
+
+        self.logger.info('services:  finished with graphics...')
+
+    def process_graphics_no_ui(self):
+        """
+        Construct the dataframe needed for the UI section.
+        """
         query = ir.read_text(sql, 'services_summary.sql')
         df = pd.read_sql(query, self.conn, index_col='rank')
 
         # Ensure that the delta columns have zeros instead of None.
         df.day_pct_delta = df.day_pct_delta.fillna(0).astype(np.float64)
         df.week_pct_delta = df.week_pct_delta.fillna(0).astype(np.float64)
+
+        return df
+
+    def process_graphics_ui(self, df, html_doc):
+        """Create the HTML and graphs for the services.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            all information needed to fill in the HTML document
+        html_doc : lxml.etree.ElementTree
+            HTML document for the logs
+        """
         self.create_services_table(df, html_doc)
 
         # Link in a folder list.
@@ -155,8 +179,6 @@ class ServicesProcessor(CommonProcessor):
         li[:] = [ul]
 
         self.summarize_transactions(html_doc)
-
-        self.logger.info('services:  finished with graphics...')
 
     def summarize_transactions(self, html_doc):
         """
