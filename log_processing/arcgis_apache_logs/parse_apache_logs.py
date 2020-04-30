@@ -61,7 +61,6 @@ class ApacheLogParser(object):
         self.regex = regexps.apache_common_log_format_regex
 
         kwargs = {
-            'logger': self.logger,
             'schema': self.schema,
             'conn': self.conn,
             'cursor': self.cursor,
@@ -283,7 +282,7 @@ class ApacheLogParser(object):
 
     def setup_logger(self, level):
 
-        self.logger = logging.getLogger('AGS Apache PG')
+        self.logger = logging.getLogger('ApacheLogParser')
         self.logger.setLevel(level)
 
         ch = logging.StreamHandler()

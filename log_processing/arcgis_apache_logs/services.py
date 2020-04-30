@@ -155,6 +155,7 @@ class ServicesProcessor(CommonProcessor):
         # Ensure that the delta columns have zeros instead of None.
         df.day_pct_delta = df.day_pct_delta.fillna(0).astype(np.float64)
         df.week_pct_delta = df.week_pct_delta.fillna(0).astype(np.float64)
+        df.month_pct_delta = df.month_pct_delta.fillna(0).astype(np.float64)
 
         return df
 
@@ -258,8 +259,10 @@ class ServicesProcessor(CommonProcessor):
         mapper = {
             'gbytes': 'GBytes',
             'gbytes %': 'GBytes %',
+            'mapdraw_pct': 'Mapdraw %',
             'day_pct_delta': 'Daily Change %',
             'week_pct_delta': 'Weekly Change %',
+            'month_pct_delta': 'Monthly Change %',
         }
         df = df.rename(mapper, axis='columns')
 
@@ -271,13 +274,18 @@ class ServicesProcessor(CommonProcessor):
                 "of hits, so this column should add to 100."
             ),
             (
-                "\"Daily Change %\" is the percentage change in number of "
-                "hits since yesterday."
+                "\"Daily Change %\" is the percentage change for yesterday in "
+                "number of hits as compared to the day before that."
             ),
             (
                 "\"Weekly Change %\" is the percentage change in number of "
                 "hits in the last seven days from the previous span of seven "
                 "days."
+            ),
+            (
+                "\"Monthy Change %\" is the percentage change in number of "
+                "hits in the last thirty days from the previous span of "
+                "thirty days."
             ),
             (
                 "\"mapdraw %\" is the ratio of service mapdraws to the "

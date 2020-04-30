@@ -24,17 +24,14 @@ class CommonProcessor(object):
     records : list
         Raw records collected, one for each apache log entry.
     """
-    def __init__(self, logger=None, schema=None, conn=None, cursor=None):
+    def __init__(self, schema=None, conn=None, cursor=None):
 
         self.schema = schema
         self.project = schema
 
         self.root = pathlib.Path.home() / 'Documents' / 'arcgis_apache_logs'
 
-        if logger is not None:
-            self.logger = logger
-        else:
-            self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger('ApacheLogParser.Common')
 
         self.conn = conn
         self.cursor = cursor
@@ -73,9 +70,10 @@ class CommonProcessor(object):
         format = {
             'hits': '{:,.0f}',
             'hits %': '{:.1f}',
-            'mapdraw %': '{:.1f}',
+            'Mapdraw %': '{:.1f}',
             'Daily Change %': '{:,.1f}',
             'Weekly Change %': '{:,.1f}',
+            'Monthly Change %': '{:,.1f}',
             'GBytes': '{:,.1f}',
             'GBytes %': '{:.1f}',
             'errors': '{:,.0f}',
