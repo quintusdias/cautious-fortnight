@@ -154,6 +154,8 @@ class RefererProcessor(CommonProcessor):
         self.summarize_referer_table(html_doc)
 
         top_referers = self.get_top_referers()
+        if len(top_referers) == 0:
+            return
 
         self.logger.info(f'Referers:  summarizing transactions ...')
         self.summarize_transactions(top_referers, html_doc)
@@ -235,6 +237,7 @@ class RefererProcessor(CommonProcessor):
         # It's possible to format the referers list wrong if there's only one
         # of them, so take this extra step.
         top_referers = ', '.join(str(id) for id in top_referers)
+
         query = query.format(top_referers=top_referers,
                              start_time=dt.date.today()-dt.timedelta(days=14))
         df = pd.read_sql(query, self.conn)

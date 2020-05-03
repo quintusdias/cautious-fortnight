@@ -9,6 +9,7 @@ from unittest.mock import patch
 import pandas as pd
 import psycopg2
 
+# local imports
 import arcgis_apache_logs
 from arcgis_apache_logs import ApacheLogParser
 

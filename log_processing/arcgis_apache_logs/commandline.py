@@ -1,5 +1,6 @@
 # standard library imports
 import argparse
+import logging
 
 # local imports
 from .parse_apache_logs import ApacheLogParser
@@ -21,7 +22,7 @@ def parse_arcgis_apache_logs():
     args = parser.parse_args()
 
     log_processor = ApacheLogParser(args.project, infile=args.infile,
-                                    dbname=args.dbname)
+                                    dbname=args.dbname, verbosity=logging.INFO)
     log_processor.parse_input()
 
 
@@ -38,7 +39,8 @@ def produce_arcgis_apache_graphics():
     parser.add_argument('project', choices=['idpgis', 'nowcoast'])
     args = parser.parse_args()
 
-    p = ApacheLogParser(args.project, infile=None, dbname=args.dbname)
+    p = ApacheLogParser(args.project, infile=None, dbname=args.dbname,
+                        verbosity=logging.INFO)
     p.process_graphics()
 
 

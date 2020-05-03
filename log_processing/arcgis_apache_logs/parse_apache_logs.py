@@ -35,7 +35,7 @@ class ApacheLogParser(object):
         Either nowcoast or idpgis
     """
     def __init__(self, project, dbname='arcgis_logs', infile=None,
-                 verbosity=logging.INFO):
+                 verbosity=logging.WARNING):
         """
         Parameters
         ----------

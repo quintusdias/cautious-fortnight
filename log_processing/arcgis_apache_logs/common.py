@@ -93,15 +93,11 @@ class CommonProcessor(object):
         return table, table_css
 
     def write_html_and_image_output(self, df, html_doc, title=None,
-                                    filename=None, yaxis_formatter=None,
-                                    folder=None, restrict_handles=True,
-                                    text=None):
+                                    filename=None, folder=None,
+                                    restrict_handles=True, text=None):
 
         fig = plt.gcf()
         ax = plt.gca()
-
-        if yaxis_formatter is not None:
-            ax.yaxis.set_major_formatter(yaxis_formatter)
 
         ax.set_title(title)
 

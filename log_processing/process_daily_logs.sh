@@ -23,7 +23,7 @@ do
     produce-ag-ap-pg-graphics $project
 
     # Delete files that are older than a week.
-    find "$root" -mtime +100080 | xargs -I fname rm fname
+    #find "$root" -mtime +100080 | xargs -I fname rm fname
     
 done
 
