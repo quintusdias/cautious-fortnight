@@ -7,8 +7,8 @@ import unittest
 import psycopg2
 
 # local imports
-import arcgis_apache_logs
-from arcgis_apache_logs import ApacheLogParser
+import arcgis_apache_postgres_logs
+from arcgis_apache_postgres_logs import ApacheLogParser
 
 
 class TestSuite(unittest.TestCase):
@@ -22,7 +22,7 @@ class TestSuite(unittest.TestCase):
             for schema in ('idpgis', 'nowcoast'):
                 cursor.execute(f'drop schema if exists {schema} cascade')
 
-                commands = ir.read_text(arcgis_apache_logs.sql,
+                commands = ir.read_text(arcgis_apache_postgres_logs.sql,
                                         f"init_{schema}.sql")
                 cursor.execute(commands)
 

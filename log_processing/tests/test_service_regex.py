@@ -2,7 +2,7 @@
 import importlib.resources as ir
 import unittest
 
-from arcgis_apache_logs.regexps import (
+from arcgis_apache_postgres_logs.regexps import (
    apache_common_log_format_regex, path_regex
 )
 

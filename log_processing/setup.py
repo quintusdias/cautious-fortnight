@@ -5,27 +5,27 @@ from setuptools import setup
 
 cmdline = 'arcgis_apache_logs.commandline'
 console_scripts = [
-    f'initialize-ag-ap-pg-database={cmdline}:initialize_ag_ap_pg_database',
-    f'check-ag-ap-pg-services={cmdline}:check_ag_ap_pg_services',
-    f'update-ag-ap-pg-database={cmdline}:update_ag_ap_pg_database',
-    f'parse-ag-ap-pg-logs={cmdline}:parse_arcgis_apache_logs',
-    f'prune-arcgis-apache-database={cmdline}:prune_arcgis_apache_database',
-    f'produce-ag-ap-pg-graphics={cmdline}:produce_arcgis_apache_graphics',
+    f'agp-initialize-database={cmdline}:initialize_ag_ap_pg_database',
+    f'agp-check-services={cmdline}:check_ag_ap_pg_services',
+    f'agp-update-database={cmdline}:update_ag_ap_pg_database',
+    f'agp-parse-logs={cmdline}:parse_arcgis_apache_logs',
+    f'agp-prune-database={cmdline}:prune_arcgis_apache_database',
+    f'agp-produce-graphics={cmdline}:produce_arcgis_apache_graphics',
 ],
 
 kwargs = {
-    'name': 'ArcGIS-Apache-Logs',
+    'name': 'ArcGIS-Apache-Postgres-Logs',
     'description': 'Tools for processing ArcGIS Apache Logs',
     'author': 'John Evans',
     'author_email': 'john.g.evans.ne@gmail.com',
     'url': 'https://github.com/quintusdias/gis-monitoring',
-    'packages': ['arcgis_apache_logs'],
+    'packages': ['arcgis_apache_postgres_logs'],
     'entry_points': {
         'console_scripts': console_scripts,
     },
     'license': 'MIT',
     'install_requires': ['pandas', 'lxml', 'setuptools'],
-    'version': '0.0.8',
+    'version': '0.0.9',
 }
 
 kwargs['classifiers'] = [

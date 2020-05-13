@@ -10,8 +10,8 @@ import pandas as pd
 import psycopg2
 
 # local imports
-import arcgis_apache_logs
-from arcgis_apache_logs import ApacheLogParser
+import arcgis_apache_postgres_logs
+from arcgis_apache_postgres_logs import ApacheLogParser
 from .test_core import MockRequestsResponse
 
 
@@ -29,7 +29,7 @@ class TestSuite(unittest.TestCase):
             for schema in ('idpgis', 'nowcoast'):
                 cursor.execute(f'drop schema if exists {schema} cascade')
 
-                commands = ir.read_text(arcgis_apache_logs.sql,
+                commands = ir.read_text(arcgis_apache_postgres_logs.sql,
                                         f"init_{schema}.sql")
                 cursor.execute(commands)
 
@@ -55,7 +55,7 @@ class TestSuite(unittest.TestCase):
             MockRequestsResponse(**kwargs) for kwargs in self._responses
         ]
 
-        patchee = 'arcgis_apache_logs.parse_apache_logs.requests.get'
+        patchee = 'arcgis_apache_postgres_logs.parse_apache_logs.requests.get'
         self.requests_patcher = patch(patchee, side_effect=side_effect)
         self.requests_patcher.start()
 
