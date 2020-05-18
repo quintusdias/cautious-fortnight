@@ -3,14 +3,14 @@
 # Third party library imports ...
 from setuptools import setup
 
-cmdline = 'arcgis_apache_logs.commandline'
+cmdline = 'arcgis_apache_postgres_logs.commandline'
 console_scripts = [
-    f'agp-initialize-database={cmdline}:initialize_ag_ap_pg_database',
-    f'agp-check-services={cmdline}:check_ag_ap_pg_services',
-    f'agp-update-database={cmdline}:update_ag_ap_pg_database',
-    f'agp-parse-logs={cmdline}:parse_arcgis_apache_logs',
-    f'agp-prune-database={cmdline}:prune_arcgis_apache_database',
-    f'agp-produce-graphics={cmdline}:produce_arcgis_apache_graphics',
+    f'agp-initialize-database={cmdline}:initialize_database',
+    f'agp-check-services={cmdline}:check_services',
+    f'agp-update-database={cmdline}:update_database',
+    f'agp-parse-logs={cmdline}:parse_logs',
+    f'agp-prune-database={cmdline}:prune_database',
+    f'agp-produce-graphics={cmdline}:produce_graphics',
 ],
 
 kwargs = {

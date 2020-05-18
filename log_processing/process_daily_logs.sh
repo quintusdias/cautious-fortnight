@@ -5,7 +5,7 @@ set -x
 for project in nowcoast idpgis
 do
 
-    apg-prune-database $project
+    agp-prune-database $project
 
     root=$HOME/data/logs/akamai/"$project"/incoming
     
@@ -17,10 +17,10 @@ do
     
     for logfile in $files_to_process
     do
-    	apg-parse-logs $project --infile $logfile
+    	agp-parse-logs $project --infile $logfile
     done
 
-    apg-produce-graphics $project
+    agp-produce-graphics $project
 
     # Delete files that are older than a week.
     #find "$root" -mtime +100080 | xargs -I fname rm fname

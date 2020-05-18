@@ -144,6 +144,10 @@ class SummaryProcessor(CommonProcessor):
         self.write_html_and_image_output(df, html_doc, **kwargs)
 
     def get_hourly_mapdraws_over_last_72_hours(self):
+        """
+        Technically, this is the last 72 hours for which we have data.  If
+        there are gaps in the logs, then the data will extend back further.
+        """
         sql = """
             SELECT
                 date,

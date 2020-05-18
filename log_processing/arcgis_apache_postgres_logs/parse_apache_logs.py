@@ -104,6 +104,9 @@ class ApacheLogParser(object):
         Examine the project web site and populate the services database with
         existing services.
         """
+        command = f"drop schema if exists {self.schema} cascade"
+        self.cursor.execute(command)
+
         commands = ir.read_text(sql, f'init_{self.schema}.sql')
         self.cursor.execute(commands)
 

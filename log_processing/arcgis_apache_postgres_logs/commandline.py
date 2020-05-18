@@ -6,7 +6,7 @@ import logging
 from .parse_apache_logs import ApacheLogParser
 
 
-def parse_arcgis_apache_logs():
+def parse_logs():
     """
     Entry point for parsing the log fragments.
     """
@@ -26,7 +26,7 @@ def parse_arcgis_apache_logs():
     log_processor.parse_input()
 
 
-def produce_arcgis_apache_graphics():
+def produce_graphics():
     """
     Entry point for creating the HTML and graphics.
     """
@@ -44,7 +44,7 @@ def produce_arcgis_apache_graphics():
     p.process_graphics()
 
 
-def initialize_ag_ap_pg_database():
+def initialize_database():
     """
     Entry point for initializing the postgresql database.
     """
@@ -72,7 +72,7 @@ def initialize_ag_ap_pg_database():
     processor.initialize_ag_ap_pg_database()
 
 
-def check_ag_ap_pg_services():
+def check_services():
     """
     Entry point for checking the database against existing services without
     updating.  This is useful in case you want to see beforehand what would
@@ -92,7 +92,7 @@ def check_ag_ap_pg_services():
     processor.check_ag_ap_pg_services()
 
 
-def update_ag_ap_pg_database():
+def update_database():
     """
     Entry point for updating the postgresql database.
     """
@@ -110,7 +110,7 @@ def update_ag_ap_pg_database():
     processor.update_ag_ap_pg_services()
 
 
-def prune_arcgis_apache_database():
+def prune_database():
     """
     Entry point for cleaning up the database.
     """
