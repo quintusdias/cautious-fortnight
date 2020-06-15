@@ -124,5 +124,6 @@ def prune_database():
 
     args = parser.parse_args()
 
-    processor = ApacheLogParser(args.project, dbname=args.dbname)
+    processor = ApacheLogParser(args.project, dbname=args.dbname,
+                                verbosity=logging.INFO)
     processor.preprocess_database()
