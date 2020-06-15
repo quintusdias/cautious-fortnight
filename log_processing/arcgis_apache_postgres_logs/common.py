@@ -1,6 +1,7 @@
 # Standard library imports
 import logging
 import pathlib
+import time
 
 # 3rd party library imports
 from lxml import etree
@@ -196,6 +197,8 @@ class CommonProcessor(object):
         The current set of records may overlap with existing records in the
         database, so we must merge them.
         """
+        date = pd.Timestamp(df_current.iloc[0].date)
+        self.logger.info(f'Merging with the database..., all after {date}')
         # Get everything from the database after this time.
         sql = f"""
                select *
@@ -203,8 +206,14 @@ class CommonProcessor(object):
                where date >= %(date)s
                order BY date
                """
-        params = {'date': pd.Timestamp(df_current.iloc[0].date)}
+        params = {'date': date}
+        t0 = time.time()
         df_database = pd.read_sql(sql, self.conn, params=params)
+        t1 = time.time()
+        msg = (
+            f'Retrieved {len(df_database)} records in {(t1 - t0):.1f} seconds'
+        )
+        self.logger.info(msg)
         if df_database.shape[0] == 0:
             # Nothing to merge.
             return df_current
@@ -239,4 +248,4 @@ class CommonProcessor(object):
         rows = [row.to_dict() for _, row in df.iterrows()]
         template = ', '.join([f'%({col})s' for col in df.columns])
         template = f"({template})"
-        psycopg2.extras.execute_values(self.cursor, sql, rows, template)
+        psycopg2.extras.execute_values(self.cursor, sql, rows, template, page_size=10000)

@@ -65,7 +65,9 @@ class RefererProcessor(CommonProcessor):
 
         df_ref = self.merge_with_database(df_ref, 'referer_logs')
 
+        self.logger.info(f'Writing {len(df)} records to referer_logs...')
         self.to_table(df_ref, 'referer_logs')
+        self.logger.info('Done writing to referer_logs...')
 
         # Reset for the next round of records.
         self.records = []

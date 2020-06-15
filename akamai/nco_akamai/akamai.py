@@ -35,9 +35,10 @@ class AkamaiBase(object):
         else:
             self.remote_log_directory = 'data/idpgis'
 
-        path = pathlib.Path.home()
-        path = path / 'data' / 'logs' / 'akamai' / self.project
-        self.local_log_directory = path
+        root = pathlib.Path.home() / 'data' / 'logs' / 'akamai'
+        self.local_log_directory = root / self.project
+        self.local_archive_directory = root / self.project
+
 
 
 class RetrieveAkamaiLogs(AkamaiBase):
@@ -74,8 +75,10 @@ class RetrieveAkamaiLogs(AkamaiBase):
 
         remote_files = ftp.nlst('*.gz')
         for remote_file in remote_files:
+            os.chdir(self.local_log_directory / 'processed')
             if not pathlib.Path(remote_file).exists():
                 print("retrieving ", remote_file)
+                os.chdir(self.local_log_directory / 'incoming')
                 with open(remote_file, 'wb') as localfile:
                     ftp.retrbinary('RETR ' + remote_file,
                                    localfile.write, 1048576)

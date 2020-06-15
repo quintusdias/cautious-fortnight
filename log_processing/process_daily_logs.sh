@@ -7,17 +7,18 @@ do
 
     agp-prune-database $project
 
-    root=$HOME/data/logs/akamai/"$project"/incoming
+    root=$HOME/data/logs/akamai/"$project"
     
     # Get any new log files.
     get_akamai_logs $project
     
     # Process files just recently downloaded
-    files_to_process=$(find "$root" -mmin -60 -name "*.gz" | sort -t "-" -k 3,3n -k4,4 -k5,5n)
+    files_to_process=$(find "$root"/incoming -mmin -60 -name "*.gz" | sort -t "-" -k 3,3n -k4,4 -k5,5n)
     
     for logfile in $files_to_process
     do
     	agp-parse-logs $project --infile $logfile
+        mv $logfile "$root"/processed
     done
 
     agp-produce-graphics $project

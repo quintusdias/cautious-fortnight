@@ -41,7 +41,9 @@ class IPAddressProcessor(CommonProcessor):
 
         df = self.merge_with_database(df, 'ip_address_logs')
 
+        self.logger.info(f'Writing {len(df)} records to ip_address_logs...')
         self.to_table(df, 'ip_address_logs')
+        self.logger.info('Done writing to ip_address_logs...')
 
         self.records = []
         self.logger.info('IP addresses:  done processing records...')

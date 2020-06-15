@@ -239,6 +239,7 @@ ALTER TABLE idpgis.service_logs OWNER TO jevans;
 
 COMMENT ON TABLE idpgis.service_logs IS 'Aggregated summary statistics';
 
+CREATE INDEX service_logs_date_idx ON idpgis.service_logs USING btree (date);
 
 --
 -- Name: COLUMN service_logs.hits; Type: COMMENT; Schema: idpgis; Owner: jevans

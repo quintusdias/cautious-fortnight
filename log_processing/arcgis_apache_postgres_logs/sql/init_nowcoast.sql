@@ -239,6 +239,7 @@ ALTER TABLE nowcoast.service_logs OWNER TO jevans;
 
 COMMENT ON TABLE nowcoast.service_logs IS 'Aggregated summary statistics';
 
+CREATE INDEX service_logs_date_idx ON nowcoast.service_logs USING btree (date);
 
 --
 -- Name: COLUMN service_logs.hits; Type: COMMENT; Schema: nowcoast; Owner: jevans

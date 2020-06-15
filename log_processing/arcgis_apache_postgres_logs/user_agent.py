@@ -58,7 +58,9 @@ class UserAgentProcessor(CommonProcessor):
 
         df = self.merge_with_database(df, 'user_agent_logs')
 
+        self.logger.info(f'Writing {len(df)} records to user_agent_logs...')
         self.to_table(df, 'user_agent_logs')
+        self.logger.info('Done writing to user_agent_logs...')
 
         # Reset for the next round of records.
         self.records = []

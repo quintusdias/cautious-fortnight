@@ -1,6 +1,7 @@
 # Standard library imports
 import datetime as dt
 import importlib.resources as ir
+import time
 
 # 3rd party libraries
 from lxml import etree
@@ -76,7 +77,9 @@ class ServicesProcessor(CommonProcessor):
 
         df = self.merge_with_database(df, 'service_logs')
 
+        self.logger.info(f'Writing {len(df)} records to service_logs...')
         self.to_table(df, 'service_logs')
+        self.logger.info('Done writing to service_logs...')
         self.conn.commit()
 
         # Reset
@@ -98,7 +101,11 @@ class ServicesProcessor(CommonProcessor):
               from service_lut s
                    inner join folder_lut f on s.folder_id = f.id
               """
+        t0 = time.time()
         known_services = pd.read_sql(sql, self.conn)
+        t1 = time.time()
+        msg = f"Selected {len(known_services)} in {(t1-t0):.1f} seconds"
+        self.logger.info(msg)
 
         msg = 'done selecting folders, services, service_types...'
         self.logger.info(msg)

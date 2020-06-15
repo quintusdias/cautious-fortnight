@@ -18,7 +18,7 @@ def run(project, dbname='arcgis_logs'):
 
     cursor.execute(f'set search_path to {project}')
 
-    date = dt.datetime(2020, 5, 16, 0, 0, 0, tzinfo=dt.timezone.utc)
+    date = dt.datetime(2020, 5, 14, 0, 0, 0, tzinfo=dt.timezone.utc)
     print(date)
 
     sql = """

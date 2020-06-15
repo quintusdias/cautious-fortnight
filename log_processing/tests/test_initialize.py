@@ -84,6 +84,20 @@ class TestSuite(unittest.TestCase):
         }
         self._set_response(json_response=json_services)
 
+    def test_verify_service_log_date_index(self):
+
+        self._start_patchers()
+
+        sql = """
+              select *
+              from pg_indexes
+              where schemaname = 'idpgis' and tablename='service_logs'
+              """
+        df = pd.read_sql(sql, self.conn)
+        self.assertEqual(len(df), 1)
+        index_name = df.iloc[0]['indexname']
+        self.assertIn('date', index_name)
+
     def test_retrieve_services_from_nco(self):
 
         self._set_minimal_requests_responses()
