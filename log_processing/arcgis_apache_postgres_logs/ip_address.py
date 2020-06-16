@@ -260,13 +260,19 @@ class IPAddressProcessor(CommonProcessor):
         self.logger.info('preprocessing IP addresses ...')
 
         sql = f"""
-            delete from ip_address_lut where id in (
-                  select logs.id
-                  from ip_address_logs logs
-                  group by id
-                  having max(date) < current_date - interval '{num_days} days'
-            )
+            delete from ip_address_logs
+            where date < current_date - interval '{num_days} days'
         """
+        self.logger.info(sql)
+        self.cursor.execute(sql)
+        self.logger.info(f'deleted {self.cursor.rowcount} records ...')
+
+        sql = """
+            delete from ip_address_lut
+            where id not in (
+                select distinct id from ip_address_logs
+            )
+            """
         self.logger.info(sql)
         self.cursor.execute(sql)
 

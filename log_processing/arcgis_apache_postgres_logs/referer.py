@@ -118,28 +118,24 @@ class RefererProcessor(CommonProcessor):
         self.logger.info('preprocessing referers ...')
 
         sql = f"""
-            -- Get the most recent activity on all referers.
-            with ref_age as (
-                select id, max(date) as max_date
-                from referer_logs
-                group by id
-            )
-
-            -- Delete any referers with no recent activity.
-            --
-            -- The foreign key constraint will cascade-delete rows
-            -- in referer_logs.
-            delete from referer_lut
-            where id in (
-                select distinct id
-                from ref_age
-                where max_date < current_date - interval '{num_days} days'
-            );
-        """
+            delete from referer_logs
+            where date < current_date - interval '{num_days} days';
+            """
         self.logger.info(sql)
         self.cursor.execute(sql)
-
         self.logger.info(f'deleted {self.cursor.rowcount} referers ...')
+
+        # Now delete the referer LUT items that have no log entries.
+        sql = """
+            delete from referer_lut
+            where id not in (
+                select distinct id from referer_logs
+            )
+            """
+        self.logger.info(sql)
+        self.cursor.execute(sql)
+        msg = f'deleted {self.cursor.rowcount} orphaned referers ...'
+        self.logger.info(msg)
 
         self.conn.commit()
 
