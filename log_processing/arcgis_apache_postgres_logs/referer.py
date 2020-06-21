@@ -123,7 +123,7 @@ class RefererProcessor(CommonProcessor):
             """
         self.logger.info(sql)
         self.cursor.execute(sql)
-        self.logger.info(f'deleted {self.cursor.rowcount} referers ...')
+        self.logger.info(f'deleted {self.cursor.rowcount} referers logs...')
 
         # Now delete the referer LUT items that have no log entries.
         sql = """

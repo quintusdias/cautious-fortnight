@@ -109,28 +109,24 @@ class UserAgentProcessor(CommonProcessor):
         self.logger.info('preprocessing user agents ...')
 
         sql = f"""
-            -- Get the most recent activity on all user agents.
-            with ua_age as (
-                select id, max(date) as max_date
-                from user_agent_logs
-                group by id
-            )
-
-            -- Delete any user agents with no recent activity.
-            --
-            -- The foreign key constraint will cascade-delete rows
-            -- in user_agent_logs.
-            delete from user_agent_lut
-            where id in (
-                select distinct id
-                from ua_age
-                where max_date < current_date - interval '{num_days} days'
-            );
-        """
+            delete from user_agent_logs
+            where date < current_date - interval '{num_days} days';
+            """
         self.logger.info(sql)
         self.cursor.execute(sql)
+        self.logger.info(f'deleted {self.cursor.rowcount} user agent logs ...')
 
-        self.logger.info(f'deleted {self.cursor.rowcount} user agents ...')
+        # Now delete the referer LUT items that have no log entries.
+        sql = """
+            delete from user_agent_lut
+            where id not in (
+                select distinct id from user_agent_logs
+            )
+            """
+        self.logger.info(sql)
+        self.cursor.execute(sql)
+        msg = f'deleted {self.cursor.rowcount} orphaned user agents ...'
+        self.logger.info(msg)
 
         self.conn.commit()
 

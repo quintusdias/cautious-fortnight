@@ -62,10 +62,12 @@ class SummaryProcessor(CommonProcessor):
         df = raw_df[columns].copy()
 
         # As a last step, aggregate the data without regard to the referer.
-        df = (df.set_index('date')
-                .resample(self.frequency)
-                .sum()
-                .reset_index())
+        df = (
+            df.set_index('date')
+              .resample(self.frequency)
+              .sum()
+              .reset_index()
+        )
 
         df = self.merge_with_database(df, 'summary')
 

@@ -159,6 +159,8 @@ class ServicesProcessor(CommonProcessor):
         query = ir.read_text(sql, 'services_summary.sql')
         df = pd.read_sql(query, self.conn, index_col='rank')
 
+        df['hits_pct'] = df['hits'] / df['hits'].sum() * 100
+
         # Ensure that the delta columns have zeros instead of None.
         df.day_pct_delta = df.day_pct_delta.fillna(0).astype(np.float64)
         df.week_pct_delta = df.week_pct_delta.fillna(0).astype(np.float64)
@@ -260,10 +262,18 @@ class ServicesProcessor(CommonProcessor):
         """
         Massage the dataframe a bit before creating an HTML table.
         """
+        # reorder columns
+        columns = [
+            'folder', 'service', 'hits', 'hits_pct', 'mapdraw_pct', 'gbytes',
+            'errors', 'day_pct_delta', 'week_pct_delta', 'month_pct_delta',
+        ]
+        df = df[columns]
+
         # Rename some columns.
         # It's awkward to deal with upper case, mixed case, or spaces in column
         # names in postgresql.
         mapper = {
+            'hits_pct': 'Hits %',
             'gbytes': 'GBytes',
             'gbytes %': 'GBytes %',
             'mapdraw_pct': 'Mapdraw %',

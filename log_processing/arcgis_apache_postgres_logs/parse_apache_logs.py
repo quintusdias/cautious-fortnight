@@ -303,9 +303,9 @@ class ApacheLogParser(object):
         """
         self.logger.info('preprocessing the database...')
 
-        if not force and dt.date.today().weekday() != 0:
-            self.logger.info('skipping preprocessing since it is Monday...')
-            return
+        # if not force and dt.date.today().weekday() != 0:
+        #     self.logger.info('skipping preprocessing since it is Monday...')
+        #     return
 
         self.ip_address.preprocess_database()
         self.referer.preprocess_database()

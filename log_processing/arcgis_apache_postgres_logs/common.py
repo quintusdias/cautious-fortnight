@@ -70,7 +70,7 @@ class CommonProcessor(object):
 
         format = {
             'hits': '{:,.0f}',
-            'hits %': '{:.1f}',
+            'Hits %': '{:.1f}',
             'Mapdraw %': '{:.1f}',
             'Daily Change %': '{:,.1f}',
             'Weekly Change %': '{:,.1f}',
