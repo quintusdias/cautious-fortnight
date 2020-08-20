@@ -277,7 +277,7 @@ class RefererProcessor(CommonProcessor):
                 SUM(logs.nbytes) as nbytes,
                 lut.name as referer
             FROM referer_logs logs INNER JOIN referer_lut lut using(id)
-            where logs.date = '{yesterday}'
+            where logs.date::date = '{yesterday}'
             GROUP BY referer
             order by hits desc
             """

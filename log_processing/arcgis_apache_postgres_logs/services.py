@@ -156,7 +156,7 @@ class ServicesProcessor(CommonProcessor):
         """
         Construct the dataframe needed for the UI section.
         """
-        query = ir.read_text(sql, 'services_summary.sql')
+        query = ir.read_text(sql, 'services_summary2.sql')
         df = pd.read_sql(query, self.conn, index_col='rank')
 
         df['hits_pct'] = df['hits'] / df['hits'].sum() * 100
@@ -287,22 +287,27 @@ class ServicesProcessor(CommonProcessor):
 
         list_items = [
             (
+                "\"hits\" are not yesterday's hits, but rather the total from "
+                "the day before that.  The reason for that is that it usually "
+                "takes two days to get all of the logs for a specific day."
+            ),
+            (
                 "\"hits %\" is the ratio of service hits to the total number "
                 "of hits, so this column should add to 100."
             ),
             (
-                "\"Daily Change %\" is the percentage change for yesterday in "
-                "number of hits as compared to the day before that."
+                "\"Daily Change %\" is the percentage change for the DAY "
+                "BEFORE YESTERDAY and the day before that."
             ),
             (
                 "\"Weekly Change %\" is the percentage change in number of "
-                "hits in the last seven days from the previous span of seven "
-                "days."
+                "hits in the last seven days (starting two days ago) "
+                "from the previous span of seven days."
             ),
             (
                 "\"Monthy Change %\" is the percentage change in number of "
-                "hits in the last thirty days from the previous span of "
-                "thirty days."
+                "hits in the last thirty days (starting two days ago) "
+                "from the previous span of thirty days."
             ),
             (
                 "\"mapdraw %\" is the ratio of service mapdraws to the "
